@@ -23,7 +23,16 @@ export type Musculo = (typeof MUSCULOS)[number];
 export const GRUPOS = ['hombros', 'pecho', 'espalda', 'brazos', 'piernas', 'gluteos', 'abdomen'] as const;
 export type Grupo = (typeof GRUPOS)[number];
 
-export const EQUIPOS = ['peso-corporal', 'mancuernas', 'barra', 'bandas'] as const;
+export const EQUIPOS = [
+  'peso-corporal',
+  'mancuernas',
+  'barra',
+  'bandas',
+  'kettlebell',
+  'barra-z',
+  'maquina',
+  'polea',
+] as const;
 export type Equipo = (typeof EQUIPOS)[number];
 
 export const NIVELES = ['principiante', 'intermedio', 'avanzado'] as const;
@@ -40,4 +49,5 @@ export interface Ejercicio {
   tecnica: string[]; // pasos en orden
   erroresComunes: string[];
   youtubeId: string; // vacío si todavía no hay video
+  fuente?: string; // de dónde salen los datos, si no son propios
 }

@@ -13,6 +13,8 @@ import {
   filtrarEjercicios,
   FILTROS_VACIOS,
   hayFiltrosActivos,
+  ordenarGruposPorMusculo,
+  trabajaComoSecundario,
   type FiltroEquipo,
   type Filtros,
 } from '../lib/filtrosEjercicios';
@@ -28,7 +30,10 @@ export function CatalogoScreen({ onAbrirEjercicio }: CatalogoScreenProps) {
   const [filtros, setFiltros] = useState<Filtros>(FILTROS_VACIOS);
   const [abiertos, setAbiertos] = useState<ReadonlySet<Grupo>>(new Set());
 
-  const grupos = useMemo(() => agruparPorGrupo(filtrarEjercicios(EJERCICIOS, filtros)), [filtros]);
+  const grupos = useMemo(
+    () => ordenarGruposPorMusculo(agruparPorGrupo(filtrarEjercicios(EJERCICIOS, filtros)), filtros.musculo),
+    [filtros],
+  );
   // Con un filtro puesto se despliegan todos los grupos para ver los resultados.
   const filtrando = hayFiltrosActivos(filtros);
   const musculoMarcado = useMemo(() => (filtros.musculo ? [filtros.musculo] : []), [filtros.musculo]);
@@ -86,7 +91,12 @@ export function CatalogoScreen({ onAbrirEjercicio }: CatalogoScreenProps) {
           </View>
         )}
 
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.chips}>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          style={styles.filaChips}
+          contentContainerStyle={styles.chips}
+        >
           {OPCIONES_EQUIPO.map((equipo) => (
             <Chip
               key={equipo}
@@ -127,9 +137,14 @@ export function CatalogoScreen({ onAbrirEjercicio }: CatalogoScreenProps) {
                   >
                     <View style={styles.flex}>
                       <Text style={styles.nombreEjercicio}>{e.nombre}</Text>
-                      <Text style={styles.detalleEjercicio}>
-                        {NOMBRE_EQUIPO[e.equipo]} · {NOMBRE_MUSCULO[e.musculoPrincipal]}
-                      </Text>
+                      <View style={styles.fila}>
+                        <Text style={styles.detalleEjercicio}>
+                          {NOMBRE_EQUIPO[e.equipo]} · {NOMBRE_MUSCULO[e.musculoPrincipal]}
+                        </Text>
+                        {filtros.musculo && trabajaComoSecundario(e, filtros.musculo) && (
+                          <Text style={styles.etiquetaSecundario}>también trabaja</Text>
+                        )}
+                      </View>
                     </View>
                     {onAbrirEjercicio && <Ionicons name="chevron-forward" size={18} color={colores.textoSecundario} />}
                   </Pressable>
@@ -163,7 +178,9 @@ const styles = StyleSheet.create({
   },
   ayuda: { color: colores.textoSecundario, fontSize: 13, marginTop: espacios.s },
   fila: { flexDirection: 'row', alignItems: 'center', gap: espacios.s },
-  chips: { gap: espacios.s },
+  // Sale del padding de la pantalla para que los chips se deslicen hasta el borde.
+  filaChips: { marginHorizontal: -espacios.m },
+  chips: { gap: espacios.s, paddingHorizontal: espacios.m },
   vacio: { color: colores.textoSecundario, textAlign: 'center', marginTop: espacios.l },
   tarjeta: { backgroundColor: colores.tarjeta, borderRadius: radios.grande, overflow: 'hidden' },
   cabeceraGrupo: {
@@ -187,4 +204,16 @@ const styles = StyleSheet.create({
   flex: { flex: 1 },
   nombreEjercicio: { color: colores.texto, fontSize: 16, fontWeight: '600' },
   detalleEjercicio: { color: colores.textoSecundario, fontSize: 13, marginTop: 2 },
+  etiquetaSecundario: {
+    color: colores.acentoSuave,
+    fontSize: 11,
+    fontWeight: '600',
+    marginTop: 2,
+    paddingHorizontal: 6,
+    paddingVertical: 1,
+    borderRadius: radios.pill,
+    borderWidth: 1,
+    borderColor: colores.acentoSuave,
+    overflow: 'hidden',
+  },
 });
