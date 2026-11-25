@@ -3672,7 +3672,7 @@
   },
   {
     "id": "saltos-sobre-banco",
-    "nombre": "Saltos sobre banco",
+    "nombre": "Saltos laterales sobre banco",
     "grupo": "piernas",
     "equipo": "peso-corporal",
     "nivel": "intermedio",
@@ -3683,10 +3683,10 @@
       "hamstring"
     ],
     "tecnica": [
-      "Parate frente a un banco bajo, con los pies al ancho de los hombros.",
-      "Hacé una sentadilla corta llevando los brazos atrás.",
-      "Saltá por encima del banco.",
-      "Caé suave, date vuelta y saltá de nuevo."
+      "Parate al costado de un banco bajo, con los pies juntos, e inclinate para apoyar las dos manos sobre el banco.",
+      "Con los brazos firmes y el peso cargado en las manos, saltá de costado llevando los pies juntos por encima del banco.",
+      "Caé del otro lado con las rodillas flexionadas.",
+      "Rebotá enseguida y saltá de vuelta al lado inicial, sin despegar las manos del banco."
     ],
     "erroresComunes": [
       "Usar un banco muy alto.",
@@ -3761,10 +3761,10 @@
     "musculoPrincipal": "adductors",
     "musculosSecundarios": [],
     "tecnica": [
-      "Enganchá la banda abajo y pasala por el tobillo de la pierna más cercana.",
-      "Parate de costado, alejado lo suficiente para que tense.",
+      "Atá la banda abajo, a un costado, y pasala por el tobillo de la pierna más cercana al anclaje.",
+      "Alejate de costado hasta que la banda tense, con esa pierna abierta hacia el anclaje.",
       "Llevá la pierna hacia adentro, cruzando por delante de la otra.",
-      "Volvé despacio y cambiá de lado."
+      "Volvé despacio a la posición abierta y, al terminar, cambiá de lado."
     ],
     "erroresComunes": [
       "Inclinar el torso.",
