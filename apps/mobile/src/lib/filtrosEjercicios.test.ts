@@ -8,6 +8,8 @@ import {
   FILTROS_VACIOS,
   hayFiltrosActivos,
   normalizar,
+  ordenarGruposPorMusculo,
+  trabajaComoSecundario,
 } from './filtrosEjercicios';
 
 function ejercicio(parcial: Partial<Ejercicio> & Pick<Ejercicio, 'id'>): Ejercicio {
@@ -74,8 +76,32 @@ describe('filtrarPorMusculo', () => {
   });
 
   test('incluye ejercicios con el músculo como principal o secundario', () => {
-    expect(filtrarPorMusculo(TODOS, 'deltoids')).toEqual([flexiones, press]);
     expect(filtrarPorMusculo(TODOS, 'triceps')).toEqual([flexiones]);
+    expect(filtrarPorMusculo(TODOS, 'abs')).toEqual([]);
+  });
+
+  test('primero los principales y después los secundarios', () => {
+    // flexiones (secundario) está antes que press (principal) en la lista original
+    expect(filtrarPorMusculo(TODOS, 'deltoids')).toEqual([press, flexiones]);
+  });
+
+  test('mantiene el orden original dentro de cada parte', () => {
+    const otroPress = ejercicio({ id: 'otro-press', grupo: 'hombros', musculoPrincipal: 'deltoids' });
+    const plancha = ejercicio({ id: 'plancha', grupo: 'abdomen', musculoPrincipal: 'abs', musculosSecundarios: ['deltoids'] });
+    expect(filtrarPorMusculo([plancha, press, flexiones, otroPress], 'deltoids')).toEqual([
+      press,
+      otroPress,
+      plancha,
+      flexiones,
+    ]);
+  });
+});
+
+describe('trabajaComoSecundario', () => {
+  test('es true sólo si el músculo es secundario', () => {
+    expect(trabajaComoSecundario(flexiones, 'triceps')).toBe(true);
+    expect(trabajaComoSecundario(flexiones, 'chest')).toBe(false);
+    expect(trabajaComoSecundario(flexiones, 'abs')).toBe(false);
   });
 });
 
@@ -98,6 +124,22 @@ describe('agruparPorGrupo', () => {
       ['brazos', 1],
       ['gluteos', 1],
     ]);
+  });
+});
+
+describe('ordenarGruposPorMusculo', () => {
+  test('sin músculo no cambia el orden', () => {
+    const grupos = agruparPorGrupo(TODOS);
+    expect(ordenarGruposPorMusculo(grupos, null)).toEqual(grupos);
+  });
+
+  test('pone primero los grupos donde el músculo es principal', () => {
+    const plancha = ejercicio({ id: 'plancha', grupo: 'abdomen', musculoPrincipal: 'abs' });
+    const conAbs = ejercicio({ id: 'con-abs', grupo: 'pecho', musculosSecundarios: ['abs'] });
+    const grupos = agruparPorGrupo(filtrarPorMusculo([plancha, conAbs], 'abs'));
+    // en el orden fijo, pecho va antes que abdomen
+    expect(grupos.map((g) => g.grupo)).toEqual(['pecho', 'abdomen']);
+    expect(ordenarGruposPorMusculo(grupos, 'abs').map((g) => g.grupo)).toEqual(['abdomen', 'pecho']);
   });
 });
 
