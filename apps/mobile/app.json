@@ -20,6 +20,14 @@
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    }
+    },
+    "plugins": [
+      [
+        "expo-sensors",
+        {
+          "motionPermission": "Usamos el sensor de movimiento para contar tus pasos y tus minutos activos. Los datos no salen de tu celu."
+        }
+      ]
+    ]
   }
 }
