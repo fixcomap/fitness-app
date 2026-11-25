@@ -1,22 +1,24 @@
 import { Ionicons } from '@expo/vector-icons';
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { HojaPasosManuales } from '../components/inicio/HojaPasosManuales';
 import { TarjetaCoach } from '../components/inicio/TarjetaCoach';
 import { AnilloProgreso } from '../components/progreso/AnilloProgreso';
 import { BarraProgreso, BarraSegmentada } from '../components/progreso/Barras';
-import { CONFIGURACION_POR_DEFECTO } from '../lib/configuracion';
 import { formatearFechaCorta, formatearNumero, inicial } from '../lib/formato';
+import { useConfiguracion } from '../hooks/useConfiguracion';
+import { usePasosManuales } from '../hooks/usePasosManuales';
 import { PERFIL_EJEMPLO } from '../lib/perfil';
 import {
+  conCargasManuales,
   kcalRestantes,
   pasosTotales,
   porcentaje,
   porcentajeKcal,
   resumenDeEjemplo,
   type Meta,
-  type ResumenDia,
 } from '../lib/resumenDia';
 import { colores } from '../theme/tema';
 
@@ -29,15 +31,19 @@ const COLOR_MACRO = { proteinas: '#F2F2F2', carbos: '#BDBDBD', grasas: '#8A8A8A'
 interface InicioScreenProps {
   onEmpezarEntreno: () => void;
   onAbrirCoach: () => void;
-  resumen?: ResumenDia;
-  hoy?: Date;
 }
 
-export function InicioScreen({ onEmpezarEntreno, onAbrirCoach, resumen: resumenProp, hoy = new Date() }: InicioScreenProps) {
+export function InicioScreen({ onEmpezarEntreno, onAbrirCoach }: InicioScreenProps) {
   const perfil = PERFIL_EJEMPLO;
+  const hoy = new Date();
+  const { config, cambiarMetaPasos } = useConfiguracion();
+  const { cargasDeHoy, totalesDeHoy, agregar, borrar } = usePasosManuales(perfil);
+  const [hojaAbierta, setHojaAbierta] = useState(false);
+
+  // Los datos de ejemplo más lo cargado a mano hoy.
   const resumen = useMemo(
-    () => resumenProp ?? resumenDeEjemplo(CONFIGURACION_POR_DEFECTO.metaPasos),
-    [resumenProp],
+    () => conCargasManuales(resumenDeEjemplo(config.metaPasos), totalesDeHoy),
+    [config.metaPasos, totalesDeHoy],
   );
   const { kcal, macros, pasos, minutosActivos, entreno } = resumen;
   const totalPasos = pasosTotales(pasos);
@@ -84,12 +90,20 @@ export function InicioScreen({ onEmpezarEntreno, onAbrirCoach, resumen: resumenP
 
         {/* Pasos y minutos activos */}
         <View style={styles.filaTarjetas}>
-          <View style={[styles.tarjeta, styles.tarjetaChica]}>
+          <Pressable
+            onPress={() => setHojaAbierta(true)}
+            style={({ pressed }) => [styles.tarjeta, styles.tarjetaChica, pressed && styles.tarjetaPresionada]}
+            accessibilityRole="button"
+            accessibilityHint="Cargar pasos caminados sin el celu"
+          >
             <Text style={styles.etiqueta}>Pasos</Text>
             <ValorSobreMeta valor={totalPasos} meta={formatearNumero(pasos.meta)} />
             <BarraSegmentada porcentaje={porcentaje(totalPasos, pasos.meta)} />
             <Text style={styles.etiqueta}>hoy</Text>
-          </View>
+            {pasos.manuales > 0 && (
+              <Text style={styles.manuales}>incluye {formatearNumero(pasos.manuales)} cargados a mano</Text>
+            )}
+          </Pressable>
           <View style={[styles.tarjeta, styles.tarjetaChica]}>
             <Text style={styles.etiqueta}>Minutos activos</Text>
             <ValorSobreMeta valor={minutosActivos.semana} meta={`${minutosActivos.metaSemana} min`} />
@@ -124,6 +138,17 @@ export function InicioScreen({ onEmpezarEntreno, onAbrirCoach, resumen: resumenP
           onProbarGratis={() => {}}
         />
       </ScrollView>
+
+      <HojaPasosManuales
+        visible={hojaAbierta}
+        onCerrar={() => setHojaAbierta(false)}
+        perfil={perfil}
+        cargasDeHoy={cargasDeHoy}
+        onAgregar={agregar}
+        onBorrar={borrar}
+        metaPasos={config.metaPasos}
+        onCambiarMeta={cambiarMetaPasos}
+      />
     </SafeAreaView>
   );
 }
@@ -211,6 +236,8 @@ const styles = StyleSheet.create({
 
   filaTarjetas: { flexDirection: 'row', gap: 10 },
   tarjetaChica: { flex: 1, paddingHorizontal: 16, paddingVertical: 16, gap: 10 },
+  tarjetaPresionada: { backgroundColor: colores.tarjetaElevada },
+  manuales: { color: colores.textoSecundario, fontSize: 11, marginTop: -6 },
   valorGrande: { color: colores.texto, fontSize: 27, fontWeight: '800', letterSpacing: -0.5 },
   valorMeta: { color: colores.textoSecundario, fontSize: 12, fontWeight: '400', letterSpacing: 0 },
 
