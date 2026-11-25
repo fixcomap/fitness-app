@@ -1,18 +1,29 @@
+import { DarkTheme, NavigationContainer, type Theme } from '@react-navigation/native';
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
+
+import { Tabs } from './src/navigation/Tabs';
+import { colores } from './src/theme/tema';
+
+const tema: Theme = {
+  ...DarkTheme,
+  colors: {
+    ...DarkTheme.colors,
+    primary: colores.acento,
+    background: colores.fondo,
+    card: colores.fondo,
+    text: colores.texto,
+    border: colores.borde,
+  },
+};
 
 export default function App() {
   return (
-    <View style={styles.contenedor}>
-      <Text style={styles.titulo}>Fitness app</Text>
-      <Text style={styles.texto}>Esqueleto inicial</Text>
+    <SafeAreaProvider>
+      <NavigationContainer theme={tema}>
+        <Tabs />
+      </NavigationContainer>
       <StatusBar style="light" />
-    </View>
+    </SafeAreaProvider>
   );
 }
-
-const styles = StyleSheet.create({
-  contenedor: { flex: 1, backgroundColor: '#0E0E0E', alignItems: 'center', justifyContent: 'center' },
-  titulo: { color: '#FFFFFF', fontSize: 32, fontWeight: '800' },
-  texto: { color: '#9A9A9A', marginTop: 8 },
-});
