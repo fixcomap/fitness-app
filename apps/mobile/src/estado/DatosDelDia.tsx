@@ -4,12 +4,15 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useState, t
 import { AppState } from 'react-native';
 
 import { useConfiguracion } from '../hooks/useConfiguracion';
-import { useActividadSensor, type ActividadSensor } from '../hooks/useActividadSensor';
+import { useActividadSensor } from '../hooks/useActividadSensor';
 import { useEstadoFuente } from '../hooks/useEstadoFuente';
+import { useHistorialActividad } from '../hooks/useHistorialActividad';
 import { usePasosManuales } from '../hooks/usePasosManuales';
 import { leerPasos, pasosDeHoy, type EstadoFuente } from '../lib/actividad/consultas';
 import { fuenteActividad } from '../lib/actividad/fuente';
-import { minutosActivos, type MinutosActivos } from '../lib/actividad/semana';
+import { crearTotalDelDia, serieDePasos, totalesVivos } from '../lib/actividad/historial';
+import { minutosActivos, type MinutosActivos, type TotalDelDia } from '../lib/actividad/semana';
+import { inicioDelDia, mismoDia } from '../lib/fechas';
 import type { FuenteActividad } from '../lib/actividad/FuenteActividad';
 import type { CargaPasos, Franja, TipoCarga } from '../lib/pasosManuales';
 import { PERFIL_EJEMPLO, type PerfilUsuario } from '../lib/perfil';
@@ -20,15 +23,17 @@ const REFRESCO_MS = 60_000;
 type Configuracion = ReturnType<typeof useConfiguracion>;
 type PasosManuales = ReturnType<typeof usePasosManuales>;
 
-export interface DatosDelDiaValor extends Configuracion, Omit<PasosManuales, 'agregar'> {
+export interface DatosDelDiaValor extends Configuracion, Omit<PasosManuales, 'agregar' | 'listo'> {
   perfil: PerfilUsuario;
   fuente: FuenteActividad;
   estadoFuente: EstadoFuente;
   pedirPermiso: () => Promise<void>;
   pasosSensorHoy: number; // 0 si la fuente no está activa
   refrescarPasos: () => void;
-  // Pasos y minutos de los últimos 7 días según la fuente (vacío si no está activa).
-  actividadSensor: ActividadSensor;
+  // Total de pasos y minutos de un día ('AAAA-MM-DD'): historial + sensor + manuales.
+  totalDelDia: TotalDelDia;
+  // Pasos por día desde el más viejo del historial hasta hoy, para la racha.
+  serieDePasos: number[];
   // Minutos activos reales (sensor + manuales), los mismos en Inicio y en Actividad.
   minutos: MinutosActivos;
   // Carga manual inteligente: le pregunta a la fuente cuántos pasos ya contó en
@@ -79,12 +84,31 @@ export function ProveedorDatosDelDia({ children }: { children: ReactNode }) {
     };
   }, [refrescarPasos]);
 
-  const { cargas, cargasDeHoy, totalesDeHoy, borrar } = manuales;
+  const { cargas, listo: manualesListos, cargasDeHoy, totalesDeHoy, borrar } = manuales;
   const actividadSensor = useActividadSensor(fuente, activa, pasosSensorHoy);
-  const minutos = useMemo(
-    () => minutosActivos(new Date(), actividadSensor.minutosPorDia, cargas),
-    [actividadSensor, cargas],
-  );
+
+  // Totales en vivo de los últimos días. Hoy siempre usa los pasos de pasosSensorHoy.
+  const vivos = useMemo(() => {
+    const ahora = new Date();
+    const sinHoy = actividadSensor.pasosPorDia.filter((d) => !mismoDia(d.dia, ahora));
+    const pasos = [...sinHoy, { dia: inicioDelDia(ahora), pasos: pasosSensorHoy }];
+    return totalesVivos(pasos, actividadSensor.minutosPorDia, cargas);
+  }, [actividadSensor, pasosSensorHoy, cargas]);
+
+  // Sólo se cierran días cuando los datos son confiables: cargas leídas, fuente
+  // resuelta y, si hay podómetro, con su respuesta ya recibida.
+  const historial = useHistorialActividad({
+    vivos,
+    conSensor: activa,
+    listoParaCerrar: manualesListos && estadoFuente !== 'cargando' && (!activa || actividadSensor.pasosPorDia.length > 0),
+  });
+
+  const { totalDelDia, minutos, serie } = useMemo(() => {
+    const ahora = new Date();
+    const total = crearTotalDelDia(ahora, historial, vivos);
+    return { totalDelDia: total, minutos: minutosActivos(ahora, total), serie: serieDePasos(ahora, historial, total) };
+  }, [historial, vivos]);
+
   const valor = useMemo<DatosDelDiaValor>(
     () => ({
       ...configuracion,
@@ -99,7 +123,8 @@ export function ProveedorDatosDelDia({ children }: { children: ReactNode }) {
       pedirPermiso,
       pasosSensorHoy,
       refrescarPasos,
-      actividadSensor,
+      totalDelDia,
+      serieDePasos: serie,
       minutos,
     }),
     [
@@ -115,7 +140,8 @@ export function ProveedorDatosDelDia({ children }: { children: ReactNode }) {
       pedirPermiso,
       pasosSensorHoy,
       refrescarPasos,
-      actividadSensor,
+      totalDelDia,
+      serie,
       minutos,
     ],
   );
