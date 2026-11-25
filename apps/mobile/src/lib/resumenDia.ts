@@ -60,6 +60,12 @@ export function porcentaje(actual: number, meta: number): number {
   return Math.min(100, (actual / meta) * 100);
 }
 
+// Cuántos segmentos de una barra segmentada se pintan: sólo los completos.
+export function segmentosLlenos(porcentajeActual: number, segmentos: number): number {
+  if (!(segmentos > 0) || !(porcentajeActual > 0)) return 0;
+  return Math.min(segmentos, Math.floor((Math.min(porcentajeActual, 100) / 100) * segmentos));
+}
+
 // Cuánto se llenó el anillo de kcal: lo comido sobre el total disponible del día.
 export function porcentajeKcal(kcal: ResumenDia['kcal']): number {
   return porcentaje(kcal.comidas, kcal.objetivo + kcal.actividad);

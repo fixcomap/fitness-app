@@ -8,6 +8,11 @@ export const colores = {
   acentoSuave: '#F4A08F',
   texto: '#FFFFFF',
   textoSecundario: '#9A9A9A',
+  pista: '#2E2E2E', // fondo de barras y anillos
+  textoSobreAcento: '#111111',
+  oro: '#D9A94A', // premium
+  oroFondo: '#1D1910',
+  oroBorde: '#6B5526',
 } as const;
 
 export const radios = {

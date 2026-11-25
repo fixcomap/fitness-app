@@ -6,6 +6,7 @@ import {
   porcentaje,
   porcentajeKcal,
   resumenDeEjemplo,
+  segmentosLlenos,
 } from './resumenDia';
 
 describe('kcalRestantes', () => {
@@ -43,6 +44,15 @@ describe('porcentaje', () => {
 test('porcentajeKcal usa lo comido sobre objetivo + actividad', () => {
   expect(porcentajeKcal({ objetivo: 1500, actividad: 500, comidas: 500 })).toBe(25);
   expect(porcentajeKcal({ objetivo: 1500, actividad: 500, comidas: 3000 })).toBe(100);
+});
+
+test('segmentosLlenos pinta sólo los segmentos completos', () => {
+  expect(segmentosLlenos(78.42, 4)).toBe(3); // 7.842 / 10.000, como en el diseño
+  expect(segmentosLlenos(100, 4)).toBe(4);
+  expect(segmentosLlenos(150, 4)).toBe(4);
+  expect(segmentosLlenos(24, 4)).toBe(0);
+  expect(segmentosLlenos(0, 4)).toBe(0);
+  expect(segmentosLlenos(50, 0)).toBe(0);
 });
 
 test('pasosTotales suma automáticos y manuales', () => {
