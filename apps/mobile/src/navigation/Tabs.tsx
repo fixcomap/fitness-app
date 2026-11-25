@@ -4,12 +4,14 @@ import type { ComponentProps } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { useEntreno } from '../estado/Entreno';
 import { PERFIL_EJEMPLO } from '../lib/perfil';
 import { ActividadScreen } from '../screens/ActividadScreen';
 import { InicioScreen } from '../screens/InicioScreen';
 import { PantallaTitulo } from '../screens/PantallaTitulo';
 import { colores } from '../theme/tema';
 import { EntrenoStack } from './EntrenoStack';
+import { useNavegacionRaiz } from './tiposRaiz';
 
 export type TabsParamList = {
   Inicio: undefined;
@@ -32,9 +34,13 @@ const ICONOS: Record<keyof TabsParamList, NombreIcono> = {
 const Tab = createBottomTabNavigator<TabsParamList>();
 
 function InicioRuta({ navigation }: BottomTabScreenProps<TabsParamList, 'Inicio'>) {
+  const { enCurso } = useEntreno();
+  // Las pantallas de la sesión están en la navegación de arriba (Raiz).
+  const raiz = useNavegacionRaiz();
   return (
     <InicioScreen
-      onEmpezarEntreno={() => navigation.navigate('Entreno')}
+      onEmpezarEntreno={() => raiz.navigate(enCurso ? 'SesionEnCurso' : 'SesionArmada')}
+      onArmarSesion={() => navigation.navigate('Entreno')}
       onAbrirCoach={() => navigation.navigate('Coach')}
     />
   );

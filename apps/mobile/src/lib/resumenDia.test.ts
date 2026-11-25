@@ -96,6 +96,25 @@ describe('armarResumenDia', () => {
     expect(r.kcal.actividad).toBe(0);
   });
 
+  test('las kcal del entreno se suman a la actividad', () => {
+    const r = armarResumenDia({
+      metaPasos: 10000,
+      pasosAutomaticos: 7300,
+      pasosManuales: 2700,
+      minutos: { hoy: 34, semana: 110 },
+      perfil,
+      kcalEntreno: 375,
+    });
+    expect(r.kcal.actividad).toBe(272 + 375);
+  });
+
+  test('entreno de hoy: la sesión armada o nada', () => {
+    const datos = { metaPasos: 10000, pasosAutomaticos: 0, pasosManuales: 0, minutos: { hoy: 0, semana: 0 }, perfil };
+    expect(armarResumenDia(datos).entreno).toBeNull();
+    const entreno = { nombre: 'Pecho y hombros', ejercicios: 4, enCurso: false };
+    expect(armarResumenDia({ ...datos, entreno }).entreno).toEqual(entreno);
+  });
+
   test('usa los minutos activos reales y la meta de la OMS', () => {
     const r = armarResumenDia({ metaPasos: 10000, pasosAutomaticos: 0, pasosManuales: 0, minutos: { hoy: 12, semana: 47 }, perfil });
     expect(r.minutosActivos).toEqual({ hoy: 12, semana: 47, metaSemana: META_MINUTOS_SEMANA_OMS });
