@@ -25,6 +25,7 @@ interface PaginaEjercicioProps {
   onAnterior: () => void;
   onSiguiente: () => void;
   onTerminar: () => void;
+  onVerTecnica: () => void; // abre la hoja con la info del ejercicio
 }
 
 // Un ejercicio de la sesión en curso: encabezado, progresión, series y tarjetas
@@ -45,6 +46,7 @@ export function PaginaEjercicio({
   onAnterior,
   onSiguiente,
   onTerminar,
+  onVerTecnica,
 }: PaginaEjercicioProps) {
   const ultima = useMemo(() => ultimaVez(historial, ejercicio.ejercicioId), [historial, ejercicio.ejercicioId]);
   const conPeso = datos ? usaPeso(datos.equipo) : true;
@@ -57,15 +59,23 @@ export function PaginaEjercicio({
       keyboardShouldPersistTaps="handled"
       showsVerticalScrollIndicator={false}
     >
-      <View style={styles.ejercicio}>
+      {/* Tocando la foto o el nombre se abre la técnica, sin salir de la sesión. */}
+      <Pressable
+        onPress={onVerTecnica}
+        disabled={!datos}
+        style={({ pressed }) => [styles.ejercicio, pressed && styles.presionado]}
+        accessibilityRole="button"
+        accessibilityHint="Muestra la técnica, los músculos y el video"
+      >
         {datos && <Miniatura ejercicio={datos} tamano={m.miniatura} radio={14} />}
         <View style={styles.flex}>
           <Text style={styles.contador}>
             Ejercicio {indice + 1} de {total}
+            {datos && <Text style={styles.verTecnica}> · Ver técnica</Text>}
           </Text>
           <Text style={styles.nombreEjercicio}>{datos?.nombre ?? 'Ejercicio'}</Text>
         </View>
-      </View>
+      </Pressable>
 
       {aviso && (
         <View style={styles.aviso}>
@@ -127,6 +137,7 @@ const styles = StyleSheet.create({
   contenido: { paddingHorizontal: m.margen, paddingTop: 14, gap: 18 },
   ejercicio: { flexDirection: 'row', alignItems: 'center', gap: 14 },
   contador: { color: c.textoTenue, fontSize: 13 },
+  verTecnica: { color: c.rojoSuave, fontWeight: '700' },
   nombreEjercicio: { color: c.blanco, fontSize: 26, fontWeight: '900', lineHeight: 30, letterSpacing: -0.5 },
   aviso: {
     flexDirection: 'row',

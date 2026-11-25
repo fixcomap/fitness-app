@@ -18,6 +18,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { BarraDescanso } from '../components/entreno/BarraDescanso';
 import { Cronometro } from '../components/entreno/Cronometro';
+import { HojaTecnica } from '../components/entreno/HojaTecnica';
 import { coloresSesion as c, medidasSesion as m } from '../components/entreno/estiloSesion';
 import { PaginaEjercicio } from '../components/entreno/PaginaEjercicio';
 import { buscarEjercicioPorId } from '../data/ejercicios';
@@ -59,6 +60,8 @@ export function SesionEnCursoScreen({ onMinimizar, onTerminada, onDescartada }: 
   // Series que se quisieron tildar con datos que faltan: "ejercicio-serie".
   const [marcadas, setMarcadas] = useState<ReadonlySet<string>>(new Set());
   const lista = useRef<FlatList<EjercicioEnCurso>>(null);
+  // Ejercicio cuya técnica se está mirando (hoja desde abajo), o null.
+  const [tecnicaDe, setTecnicaDe] = useState<string | null>(null);
   const actual = enCurso?.actual ?? 0;
 
   // Si el ejercicio cambia por un botón o la barra de arriba, se desliza hasta él.
@@ -71,6 +74,7 @@ export function SesionEnCursoScreen({ onMinimizar, onTerminada, onDescartada }: 
   }
 
   const total = enCurso.ejercicios.length;
+  const ejercicioTecnica = tecnicaDe ? buscarEjercicioPorId(tecnicaDe) : undefined;
   const progreso = progresoPorEjercicio(enCurso);
 
   const irA = (indice: number) => actualizar((s) => irAEjercicio(s, indice));
@@ -235,6 +239,7 @@ export function SesionEnCursoScreen({ onMinimizar, onTerminada, onDescartada }: 
                   onAnterior={() => irA(index - 1)}
                   onSiguiente={() => irA(index + 1)}
                   onTerminar={pedirTerminar}
+                  onVerTecnica={() => setTecnicaDe(item.ejercicioId)}
                 />
               </View>
             );
@@ -252,6 +257,9 @@ export function SesionEnCursoScreen({ onMinimizar, onTerminada, onDescartada }: 
           </View>
         )}
       </KeyboardAvoidingView>
+
+      {/* La sesión sigue debajo: el descanso no se corta. */}
+      {ejercicioTecnica && <HojaTecnica ejercicio={ejercicioTecnica} onCerrar={() => setTecnicaDe(null)} />}
     </View>
   );
 }
