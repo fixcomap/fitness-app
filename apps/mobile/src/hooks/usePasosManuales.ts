@@ -51,5 +51,8 @@ export function usePasosManuales(perfil: DatosPaso) {
   const dia = claveDia(new Date());
   const cargasDeHoy = useMemo(() => cargasDelDia(cargas, dia), [cargas, dia]);
   const totalesDeHoy = useMemo(() => totalesCargas(cargasDeHoy), [cargasDeHoy]);
-  return { cargasDeHoy, totalesDeHoy, agregar, borrar };
+  return useMemo(
+    () => ({ cargas, cargasDeHoy, totalesDeHoy, agregar, borrar }),
+    [cargas, cargasDeHoy, totalesDeHoy, agregar, borrar],
+  );
 }

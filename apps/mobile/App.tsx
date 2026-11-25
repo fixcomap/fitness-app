@@ -2,6 +2,7 @@ import { DarkTheme, NavigationContainer, type Theme } from '@react-navigation/na
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
+import { ProveedorDatosDelDia } from './src/estado/DatosDelDia';
 import { Tabs } from './src/navigation/Tabs';
 import { colores } from './src/theme/tema';
 
@@ -20,9 +21,11 @@ const tema: Theme = {
 export default function App() {
   return (
     <SafeAreaProvider>
-      <NavigationContainer theme={tema}>
-        <Tabs />
-      </NavigationContainer>
+      <ProveedorDatosDelDia>
+        <NavigationContainer theme={tema}>
+          <Tabs />
+        </NavigationContainer>
+      </ProveedorDatosDelDia>
       <StatusBar style="light" />
     </SafeAreaProvider>
   );

@@ -1,4 +1,5 @@
 import {
+  armarResumenDia,
   conCargasManuales,
   kcalRestantes,
   META_MINUTOS_SEMANA_OMS,
@@ -71,6 +72,30 @@ describe('resumenDeEjemplo', () => {
   test('la meta semanal de minutos es la de la OMS', () => {
     expect(resumenDeEjemplo(10000).minutosActivos.metaSemana).toBe(META_MINUTOS_SEMANA_OMS);
     expect(META_MINUTOS_SEMANA_OMS).toBe(150);
+  });
+});
+
+describe('armarResumenDia', () => {
+  const perfil = { alturaCm: 175, pesoKg: 75 };
+
+  test('usa los pasos del sensor y suma los manuales', () => {
+    const r = armarResumenDia({ metaPasos: 10000, pasosAutomaticos: 6000, manual: { pasos: 2700, minutos: 27 }, perfil });
+    expect(r.pasos).toEqual({ automaticos: 6000, manuales: 2700, meta: 10000 });
+    expect(pasosTotales(r.pasos)).toBe(8700);
+  });
+
+  test('la actividad en kcal sale de los pasos totales (km × peso × 0,5)', () => {
+    // 10.000 pasos → 7,2625 km × 75 × 0,5 = 272
+    const r = armarResumenDia({ metaPasos: 10000, pasosAutomaticos: 7300, manual: { pasos: 2700, minutos: 27 }, perfil });
+    expect(r.kcal.actividad).toBe(272);
+    // objetivo y comido siguen de ejemplo: 2350 + 272 − 1480
+    expect(kcalRestantes(r.kcal)).toBe(1142);
+  });
+
+  test('sin pasos no hay actividad', () => {
+    const r = armarResumenDia({ metaPasos: 10000, pasosAutomaticos: 0, manual: { pasos: 0, minutos: 0 }, perfil });
+    expect(r.kcal.actividad).toBe(0);
+    expect(r.minutosActivos.hoy).toBe(resumenDeEjemplo(10000).minutosActivos.hoy);
   });
 });
 

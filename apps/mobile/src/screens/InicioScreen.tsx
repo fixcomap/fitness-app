@@ -1,23 +1,22 @@
 import { Ionicons } from '@expo/vector-icons';
+import { useFocusEffect } from '@react-navigation/native';
 import { useMemo, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { AvisoFuenteActividad } from '../components/actividad/AvisoFuenteActividad';
 import { HojaPasosManuales } from '../components/inicio/HojaPasosManuales';
 import { TarjetaCoach } from '../components/inicio/TarjetaCoach';
 import { AnilloProgreso } from '../components/progreso/AnilloProgreso';
 import { BarraProgreso, BarraSegmentada } from '../components/progreso/Barras';
 import { formatearFechaCorta, formatearNumero, inicial } from '../lib/formato';
-import { useConfiguracion } from '../hooks/useConfiguracion';
-import { usePasosManuales } from '../hooks/usePasosManuales';
-import { PERFIL_EJEMPLO } from '../lib/perfil';
+import { useDatosDelDia } from '../estado/DatosDelDia';
 import {
-  conCargasManuales,
+  armarResumenDia,
   kcalRestantes,
   pasosTotales,
   porcentaje,
   porcentajeKcal,
-  resumenDeEjemplo,
   type Meta,
 } from '../lib/resumenDia';
 import { colores } from '../theme/tema';
@@ -34,16 +33,35 @@ interface InicioScreenProps {
 }
 
 export function InicioScreen({ onEmpezarEntreno, onAbrirCoach }: InicioScreenProps) {
-  const perfil = PERFIL_EJEMPLO;
   const hoy = new Date();
-  const { config, cambiarMetaPasos } = useConfiguracion();
-  const { cargasDeHoy, totalesDeHoy, agregar, borrar } = usePasosManuales(perfil);
+  const {
+    perfil,
+    config,
+    cambiarMetaPasos,
+    cargasDeHoy,
+    totalesDeHoy,
+    agregar,
+    borrar,
+    estadoFuente,
+    pedirPermiso,
+    pasosSensorHoy,
+    refrescarPasos,
+  } = useDatosDelDia();
   const [hojaAbierta, setHojaAbierta] = useState(false);
 
-  // Los datos de ejemplo más lo cargado a mano hoy.
+  // Al volver a esta pestaña, pedimos los pasos actualizados.
+  useFocusEffect(refrescarPasos);
+
+  // Pasos del sensor + cargados a mano; las kcal de actividad salen de esos pasos.
   const resumen = useMemo(
-    () => conCargasManuales(resumenDeEjemplo(config.metaPasos), totalesDeHoy),
-    [config.metaPasos, totalesDeHoy],
+    () =>
+      armarResumenDia({
+        metaPasos: config.metaPasos,
+        pasosAutomaticos: pasosSensorHoy,
+        manual: totalesDeHoy,
+        perfil,
+      }),
+    [config.metaPasos, pasosSensorHoy, totalesDeHoy, perfil],
   );
   const { kcal, macros, pasos, minutosActivos, entreno } = resumen;
   const totalPasos = pasosTotales(pasos);
@@ -111,6 +129,9 @@ export function InicioScreen({ onEmpezarEntreno, onAbrirCoach }: InicioScreenPro
             <Text style={styles.etiqueta}>hoy: {minutosActivos.hoy} min</Text>
           </View>
         </View>
+
+        {/* Permiso del podómetro o aviso de Android */}
+        <AvisoFuenteActividad estado={estadoFuente} onPermitir={pedirPermiso} />
 
         {/* Entreno de hoy */}
         {entreno && (

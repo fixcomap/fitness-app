@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { guardarConfiguracion, leerConfiguracionGuardada } from '../lib/almacenamiento';
 import { CONFIGURACION_POR_DEFECTO, validarMetaPasos, type Configuracion } from '../lib/configuracion';
@@ -29,5 +29,5 @@ export function useConfiguracion() {
     return meta;
   }, []);
 
-  return { config, cambiarMetaPasos };
+  return useMemo(() => ({ config, cambiarMetaPasos }), [config, cambiarMetaPasos]);
 }
