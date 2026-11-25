@@ -37,7 +37,8 @@
     "ios": "expo start --ios",
     "web": "expo start --web",
     "lint": "eslint . && tsc --noEmit",
-    "test": "jest"
+    "test": "jest",
+    "verificar-videos": "node scripts/verificar-videos.mjs"
   },
   "private": true,
   "jest": {
