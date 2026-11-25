@@ -4,10 +4,12 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useState, t
 import { AppState } from 'react-native';
 
 import { useConfiguracion } from '../hooks/useConfiguracion';
+import { useActividadSensor, type ActividadSensor } from '../hooks/useActividadSensor';
 import { useEstadoFuente } from '../hooks/useEstadoFuente';
 import { usePasosManuales } from '../hooks/usePasosManuales';
 import { leerPasos, pasosDeHoy, type EstadoFuente } from '../lib/actividad/consultas';
 import { fuenteActividad } from '../lib/actividad/fuente';
+import { minutosActivos, type MinutosActivos } from '../lib/actividad/semana';
 import type { FuenteActividad } from '../lib/actividad/FuenteActividad';
 import type { CargaPasos, Franja, TipoCarga } from '../lib/pasosManuales';
 import { PERFIL_EJEMPLO, type PerfilUsuario } from '../lib/perfil';
@@ -25,6 +27,10 @@ export interface DatosDelDiaValor extends Configuracion, Omit<PasosManuales, 'ag
   pedirPermiso: () => Promise<void>;
   pasosSensorHoy: number; // 0 si la fuente no está activa
   refrescarPasos: () => void;
+  // Pasos y minutos de los últimos 7 días según la fuente (vacío si no está activa).
+  actividadSensor: ActividadSensor;
+  // Minutos activos reales (sensor + manuales), los mismos en Inicio y en Actividad.
+  minutos: MinutosActivos;
   // Carga manual inteligente: le pregunta a la fuente cuántos pasos ya contó en
   // esa franja y suma sólo la diferencia.
   agregarCarga: (tipo: TipoCarga, valor: number, franja: Franja) => Promise<CargaPasos>;
@@ -74,6 +80,11 @@ export function ProveedorDatosDelDia({ children }: { children: ReactNode }) {
   }, [refrescarPasos]);
 
   const { cargas, cargasDeHoy, totalesDeHoy, borrar } = manuales;
+  const actividadSensor = useActividadSensor(fuente, activa, pasosSensorHoy);
+  const minutos = useMemo(
+    () => minutosActivos(new Date(), actividadSensor.minutosPorDia, cargas),
+    [actividadSensor, cargas],
+  );
   const valor = useMemo<DatosDelDiaValor>(
     () => ({
       ...configuracion,
@@ -88,6 +99,8 @@ export function ProveedorDatosDelDia({ children }: { children: ReactNode }) {
       pedirPermiso,
       pasosSensorHoy,
       refrescarPasos,
+      actividadSensor,
+      minutos,
     }),
     [
       configuracion,
@@ -102,6 +115,8 @@ export function ProveedorDatosDelDia({ children }: { children: ReactNode }) {
       pedirPermiso,
       pasosSensorHoy,
       refrescarPasos,
+      actividadSensor,
+      minutos,
     ],
   );
 

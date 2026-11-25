@@ -1,7 +1,7 @@
 // Resumen del día: lo que muestra la pantalla Inicio.
 // Es el punto de encuentro de todas las secciones (Comida, Actividad, Entreno).
-// Ya son reales: los pasos (sensor + manuales) y las kcal de actividad.
-// Siguen de ejemplo: objetivo y comido, macros, minutos activos y entreno.
+// Ya son reales: los pasos y los minutos activos (sensor + manuales) y las kcal de actividad.
+// Siguen de ejemplo: objetivo y comido, macros y entreno.
 import { kcalCaminata } from './actividad/calculos';
 
 // Recomendación de la OMS para adultos: 150 minutos de actividad moderada por semana.
@@ -39,22 +39,21 @@ export interface ResumenDia {
 export interface DatosDelDia {
   metaPasos: number;
   pasosAutomaticos: number; // del sensor; 0 si no hay fuente
-  manual: { pasos: number; minutos: number }; // cargado a mano hoy
+  pasosManuales: number; // cargados a mano hoy
+  minutos: { hoy: number; semana: number }; // minutos activos reales (sensor + manuales)
   perfil: { alturaCm: number; pesoKg: number };
 }
 
 // Arma el resumen con los datos reales que ya hay y completa el resto con ejemplos.
-export function armarResumenDia({ metaPasos, pasosAutomaticos, manual, perfil }: DatosDelDia): ResumenDia {
-  const pasosDelDia = pasosAutomaticos + manual.pasos;
+export function armarResumenDia({ metaPasos, pasosAutomaticos, pasosManuales, minutos, perfil }: DatosDelDia): ResumenDia {
+  const pasosDelDia = pasosAutomaticos + pasosManuales;
   const base = resumenDeEjemplo(metaPasos);
-  return conCargasManuales(
-    {
-      ...base,
-      kcal: { ...base.kcal, actividad: kcalCaminata(pasosDelDia, perfil.alturaCm, perfil.pesoKg) },
-      pasos: { automaticos: pasosAutomaticos, manuales: 0, meta: metaPasos },
-    },
-    manual,
-  );
+  return {
+    ...base,
+    kcal: { ...base.kcal, actividad: kcalCaminata(pasosDelDia, perfil.alturaCm, perfil.pesoKg) },
+    pasos: { automaticos: pasosAutomaticos, manuales: pasosManuales, meta: metaPasos },
+    minutosActivos: { ...base.minutosActivos, hoy: minutos.hoy, semana: minutos.semana },
+  };
 }
 
 // Datos de ejemplo para lo que todavía no alimenta ninguna sección.
@@ -96,17 +95,4 @@ export function porcentajeKcal(kcal: ResumenDia['kcal']): number {
 
 export function pasosTotales({ automaticos, manuales }: ResumenDia['pasos']): number {
   return automaticos + manuales;
-}
-
-// Suma al resumen lo cargado a mano: los pasos y los minutos (que cuentan hoy y en la semana).
-export function conCargasManuales(resumen: ResumenDia, manual: { pasos: number; minutos: number }): ResumenDia {
-  return {
-    ...resumen,
-    pasos: { ...resumen.pasos, manuales: resumen.pasos.manuales + manual.pasos },
-    minutosActivos: {
-      ...resumen.minutosActivos,
-      hoy: resumen.minutosActivos.hoy + manual.minutos,
-      semana: resumen.minutosActivos.semana + manual.minutos,
-    },
-  };
 }

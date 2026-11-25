@@ -1,5 +1,5 @@
 import type { CargaPasos } from '../pasosManuales';
-import { armarSemana, pasosRecientes } from './semana';
+import { armarSemana, minutosActivos, pasosRecientes } from './semana';
 
 const AHORA = new Date(2026, 10, 25, 15); // miércoles
 
@@ -38,12 +38,25 @@ describe('armarSemana', () => {
   test('promedio de lunes a hoy', () => {
     expect(semana.promedio).toBe(8281);
   });
-
-  test('minutos manuales sólo de esta semana', () => {
-    expect(semana.minutosManuales).toBe(13);
-  });
 });
 
 test('pasosRecientes junta sensor y manuales por día', () => {
   expect(pasosRecientes(sensor, cargas)).toEqual([9000, 8000, 7500, 12000, 6000, 11000, 7842]);
+});
+
+describe('minutosActivos', () => {
+  const sensorMin = { '2026-11-22': 60, '2026-11-23': 30, '2026-11-24': 40, '2026-11-25': 20 };
+
+  test('hoy: sensor + manuales de hoy', () => {
+    expect(minutosActivos(AHORA, sensorMin, cargas).hoy).toBe(28);
+  });
+
+  test('semana: de lunes a hoy, sin el domingo anterior', () => {
+    // sensor 30 + 40 + 20, manuales 5 (lun) + 8 (hoy)
+    expect(minutosActivos(AHORA, sensorMin, cargas).semana).toBe(103);
+  });
+
+  test('sin sensor quedan sólo los manuales', () => {
+    expect(minutosActivos(AHORA, {}, cargas)).toEqual({ hoy: 8, semana: 13 });
+  });
 });

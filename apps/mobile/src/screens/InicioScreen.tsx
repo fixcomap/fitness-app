@@ -46,22 +46,24 @@ export function InicioScreen({ onEmpezarEntreno, onAbrirCoach }: InicioScreenPro
     pedirPermiso,
     pasosSensorHoy,
     refrescarPasos,
+    minutos,
   } = useDatosDelDia();
   const [hojaAbierta, setHojaAbierta] = useState(false);
 
   // Al volver a esta pestaña, pedimos los pasos actualizados.
   useFocusEffect(refrescarPasos);
 
-  // Pasos del sensor + cargados a mano; las kcal de actividad salen de esos pasos.
+  // Pasos y minutos del sensor + cargados a mano; las kcal de actividad salen de esos pasos.
   const resumen = useMemo(
     () =>
       armarResumenDia({
         metaPasos: config.metaPasos,
         pasosAutomaticos: pasosSensorHoy,
-        manual: totalesDeHoy,
+        pasosManuales: totalesDeHoy.pasos,
+        minutos,
         perfil,
       }),
-    [config.metaPasos, pasosSensorHoy, totalesDeHoy, perfil],
+    [config.metaPasos, pasosSensorHoy, totalesDeHoy, minutos, perfil],
   );
   const { kcal, macros, pasos, minutosActivos, entreno } = resumen;
   const totalPasos = pasosTotales(pasos);
