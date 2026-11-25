@@ -1,7 +1,9 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useState } from 'react';
 import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { EncabezadoSesion } from '../components/entreno/EncabezadoSesion';
 import { buscarEjercicioPorId } from '../data/ejercicios';
 import { useEntreno } from '../estado/Entreno';
 import { textoSeries } from '../lib/entreno/progresion';
@@ -12,30 +14,34 @@ import { colores, espacios, radios } from '../theme/tema';
 
 // Sesiones pasadas, de la más nueva a la más vieja. Por ahora sólo historial:
 // las rutinas guardadas llegan más adelante.
-export function HistorialSesionesScreen() {
+export function HistorialSesionesScreen({ onVolver }: { onVolver: () => void }) {
+  const insets = useSafeAreaInsets();
   const { historial } = useEntreno();
   const [abierta, setAbierta] = useState<string | null>(null);
 
   return (
-    <FlatList
-      data={historial}
-      keyExtractor={(s) => s.id}
-      contentContainerStyle={styles.contenido}
-      ListEmptyComponent={
-        <View style={styles.vacio}>
-          <Ionicons name="calendar-outline" size={40} color={colores.textoSecundario} />
-          <Text style={styles.textoVacio}>Todavía no terminaste ninguna sesión.</Text>
-          <Text style={styles.secundario}>Cuando termines una, la vas a ver acá.</Text>
-        </View>
-      }
-      renderItem={({ item }) => (
-        <TarjetaSesion
-          sesion={item}
-          abierta={abierta === item.id}
-          onPress={() => setAbierta((a) => (a === item.id ? null : item.id))}
-        />
-      )}
-    />
+    <View style={styles.pantalla}>
+      <EncabezadoSesion titulo="Mis rutinas" icono="chevron-back" etiquetaBoton="Volver a Entreno" onPress={onVolver} />
+      <FlatList
+        data={historial}
+        keyExtractor={(s) => s.id}
+        contentContainerStyle={[styles.contenido, { paddingBottom: insets.bottom + espacios.m }]}
+        ListEmptyComponent={
+          <View style={styles.vacio}>
+            <Ionicons name="calendar-outline" size={40} color={colores.textoSecundario} />
+            <Text style={styles.textoVacio}>Todavía no terminaste ninguna sesión.</Text>
+            <Text style={styles.secundario}>Cuando termines una, la vas a ver acá.</Text>
+          </View>
+        }
+        renderItem={({ item }) => (
+          <TarjetaSesion
+            sesion={item}
+            abierta={abierta === item.id}
+            onPress={() => setAbierta((a) => (a === item.id ? null : item.id))}
+          />
+        )}
+      />
+    </View>
   );
 }
 
@@ -73,6 +79,7 @@ function TarjetaSesion({ sesion, abierta, onPress }: { sesion: SesionGuardada; a
 }
 
 const styles = StyleSheet.create({
+  pantalla: { flex: 1, backgroundColor: colores.fondo },
   contenido: { padding: espacios.m, gap: espacios.s + 4 },
   flex: { flex: 1 },
   vacio: { alignItems: 'center', gap: espacios.s, paddingVertical: espacios.xl, paddingHorizontal: espacios.l },

@@ -1,17 +1,22 @@
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
+import { useAhora } from '../../hooks/useAhora';
 import { formatearCronometro } from '../../lib/entreno/resumen';
-import { AJUSTE_DESCANSO_S } from '../../lib/entreno/sesion';
+import { AJUSTE_DESCANSO_S, segundosRestantes } from '../../lib/entreno/sesion';
+import type { Descanso } from '../../lib/entreno/tipos';
 import { colores, espacios, radios } from '../../theme/tema';
 
 interface BarraDescansoProps {
-  segundos: number;
+  descanso: Descanso;
   onAjustar: (deltaS: number) => void;
   onSaltar: () => void;
 }
 
 // Temporizador de descanso: cuenta regresiva con −15, +15 y Saltar.
-export function BarraDescanso({ segundos, onAjustar, onSaltar }: BarraDescansoProps) {
+// Tiene su propio reloj para no redibujar la pantalla entera.
+export function BarraDescanso({ descanso, onAjustar, onSaltar }: BarraDescansoProps) {
+  const ahora = useAhora(250);
+  const segundos = segundosRestantes({ descanso }, ahora);
   return (
     <View style={styles.barra} accessibilityLiveRegion="polite">
       <View style={styles.flex}>

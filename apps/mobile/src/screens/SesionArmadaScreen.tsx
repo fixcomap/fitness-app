@@ -1,7 +1,8 @@
 import { Ionicons } from '@expo/vector-icons';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { EncabezadoSesion } from '../components/entreno/EncabezadoSesion';
 import { Miniatura } from '../components/entreno/Miniatura';
 import { NOMBRE_EQUIPO, NOMBRE_MUSCULO } from '../data/nombres';
 import { useEntreno } from '../estado/Entreno';
@@ -11,10 +12,12 @@ import { colores, espacios, radios } from '../theme/tema';
 interface SesionArmadaScreenProps {
   onEmpezar: () => void;
   onAgregarEjercicios: () => void;
+  onCerrar: () => void;
 }
 
 // Los ejercicios de la sesión de hoy: se reordenan, se sacan y se empieza.
-export function SesionArmadaScreen({ onEmpezar, onAgregarEjercicios }: SesionArmadaScreenProps) {
+export function SesionArmadaScreen({ onEmpezar, onAgregarEjercicios, onCerrar }: SesionArmadaScreenProps) {
+  const insets = useSafeAreaInsets();
   const { ejerciciosArmados, enCurso, quitar, mover, empezar } = useEntreno();
   const vacia = ejerciciosArmados.length === 0;
 
@@ -23,7 +26,8 @@ export function SesionArmadaScreen({ onEmpezar, onAgregarEjercicios }: SesionArm
   };
 
   return (
-    <SafeAreaView style={styles.pantalla} edges={['bottom']}>
+    <View style={styles.pantalla}>
+      <EncabezadoSesion titulo="Sesión de hoy" icono="close" etiquetaBoton="Cerrar" onPress={onCerrar} />
       <ScrollView contentContainerStyle={styles.contenido}>
         {!vacia && (
           <View>
@@ -73,7 +77,7 @@ export function SesionArmadaScreen({ onEmpezar, onAgregarEjercicios }: SesionArm
         </Pressable>
       </ScrollView>
 
-      <View style={styles.pie}>
+      <View style={[styles.pie, { paddingBottom: Math.max(insets.bottom, espacios.m) }]}>
         {enCurso && <Text style={styles.aviso}>Ya tenés una sesión en curso.</Text>}
         <Pressable
           onPress={alEmpezar}
@@ -85,7 +89,7 @@ export function SesionArmadaScreen({ onEmpezar, onAgregarEjercicios }: SesionArm
           <Text style={styles.textoBoton}>{enCurso ? 'Volver a la sesión' : 'Empezar'}</Text>
         </Pressable>
       </View>
-    </SafeAreaView>
+    </View>
   );
 }
 
@@ -143,7 +147,6 @@ const styles = StyleSheet.create({
     right: 0,
     bottom: 0,
     padding: espacios.m,
-    paddingBottom: espacios.l,
     gap: espacios.s,
     backgroundColor: colores.fondo,
     borderTopWidth: StyleSheet.hairlineWidth,

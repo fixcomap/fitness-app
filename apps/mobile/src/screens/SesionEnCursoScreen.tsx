@@ -1,17 +1,27 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useKeepAwake } from 'expo-keep-awake';
-import { useMemo, useState } from 'react';
-import { Alert, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { useEffect, useRef, useState } from 'react';
+import {
+  Alert,
+  FlatList,
+  KeyboardAvoidingView,
+  Platform,
+  Pressable,
+  StyleSheet,
+  Text,
+  useWindowDimensions,
+  View,
+  type NativeScrollEvent,
+  type NativeSyntheticEvent,
+} from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { BarraDescanso } from '../components/entreno/BarraDescanso';
-import { Miniatura } from '../components/entreno/Miniatura';
-import { TablaSeries } from '../components/entreno/TablaSeries';
+import { Cronometro } from '../components/entreno/Cronometro';
+import { PaginaEjercicio } from '../components/entreno/PaginaEjercicio';
 import { buscarEjercicioPorId } from '../data/ejercicios';
 import { useEntreno } from '../estado/Entreno';
-import { useAhora } from '../hooks/useAhora';
-import { textoProgresion, ultimaVez, usaPeso } from '../lib/entreno/progresion';
-import { formatearCronometro } from '../lib/entreno/resumen';
+import { usaPeso } from '../lib/entreno/progresion';
 import {
   agregarSerie,
   ajustarDescanso,
@@ -20,13 +30,16 @@ import {
   irAEjercicio,
   objetivoDe,
   progresoPorEjercicio,
-  segundosRestantes,
   serieValida,
   terminarDescanso,
   tildarSerie,
   totalSeriesHechas,
 } from '../lib/entreno/sesion';
+import type { EjercicioEnCurso } from '../lib/entreno/tipos';
 import { colores, espacios, radios } from '../theme/tema';
+
+// Alto aproximado de la barra de descanso, para que no tape el final de la página.
+const ALTO_BARRA_DESCANSO = 90;
 
 interface SesionEnCursoScreenProps {
   onMinimizar: () => void;
@@ -37,48 +50,56 @@ interface SesionEnCursoScreenProps {
 export function SesionEnCursoScreen({ onMinimizar, onTerminada, onDescartada }: SesionEnCursoScreenProps) {
   // La pantalla no se apaga mientras se entrena.
   useKeepAwake();
+  // Dentro de un modal a pantalla completa SafeAreaView no siempre recibe los
+  // márgenes: se aplican a mano.
+  const insets = useSafeAreaInsets();
+  const { width: ancho } = useWindowDimensions();
   const { enCurso, historial, actualizar, terminar, descartar } = useEntreno();
-  const ahora = useAhora(500);
   // Series que se quisieron tildar con datos que faltan: "ejercicio-serie".
   const [marcadas, setMarcadas] = useState<ReadonlySet<string>>(new Set());
-
+  const lista = useRef<FlatList<EjercicioEnCurso>>(null);
   const actual = enCurso?.actual ?? 0;
-  const ejercicioActual = enCurso?.ejercicios[actual];
-  const datos = ejercicioActual ? buscarEjercicioPorId(ejercicioActual.ejercicioId) : undefined;
-  const ultima = useMemo(
-    () => (ejercicioActual ? ultimaVez(historial, ejercicioActual.ejercicioId) : null),
-    [historial, ejercicioActual],
-  );
 
-  if (!enCurso || !ejercicioActual) {
-    return <SafeAreaView style={styles.pantalla} />;
+  // Si el ejercicio cambia por un botón o la barra de arriba, se desliza hasta él.
+  useEffect(() => {
+    lista.current?.scrollToIndex({ index: actual, animated: true });
+  }, [actual]);
+
+  if (!enCurso) {
+    return <View style={styles.pantalla} />;
   }
 
-  const conPeso = datos ? usaPeso(datos.equipo) : true;
   const total = enCurso.ejercicios.length;
   const progreso = progresoPorEjercicio(enCurso);
-  const aviso = datos ? textoProgresion(ultima, datos.equipo, ahora) : null;
-  const restante = segundosRestantes(enCurso, ahora);
-  const siguiente = actual + 1 < total ? enCurso.ejercicios[actual + 1] : null;
-  const nombreSiguiente = siguiente ? (buscarEjercicioPorId(siguiente.ejercicioId)?.nombre ?? 'Ejercicio') : null;
-  const marcadasActual = new Set(
-    [...marcadas].filter((k) => k.startsWith(`${actual}-`)).map((k) => Number(k.split('-')[1])),
-  );
 
-  const tildar = (indice: number) => {
-    const serie = ejercicioActual.series[indice];
+  const irA = (indice: number) => actualizar((s) => irAEjercicio(s, indice));
+
+  // Al terminar de deslizar, el ejercicio visible pasa a ser el actual.
+  const alDeslizar = (e: NativeSyntheticEvent<NativeScrollEvent>) => {
+    const indice = Math.round(e.nativeEvent.contentOffset.x / ancho);
+    if (indice !== actual) irA(indice);
+  };
+
+  const tildar = (indiceEjercicio: number, indiceSerie: number) => {
+    const ejercicio = enCurso.ejercicios[indiceEjercicio];
+    const datos = buscarEjercicioPorId(ejercicio.ejercicioId);
+    const conPeso = datos ? usaPeso(datos.equipo) : true;
+    const serie = ejercicio.series[indiceSerie];
     if (!serie.hecha && !serieValida(serie, conPeso)) {
-      setMarcadas((m) => new Set(m).add(`${actual}-${indice}`));
+      setMarcadas((m) => new Set(m).add(`${indiceEjercicio}-${indiceSerie}`));
       return;
     }
-    actualizar((s) => tildarSerie(s, actual, indice, conPeso, new Date()));
+    actualizar((s) => tildarSerie(s, indiceEjercicio, indiceSerie, conPeso, new Date()));
   };
 
-  const borrar = (indice: number) => {
-    // Las marcas quedan atadas a la posición: al borrar una serie se limpian las de este ejercicio.
-    setMarcadas((m) => new Set([...m].filter((k) => !k.startsWith(`${actual}-`))));
-    actualizar((s) => borrarSerie(s, actual, indice));
+  const borrar = (indiceEjercicio: number, indiceSerie: number) => {
+    // Las marcas quedan atadas a la posición: al borrar una serie se limpian las de ese ejercicio.
+    setMarcadas((m) => new Set([...m].filter((k) => !k.startsWith(`${indiceEjercicio}-`))));
+    actualizar((s) => borrarSerie(s, indiceEjercicio, indiceSerie));
   };
+
+  const marcadasDe = (indice: number) =>
+    new Set([...marcadas].filter((k) => k.startsWith(`${indice}-`)).map((k) => Number(k.split('-')[1])));
 
   const pedirTerminar = () => {
     if (totalSeriesHechas(enCurso) === 0) {
@@ -107,22 +128,28 @@ export function SesionEnCursoScreen({ onMinimizar, onTerminada, onDescartada }: 
     ]);
   };
 
+  const espacioAbajo = enCurso.descanso ? ALTO_BARRA_DESCANSO : 0;
+
   return (
-    <SafeAreaView style={styles.pantalla} edges={['top', 'bottom']}>
+    <View style={[styles.pantalla, { paddingTop: insets.top }]}>
       <KeyboardAvoidingView style={styles.flex} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
         {/* Arriba: nombre, cronómetro total, Terminar y progreso por ejercicio */}
         <View style={styles.cabecera}>
           <View style={styles.filaCabecera}>
-            <Pressable onPress={onMinimizar} hitSlop={8} accessibilityRole="button" accessibilityLabel="Minimizar la sesión">
-              <Ionicons name="chevron-down" size={26} color={colores.texto} />
+            <Pressable
+              onPress={onMinimizar}
+              hitSlop={8}
+              style={styles.botonRedondo}
+              accessibilityRole="button"
+              accessibilityLabel="Minimizar la sesión"
+            >
+              <Ionicons name="chevron-down" size={24} color={colores.texto} />
             </Pressable>
             <View style={styles.flex}>
               <Text style={styles.nombreSesion} numberOfLines={1}>
                 {enCurso.nombre}
               </Text>
-              <Text style={styles.cronometro} accessibilityLabel="Tiempo total">
-                {formatearCronometro(ahora.getTime() - Date.parse(enCurso.inicio))}
-              </Text>
+              <Cronometro inicio={enCurso.inicio} style={styles.cronometro} />
             </View>
             <Pressable
               onPress={pedirTerminar}
@@ -132,88 +159,80 @@ export function SesionEnCursoScreen({ onMinimizar, onTerminada, onDescartada }: 
               <Text style={styles.textoTerminar}>Terminar</Text>
             </Pressable>
           </View>
+          {/* Cada segmento tiene un área de toque alta, aunque la línea sea fina. */}
           <View style={styles.progreso}>
             {progreso.map((p, i) => (
               <Pressable
                 key={i}
-                onPress={() => actualizar((s) => irAEjercicio(s, i))}
-                hitSlop={{ top: 10, bottom: 10 }}
-                style={[styles.segmento, i === actual && styles.segmentoActual]}
+                onPress={() => irA(i)}
+                style={styles.toqueSegmento}
                 accessibilityRole="button"
                 accessibilityLabel={`Ir al ejercicio ${i + 1}`}
+                accessibilityState={{ selected: i === actual }}
               >
-                <View style={[styles.rellenoSegmento, { width: `${Math.round(p * 100)}%` }]} />
+                <View style={[styles.segmento, i === actual && styles.segmentoActual]}>
+                  <View style={[styles.rellenoSegmento, { width: `${Math.round(p * 100)}%` }]} />
+                </View>
               </Pressable>
             ))}
           </View>
         </View>
 
-        <ScrollView contentContainerStyle={styles.contenido} keyboardShouldPersistTaps="handled">
-          {/* Ejercicio actual */}
-          <View style={styles.ejercicio}>
-            {datos && <Miniatura ejercicio={datos} tamano={64} />}
-            <View style={styles.flex}>
-              <Text style={styles.contador}>
-                Ejercicio {actual + 1} de {total}
-              </Text>
-              <Text style={styles.nombreEjercicio}>{datos?.nombre ?? 'Ejercicio'}</Text>
-            </View>
-          </View>
+        {/* Un ejercicio por página: se desliza hacia los costados */}
+        <FlatList
+          ref={lista}
+          data={enCurso.ejercicios}
+          extraData={[marcadas, historial, espacioAbajo]}
+          keyExtractor={(e, i) => `${i}-${e.ejercicioId}`}
+          horizontal
+          pagingEnabled
+          showsHorizontalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
+          initialScrollIndex={actual}
+          getItemLayout={(_, i) => ({ length: ancho, offset: ancho * i, index: i })}
+          onMomentumScrollEnd={alDeslizar}
+          renderItem={({ item, index }) => {
+            const siguiente = enCurso.ejercicios[index + 1];
+            return (
+              <View style={{ width: ancho }}>
+                <PaginaEjercicio
+                  ejercicio={item}
+                  datos={buscarEjercicioPorId(item.ejercicioId)}
+                  indice={index}
+                  total={total}
+                  historial={historial}
+                  marcadas={marcadasDe(index)}
+                  siguiente={
+                    siguiente
+                      ? `${buscarEjercicioPorId(siguiente.ejercicioId)?.nombre ?? 'Ejercicio'} · ${objetivoDe(siguiente)}`
+                      : null
+                  }
+                  espacioAbajo={espacioAbajo}
+                  onEditar={(serie, cambios) => actualizar((s) => editarSerie(s, index, serie, cambios))}
+                  onTildar={(serie) => tildar(index, serie)}
+                  onBorrar={(serie) => borrar(index, serie)}
+                  onAgregar={() => actualizar((s) => agregarSerie(s, index))}
+                  onAnterior={() => irA(index - 1)}
+                  onSiguiente={() => irA(index + 1)}
+                  onTerminar={pedirTerminar}
+                />
+              </View>
+            );
+          }}
+        />
 
-          {aviso && (
-            <View style={styles.aviso}>
-              <Ionicons name="trending-up" size={18} color={colores.acentoSuave} />
-              <Text style={styles.textoAviso}>{aviso}</Text>
-            </View>
-          )}
-
-          <View style={styles.tarjeta}>
-            <TablaSeries
-              series={ejercicioActual.series}
-              anteriores={ultima?.ejercicio.series ?? []}
-              conPeso={conPeso}
-              marcadas={marcadasActual}
-              onEditar={(i, cambios) => actualizar((s) => editarSerie(s, actual, i, cambios))}
-              onTildar={tildar}
-              onBorrar={borrar}
-              onAgregar={() => actualizar((s) => agregarSerie(s, actual))}
-            />
-          </View>
-        </ScrollView>
-
-        {/* Abajo: descanso y siguiente ejercicio */}
-        <View style={styles.pie}>
-          {enCurso.descanso && restante > 0 && (
+        {/* Descanso, fijo abajo */}
+        {enCurso.descanso && (
+          <View style={[styles.pie, { paddingBottom: Math.max(insets.bottom, espacios.s) }]}>
             <BarraDescanso
-              segundos={restante}
+              descanso={enCurso.descanso}
               onAjustar={(delta) => actualizar((s) => ajustarDescanso(s, delta, new Date()))}
               onSaltar={() => actualizar(terminarDescanso)}
             />
-          )}
-          {siguiente ? (
-            <Pressable
-              onPress={() => actualizar((s) => irAEjercicio(s, actual + 1))}
-              style={({ pressed }) => [styles.botonSiguiente, pressed && styles.presionado]}
-              accessibilityRole="button"
-            >
-              <Text style={styles.textoSiguiente} numberOfLines={1}>
-                Siguiente: {nombreSiguiente} · {objetivoDe(siguiente)}
-              </Text>
-              <Ionicons name="arrow-forward" size={18} color={colores.texto} />
-            </Pressable>
-          ) : (
-            <Pressable
-              onPress={pedirTerminar}
-              style={({ pressed }) => [styles.botonSiguiente, pressed && styles.presionado]}
-              accessibilityRole="button"
-            >
-              <Text style={styles.textoSiguiente}>Terminar sesión</Text>
-              <Ionicons name="flag" size={18} color={colores.texto} />
-            </Pressable>
-          )}
-        </View>
+          </View>
+        )}
       </KeyboardAvoidingView>
-    </SafeAreaView>
+    </View>
   );
 }
 
@@ -222,13 +241,21 @@ const styles = StyleSheet.create({
   flex: { flex: 1 },
   presionado: { opacity: 0.8 },
 
-  cabecera: { paddingHorizontal: espacios.m, paddingTop: espacios.s, paddingBottom: espacios.m, gap: espacios.m },
+  cabecera: { paddingHorizontal: espacios.m, paddingTop: espacios.s, gap: espacios.xs },
   filaCabecera: { flexDirection: 'row', alignItems: 'center', gap: espacios.s + 4 },
+  botonRedondo: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: colores.tarjeta,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   nombreSesion: { color: colores.texto, fontSize: 17, fontWeight: '800' },
   cronometro: { color: colores.acento, fontSize: 22, fontWeight: '800', fontVariant: ['tabular-nums'] },
   botonTerminar: {
     paddingHorizontal: espacios.m,
-    height: 36,
+    height: 40,
     borderRadius: radios.pill,
     borderWidth: 1,
     borderColor: colores.borde,
@@ -237,44 +264,18 @@ const styles = StyleSheet.create({
   },
   textoTerminar: { color: colores.texto, fontSize: 14, fontWeight: '800' },
   progreso: { flexDirection: 'row', gap: 4 },
-  segmento: { flex: 1, height: 6, borderRadius: 3, backgroundColor: colores.pista, overflow: 'hidden' },
+  toqueSegmento: { flex: 1, paddingVertical: 14 },
+  segmento: { height: 8, borderRadius: 4, backgroundColor: colores.pista, overflow: 'hidden' },
   segmentoActual: { borderWidth: 1, borderColor: colores.texto },
   rellenoSegmento: { height: '100%', backgroundColor: colores.acento },
 
-  contenido: { paddingHorizontal: espacios.m, paddingBottom: espacios.l, gap: espacios.m },
-  ejercicio: { flexDirection: 'row', alignItems: 'center', gap: espacios.m },
-  contador: { color: colores.textoSecundario, fontSize: 13, fontWeight: '700' },
-  nombreEjercicio: { color: colores.texto, fontSize: 22, fontWeight: '800' },
-  aviso: {
-    flexDirection: 'row',
-    gap: espacios.s,
-    alignItems: 'flex-start',
-    backgroundColor: colores.tarjeta,
-    borderRadius: radios.medio,
-    borderLeftWidth: 3,
-    borderLeftColor: colores.acento,
-    padding: espacios.s + 4,
-  },
-  textoAviso: { flex: 1, color: colores.texto, fontSize: 14, lineHeight: 20 },
-  tarjeta: { backgroundColor: colores.tarjeta, borderRadius: radios.grande, padding: espacios.s + 4 },
-
   pie: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    bottom: 0,
     paddingHorizontal: espacios.m,
-    paddingTop: espacios.s + 4,
-    paddingBottom: espacios.s,
-    gap: espacios.s,
-    borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: colores.borde,
+    paddingTop: espacios.s,
+    backgroundColor: colores.fondo,
   },
-  botonSiguiente: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: espacios.s,
-    backgroundColor: colores.acento,
-    borderRadius: radios.medio,
-    paddingVertical: 14,
-    paddingHorizontal: espacios.m,
-  },
-  textoSiguiente: { flexShrink: 1, color: colores.texto, fontSize: 15, fontWeight: '800' },
 });

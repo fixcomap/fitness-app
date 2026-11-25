@@ -29,6 +29,10 @@ function CatalogoRuta({ navigation }: NativeStackScreenProps<EntrenoStackParamLi
   );
 }
 
+function HistorialRuta({ navigation }: NativeStackScreenProps<EntrenoStackParamList, 'Historial'>) {
+  return <HistorialSesionesScreen onVolver={() => navigation.goBack()} />;
+}
+
 function DetalleRuta({ route }: NativeStackScreenProps<EntrenoStackParamList, 'Detalle'>) {
   return <DetalleEjercicioScreen id={route.params.id} />;
 }
@@ -45,11 +49,7 @@ export function EntrenoStack() {
     >
       <Stack.Screen name="Catalogo" component={CatalogoRuta} options={{ headerShown: false }} />
       <Stack.Screen name="Detalle" component={DetalleRuta} options={{ title: '', headerBackTitle: 'Entreno' }} />
-      <Stack.Screen
-        name="Historial"
-        component={HistorialSesionesScreen}
-        options={{ title: 'Mis rutinas', headerBackTitle: 'Entreno' }}
-      />
+      <Stack.Screen name="Historial" component={HistorialRuta} options={{ headerShown: false }} />
     </Stack.Navigator>
   );
 }

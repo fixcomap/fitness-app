@@ -40,6 +40,7 @@ function SesionArmadaRuta({ navigation }: NativeStackScreenProps<RaizParamList, 
     <SesionArmadaScreen
       onEmpezar={() => navigation.replace('SesionEnCurso')}
       onAgregarEjercicios={() => navigation.navigate('Tabs', { screen: 'Entreno' })}
+      onCerrar={() => navigation.goBack()}
     />
   );
 }
@@ -72,7 +73,8 @@ export function Raiz() {
       <Stack.Screen
         name="SesionArmada"
         component={SesionArmadaRuta}
-        options={{ title: 'Sesión de hoy', presentation: 'modal' }}
+        // Sin encabezado nativo: la pantalla dibuja el suyo respetando el margen de arriba.
+        options={{ headerShown: false, presentation: 'fullScreenModal' }}
       />
       <Stack.Screen
         name="SesionEnCurso"

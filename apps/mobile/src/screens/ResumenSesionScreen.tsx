@@ -1,7 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useMemo } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { buscarEjercicioPorId } from '../data/ejercicios';
 import { useEntreno } from '../estado/Entreno';
@@ -16,12 +16,14 @@ interface ResumenSesionScreenProps {
 }
 
 export function ResumenSesionScreen({ id, onListo }: ResumenSesionScreenProps) {
+  // Dentro de un modal a pantalla completa los márgenes se aplican a mano.
+  const insets = useSafeAreaInsets();
   const { historial } = useEntreno();
   const sesion = historial.find((s) => s.id === id);
   const records = useMemo(() => (sesion ? recordsNuevos(sesion, historial) : []), [sesion, historial]);
 
   return (
-    <SafeAreaView style={styles.pantalla} edges={['top', 'bottom']}>
+    <View style={[styles.pantalla, { paddingTop: insets.top }]}>
       <ScrollView contentContainerStyle={styles.contenido}>
         <View style={styles.encabezado}>
           <Ionicons name="trophy" size={36} color={colores.oro} />
@@ -68,12 +70,12 @@ export function ResumenSesionScreen({ id, onListo }: ResumenSesionScreenProps) {
         )}
       </ScrollView>
 
-      <View style={styles.pie}>
+      <View style={[styles.pie, { paddingBottom: Math.max(insets.bottom, espacios.m) }]}>
         <Pressable onPress={onListo} style={({ pressed }) => [styles.boton, pressed && styles.presionado]} accessibilityRole="button">
           <Text style={styles.textoBoton}>Listo</Text>
         </Pressable>
       </View>
-    </SafeAreaView>
+    </View>
   );
 }
 
