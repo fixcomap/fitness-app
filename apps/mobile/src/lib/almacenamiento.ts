@@ -5,10 +5,12 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { leerHistorialGuardado, type RegistroDia } from './actividad/historial';
 import { leerConfiguracion, type Configuracion } from './configuracion';
 import { leerCargasGuardadas, type CargaPasos } from './pasosManuales';
+import { leerReportesGuardados, type VideoReportado } from './videosReportados';
 
 const CLAVE_CARGAS = 'pasosManuales:v1';
 const CLAVE_CONFIGURACION = 'configuracion:v1';
 const CLAVE_HISTORIAL = 'historialActividad:v1';
+const CLAVE_VIDEOS_REPORTADOS = 'videosReportados:v1';
 
 async function leerJson(clave: string): Promise<unknown> {
   try {
@@ -41,4 +43,12 @@ export async function leerHistorial(): Promise<RegistroDia[]> {
 
 export async function guardarHistorial(historial: readonly RegistroDia[]): Promise<void> {
   await AsyncStorage.setItem(CLAVE_HISTORIAL, JSON.stringify(historial));
+}
+
+export async function leerVideosReportados(): Promise<VideoReportado[]> {
+  return leerReportesGuardados(await leerJson(CLAVE_VIDEOS_REPORTADOS));
+}
+
+export async function guardarVideosReportados(reportes: readonly VideoReportado[]): Promise<void> {
+  await AsyncStorage.setItem(CLAVE_VIDEOS_REPORTADOS, JSON.stringify(reportes));
 }
