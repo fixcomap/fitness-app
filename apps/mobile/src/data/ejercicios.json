@@ -1,0 +1,443 @@
+[
+  {
+    "id": "press-militar-mancuernas",
+    "nombre": "Press militar con mancuernas",
+    "grupo": "hombros",
+    "equipo": "mancuernas",
+    "nivel": "intermedio",
+    "musculoPrincipal": "deltoids",
+    "musculosSecundarios": ["triceps", "trapezius"],
+    "tecnica": [
+      "Parate con los pies al ancho de la cadera y una mancuerna en cada mano a la altura de los hombros.",
+      "Apretá el abdomen y los glúteos para no arquear la zona lumbar.",
+      "Empujá las mancuernas hacia arriba hasta estirar los brazos, sin chocarlas.",
+      "Bajá controlando hasta volver a la altura de los hombros."
+    ],
+    "erroresComunes": [
+      "Arquear la espalda para empujar más peso.",
+      "Usar las piernas para impulsar las mancuernas.",
+      "Bajar sólo hasta la frente y acortar el recorrido."
+    ],
+    "youtubeId": ""
+  },
+  {
+    "id": "elevaciones-laterales",
+    "nombre": "Elevaciones laterales",
+    "grupo": "hombros",
+    "equipo": "mancuernas",
+    "nivel": "principiante",
+    "musculoPrincipal": "deltoids",
+    "musculosSecundarios": ["trapezius"],
+    "tecnica": [
+      "Parate derecho con una mancuerna en cada mano, los brazos al costado del cuerpo.",
+      "Con los codos apenas flexionados, subí los brazos hacia los costados.",
+      "Frená cuando las manos lleguen a la altura de los hombros.",
+      "Bajá despacio, sin dejar caer las mancuernas."
+    ],
+    "erroresComunes": [
+      "Balancear el torso para subir el peso.",
+      "Subir los hombros hacia las orejas y cargar el trapecio.",
+      "Usar demasiado peso y perder el control al bajar."
+    ],
+    "youtubeId": ""
+  },
+  {
+    "id": "pike-push-up",
+    "nombre": "Flexiones en pica",
+    "grupo": "hombros",
+    "equipo": "peso-corporal",
+    "nivel": "intermedio",
+    "musculoPrincipal": "deltoids",
+    "musculosSecundarios": ["triceps", "chest"],
+    "tecnica": [
+      "Apoyá las manos y los pies en el piso y subí la cadera hasta formar una V invertida.",
+      "Dejá la cabeza entre los brazos, mirando hacia los pies.",
+      "Flexioná los codos y bajá la cabeza hacia el piso, por delante de las manos.",
+      "Empujá el piso para volver a estirar los brazos."
+    ],
+    "erroresComunes": [
+      "Bajar la cadera y convertirlo en una flexión común.",
+      "Abrir demasiado los codos hacia los costados.",
+      "Hacer el recorrido a medias."
+    ],
+    "youtubeId": ""
+  },
+  {
+    "id": "flexiones",
+    "nombre": "Flexiones de brazos",
+    "grupo": "pecho",
+    "equipo": "peso-corporal",
+    "nivel": "principiante",
+    "musculoPrincipal": "chest",
+    "musculosSecundarios": ["triceps", "deltoids", "abs"],
+    "tecnica": [
+      "Apoyá las manos un poco más abiertas que los hombros y estirá las piernas hacia atrás.",
+      "Mantené el cuerpo en línea recta, de la cabeza a los talones.",
+      "Bajá el pecho hasta casi tocar el piso, con los codos a unos 45° del cuerpo.",
+      "Empujá el piso hasta estirar los brazos."
+    ],
+    "erroresComunes": [
+      "Dejar caer la cadera o subirla demasiado.",
+      "Abrir los codos en forma de T.",
+      "Bajar sólo la cabeza en lugar de todo el cuerpo."
+    ],
+    "youtubeId": ""
+  },
+  {
+    "id": "press-banca-barra",
+    "nombre": "Press de banca con barra",
+    "grupo": "pecho",
+    "equipo": "barra",
+    "nivel": "intermedio",
+    "musculoPrincipal": "chest",
+    "musculosSecundarios": ["triceps", "deltoids"],
+    "tecnica": [
+      "Acostate en el banco con los ojos debajo de la barra y los pies firmes en el piso.",
+      "Juntá las escápulas y agarrá la barra un poco más abierta que los hombros.",
+      "Bajá la barra controlando hasta la parte baja del pecho.",
+      "Empujá hacia arriba hasta estirar los brazos, sin despegar la espalda alta del banco."
+    ],
+    "erroresComunes": [
+      "Rebotar la barra contra el pecho.",
+      "Despegar la cola del banco.",
+      "Entrenar pesado sin alguien que te asista."
+    ],
+    "youtubeId": ""
+  },
+  {
+    "id": "aperturas-piso-mancuernas",
+    "nombre": "Aperturas en el piso con mancuernas",
+    "grupo": "pecho",
+    "equipo": "mancuernas",
+    "nivel": "principiante",
+    "musculoPrincipal": "chest",
+    "musculosSecundarios": ["deltoids"],
+    "tecnica": [
+      "Acostate boca arriba con las rodillas flexionadas y las mancuernas arriba del pecho.",
+      "Con los codos apenas flexionados, abrí los brazos hacia los costados.",
+      "Bajá hasta que los codos toquen suave el piso.",
+      "Cerrá los brazos como si abrazaras un árbol hasta volver arriba."
+    ],
+    "erroresComunes": [
+      "Estirar del todo los codos y cargar la articulación.",
+      "Dejar caer los brazos de golpe contra el piso.",
+      "Convertir el movimiento en un press flexionando mucho los codos."
+    ],
+    "youtubeId": ""
+  },
+  {
+    "id": "dominadas",
+    "nombre": "Dominadas",
+    "grupo": "espalda",
+    "equipo": "peso-corporal",
+    "nivel": "avanzado",
+    "musculoPrincipal": "upper-back",
+    "musculosSecundarios": ["biceps", "forearm", "trapezius"],
+    "tecnica": [
+      "Colgate de una barra fija con las palmas hacia adelante, un poco más abiertas que los hombros.",
+      "Llevá los hombros hacia abajo y atrás antes de tirar.",
+      "Tirá hasta que el mentón pase la barra.",
+      "Bajá controlando hasta estirar los brazos del todo."
+    ],
+    "erroresComunes": [
+      "Balancearte o patear para subir.",
+      "No bajar del todo entre repeticiones.",
+      "Estirar el cuello para llegar con el mentón."
+    ],
+    "youtubeId": ""
+  },
+  {
+    "id": "remo-barra",
+    "nombre": "Remo con barra",
+    "grupo": "espalda",
+    "equipo": "barra",
+    "nivel": "intermedio",
+    "musculoPrincipal": "upper-back",
+    "musculosSecundarios": ["biceps", "lower-back", "trapezius"],
+    "tecnica": [
+      "Agarrá la barra con las manos al ancho de los hombros y flexioná un poco las rodillas.",
+      "Inclinate hacia adelante desde la cadera, con la espalda recta.",
+      "Tirá la barra hacia el ombligo llevando los codos hacia atrás.",
+      "Bajá la barra controlando hasta estirar los brazos."
+    ],
+    "erroresComunes": [
+      "Redondear la espalda baja.",
+      "Enderezar el torso en cada repetición para ayudarte.",
+      "Tirar con los brazos en lugar de con la espalda."
+    ],
+    "youtubeId": ""
+  },
+  {
+    "id": "remo-mancuerna-una-mano",
+    "nombre": "Remo con mancuerna a una mano",
+    "grupo": "espalda",
+    "equipo": "mancuernas",
+    "nivel": "principiante",
+    "musculoPrincipal": "upper-back",
+    "musculosSecundarios": ["biceps", "trapezius"],
+    "tecnica": [
+      "Apoyá una mano y una rodilla en un banco, con la espalda paralela al piso.",
+      "Con la otra mano agarrá la mancuerna con el brazo estirado.",
+      "Tirá la mancuerna hacia la cadera, con el codo pegado al cuerpo.",
+      "Bajá despacio hasta estirar el brazo."
+    ],
+    "erroresComunes": [
+      "Girar el torso para subir más el peso.",
+      "Tirar la mancuerna hacia el pecho en lugar de la cadera.",
+      "Encoger el hombro."
+    ],
+    "youtubeId": ""
+  },
+  {
+    "id": "curl-barra",
+    "nombre": "Curl de bíceps con barra",
+    "grupo": "brazos",
+    "equipo": "barra",
+    "nivel": "principiante",
+    "musculoPrincipal": "biceps",
+    "musculosSecundarios": ["forearm"],
+    "tecnica": [
+      "Parate derecho con la barra agarrada con las palmas hacia adelante.",
+      "Dejá los codos pegados al costado del cuerpo.",
+      "Flexioná los codos y subí la barra hasta los hombros.",
+      "Bajá despacio hasta estirar los brazos."
+    ],
+    "erroresComunes": [
+      "Balancear el cuerpo para subir la barra.",
+      "Despegar los codos y llevarlos hacia adelante.",
+      "Soltar la barra de golpe al bajar."
+    ],
+    "youtubeId": ""
+  },
+  {
+    "id": "curl-martillo",
+    "nombre": "Curl martillo",
+    "grupo": "brazos",
+    "equipo": "mancuernas",
+    "nivel": "principiante",
+    "musculoPrincipal": "biceps",
+    "musculosSecundarios": ["forearm"],
+    "tecnica": [
+      "Parate con una mancuerna en cada mano y las palmas mirándose entre sí.",
+      "Con los codos quietos, subí las mancuernas hacia los hombros.",
+      "Mantené las palmas enfrentadas durante todo el movimiento.",
+      "Bajá controlando hasta estirar los brazos."
+    ],
+    "erroresComunes": [
+      "Girar las muñecas como en un curl común.",
+      "Mover los codos hacia adelante.",
+      "Hacer las repeticiones demasiado rápido."
+    ],
+    "youtubeId": ""
+  },
+  {
+    "id": "extension-triceps-banda",
+    "nombre": "Extensión de tríceps con banda",
+    "grupo": "brazos",
+    "equipo": "bandas",
+    "nivel": "principiante",
+    "musculoPrincipal": "triceps",
+    "musculosSecundarios": [],
+    "tecnica": [
+      "Enganchá la banda en algo firme por arriba de tu cabeza y agarrala con las dos manos.",
+      "Pegá los codos al cuerpo, flexionados a 90°.",
+      "Estirá los brazos hacia abajo hasta trabar los codos.",
+      "Volvé despacio a la posición inicial."
+    ],
+    "erroresComunes": [
+      "Despegar los codos del cuerpo.",
+      "Inclinarte hacia adelante para usar el peso del cuerpo.",
+      "Dejar que la banda te tire de vuelta sin control."
+    ],
+    "youtubeId": ""
+  },
+  {
+    "id": "sentadilla-barra",
+    "nombre": "Sentadilla con barra",
+    "grupo": "piernas",
+    "equipo": "barra",
+    "nivel": "intermedio",
+    "musculoPrincipal": "quadriceps",
+    "musculosSecundarios": ["gluteal", "hamstring", "adductors", "lower-back"],
+    "tecnica": [
+      "Apoyá la barra sobre la parte alta de la espalda, no sobre el cuello.",
+      "Separá los pies al ancho de los hombros, con las puntas un poco hacia afuera.",
+      "Bajá llevando la cadera hacia atrás y abajo, con las rodillas en la línea de los pies.",
+      "Bajá hasta que los muslos queden paralelos al piso y empujá para subir."
+    ],
+    "erroresComunes": [
+      "Juntar las rodillas hacia adentro al subir.",
+      "Levantar los talones del piso.",
+      "Redondear la espalda abajo de todo."
+    ],
+    "youtubeId": ""
+  },
+  {
+    "id": "zancadas-mancuernas",
+    "nombre": "Zancadas con mancuernas",
+    "grupo": "piernas",
+    "equipo": "mancuernas",
+    "nivel": "intermedio",
+    "musculoPrincipal": "quadriceps",
+    "musculosSecundarios": ["gluteal", "hamstring", "adductors"],
+    "tecnica": [
+      "Parate derecho con una mancuerna en cada mano.",
+      "Da un paso largo hacia adelante.",
+      "Bajá hasta que las dos rodillas queden flexionadas a 90°, sin que la de atrás toque el piso.",
+      "Empujá con el pie de adelante para volver y cambiá de pierna."
+    ],
+    "erroresComunes": [
+      "Dar un paso demasiado corto y cargar la rodilla.",
+      "Inclinar el torso hacia adelante.",
+      "Dejar que la rodilla de adelante se vaya hacia adentro."
+    ],
+    "youtubeId": ""
+  },
+  {
+    "id": "elevacion-talones",
+    "nombre": "Elevación de talones",
+    "grupo": "piernas",
+    "equipo": "peso-corporal",
+    "nivel": "principiante",
+    "musculoPrincipal": "calves",
+    "musculosSecundarios": [],
+    "tecnica": [
+      "Parate con la punta de los pies sobre un escalón y los talones en el aire.",
+      "Apoyate en una pared o baranda sólo para mantener el equilibrio.",
+      "Subí los talones lo más alto que puedas.",
+      "Bajá despacio hasta que los talones queden por debajo del escalón."
+    ],
+    "erroresComunes": [
+      "Rebotar abajo en lugar de bajar controlado.",
+      "Flexionar las rodillas para ayudarte.",
+      "Hacer el recorrido corto."
+    ],
+    "youtubeId": ""
+  },
+  {
+    "id": "hip-thrust-barra",
+    "nombre": "Hip thrust con barra",
+    "grupo": "gluteos",
+    "equipo": "barra",
+    "nivel": "intermedio",
+    "musculoPrincipal": "gluteal",
+    "musculosSecundarios": ["hamstring", "quadriceps"],
+    "tecnica": [
+      "Sentate en el piso con la espalda alta apoyada en un banco y la barra sobre la cadera.",
+      "Apoyá los pies firmes en el piso, al ancho de la cadera.",
+      "Empujá con los talones y subí la cadera hasta que el torso quede paralelo al piso.",
+      "Apretá los glúteos arriba y bajá controlando."
+    ],
+    "erroresComunes": [
+      "Arquear la zona lumbar en lugar de extender la cadera.",
+      "Apoyar los pies demasiado lejos y cargar los isquiotibiales.",
+      "Subir rápido sin pausa arriba."
+    ],
+    "youtubeId": ""
+  },
+  {
+    "id": "peso-muerto-rumano-mancuernas",
+    "nombre": "Peso muerto rumano con mancuernas",
+    "grupo": "gluteos",
+    "equipo": "mancuernas",
+    "nivel": "intermedio",
+    "musculoPrincipal": "hamstring",
+    "musculosSecundarios": ["gluteal", "lower-back"],
+    "tecnica": [
+      "Parate con una mancuerna en cada mano delante de los muslos.",
+      "Con las rodillas apenas flexionadas, llevá la cadera hacia atrás.",
+      "Bajá las mancuernas pegadas a las piernas hasta sentir el estiramiento atrás del muslo.",
+      "Empujá la cadera hacia adelante para volver a pararte."
+    ],
+    "erroresComunes": [
+      "Redondear la espalda al bajar.",
+      "Flexionar demasiado las rodillas y convertirlo en sentadilla.",
+      "Alejar las mancuernas del cuerpo."
+    ],
+    "youtubeId": ""
+  },
+  {
+    "id": "puente-gluteo-banda",
+    "nombre": "Puente de glúteos con banda",
+    "grupo": "gluteos",
+    "equipo": "bandas",
+    "nivel": "principiante",
+    "musculoPrincipal": "gluteal",
+    "musculosSecundarios": ["hamstring"],
+    "tecnica": [
+      "Acostate boca arriba con las rodillas flexionadas y la banda justo arriba de las rodillas.",
+      "Apoyá los pies en el piso al ancho de la cadera.",
+      "Subí la cadera empujando con los talones y abrí un poco las rodillas contra la banda.",
+      "Sostené un segundo arriba y bajá despacio."
+    ],
+    "erroresComunes": [
+      "Dejar que las rodillas se cierren.",
+      "Arquear la espalda baja arriba de todo.",
+      "Empujar con las puntas de los pies."
+    ],
+    "youtubeId": ""
+  },
+  {
+    "id": "plancha",
+    "nombre": "Plancha",
+    "grupo": "abdomen",
+    "equipo": "peso-corporal",
+    "nivel": "principiante",
+    "musculoPrincipal": "abs",
+    "musculosSecundarios": ["obliques", "deltoids"],
+    "tecnica": [
+      "Apoyá los antebrazos en el piso con los codos debajo de los hombros.",
+      "Estirá las piernas hacia atrás y apoyate en las puntas de los pies.",
+      "Apretá el abdomen y los glúteos para mantener el cuerpo recto.",
+      "Sostené la posición respirando normal."
+    ],
+    "erroresComunes": [
+      "Dejar caer la cadera.",
+      "Subir la cola demasiado.",
+      "Contener la respiración."
+    ],
+    "youtubeId": ""
+  },
+  {
+    "id": "plancha-lateral",
+    "nombre": "Plancha lateral",
+    "grupo": "abdomen",
+    "equipo": "peso-corporal",
+    "nivel": "principiante",
+    "musculoPrincipal": "obliques",
+    "musculosSecundarios": ["abs", "deltoids"],
+    "tecnica": [
+      "Acostate de costado apoyado sobre un antebrazo, con el codo debajo del hombro.",
+      "Estirá las piernas y apoyá un pie arriba del otro.",
+      "Subí la cadera hasta que el cuerpo quede en línea recta.",
+      "Sostené la posición y después cambiá de lado."
+    ],
+    "erroresComunes": [
+      "Dejar que la cadera caiga hacia el piso.",
+      "Girar el torso hacia adelante.",
+      "Apoyar el codo lejos del hombro."
+    ],
+    "youtubeId": ""
+  },
+  {
+    "id": "pallof-press-banda",
+    "nombre": "Pallof press con banda",
+    "grupo": "abdomen",
+    "equipo": "bandas",
+    "nivel": "intermedio",
+    "musculoPrincipal": "obliques",
+    "musculosSecundarios": ["abs"],
+    "tecnica": [
+      "Enganchá la banda a la altura del pecho y parate de costado al anclaje.",
+      "Agarrá la banda con las dos manos pegadas al pecho y alejate hasta que tense.",
+      "Estirá los brazos hacia adelante sin dejar que la banda te gire.",
+      "Volvé las manos al pecho controlando y repetí."
+    ],
+    "erroresComunes": [
+      "Dejar que el torso rote hacia el anclaje.",
+      "Pararte demasiado cerca y que la banda no tense.",
+      "Arquear la espalda para compensar."
+    ],
+    "youtubeId": ""
+  }
+]
