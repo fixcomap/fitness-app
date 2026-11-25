@@ -1,4 +1,4 @@
-import { estadoFuente, leerEstadoFuente, leerPasos, pasosDeHoy, pasosPorDia } from './consultas';
+import { estadoFuente, leerEstadoFuente, leerPasos, minutosActivosDelDia, pasosDeHoy, pasosPorDia } from './consultas';
 import { crearFuenteFalsa } from './fuenteFalsa';
 
 const AHORA = new Date(2026, 10, 25, 15, 0); // miércoles 15:00
@@ -68,5 +68,36 @@ describe('pasosPorDia', () => {
   test('si la fuente falla, los días quedan en 0', async () => {
     const { fuente } = crearFuenteFalsa({ falla: true });
     expect((await pasosPorDia(fuente, AHORA, 3)).map((d) => d.pasos)).toEqual([0, 0, 0]);
+  });
+});
+
+describe('minutosActivosDelDia', () => {
+  test('cuenta los intervalos de 10 min con ≥ 100 pasos/min', async () => {
+    const { fuente } = crearFuenteFalsa({
+      muestras: [
+        // 9:00–9:30 caminata rápida: 3 intervalos de 1200 pasos
+        { fecha: new Date(2026, 10, 25, 9, 2), pasos: 1200 },
+        { fecha: new Date(2026, 10, 25, 9, 12), pasos: 1200 },
+        { fecha: new Date(2026, 10, 25, 9, 25), pasos: 1200 },
+        // 12:00 paseo tranquilo: 600 pasos en 10 min, no cuenta
+        { fecha: new Date(2026, 10, 25, 12, 5), pasos: 600 },
+      ],
+    });
+    expect(await minutosActivosDelDia(fuente, AHORA, AHORA)).toBe(30);
+  });
+
+  test('sólo pide detalle de las horas candidatas', async () => {
+    const { fuente, consultas } = crearFuenteFalsa({
+      muestras: [{ fecha: new Date(2026, 10, 25, 9, 2), pasos: 1200 }],
+    });
+    await minutosActivosDelDia(fuente, AHORA, AHORA);
+    // 15 horas hasta las 15:00 + 6 intervalos de la hora 9
+    expect(consultas).toHaveLength(15 + 6);
+  });
+
+  test('un día pasado se consulta completo', async () => {
+    const { consultas, fuente } = crearFuenteFalsa();
+    await minutosActivosDelDia(fuente, new Date(2026, 10, 24), AHORA);
+    expect(consultas).toHaveLength(24);
   });
 });

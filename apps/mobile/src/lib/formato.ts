@@ -20,3 +20,8 @@ export function inicial(nombre: string): string {
   const limpio = nombre.trim();
   return limpio ? limpio[0].toUpperCase() : '?';
 }
+
+// → "miércoles"
+export function nombreDia(fecha: Date): string {
+  return DIAS[fecha.getDay()].toLowerCase();
+}

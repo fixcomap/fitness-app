@@ -5,6 +5,7 @@ import { StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { PERFIL_EJEMPLO } from '../lib/perfil';
+import { ActividadScreen } from '../screens/ActividadScreen';
 import { InicioScreen } from '../screens/InicioScreen';
 import { PantallaTitulo } from '../screens/PantallaTitulo';
 import { colores } from '../theme/tema';
@@ -40,7 +41,6 @@ function InicioRuta({ navigation }: BottomTabScreenProps<TabsParamList, 'Inicio'
 }
 
 const Comida = () => <PantallaTitulo titulo="Comida" />;
-const Actividad = () => <PantallaTitulo titulo="Actividad" />;
 const Coach = () => <PantallaTitulo titulo="Coach" />;
 
 function IconoTab({ nombre, color, bloqueado }: { nombre: NombreIcono; color: string; bloqueado: boolean }) {
@@ -78,7 +78,7 @@ export function Tabs() {
       <Tab.Screen name="Inicio" component={InicioRuta} />
       <Tab.Screen name="Entreno" component={EntrenoStack} />
       <Tab.Screen name="Comida" component={Comida} />
-      <Tab.Screen name="Actividad" component={Actividad} />
+      <Tab.Screen name="Actividad" component={ActividadScreen} />
       <Tab.Screen name="Coach" component={Coach} />
     </Tab.Navigator>
   );
