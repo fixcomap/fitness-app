@@ -116,6 +116,44 @@ export function moverFranja(franja: Franja, extremo: 'inicio' | 'fin', deltaMin:
   return { ...franja, fin: limitar(sumarMinutos(franja.fin, deltaMin), min, techo) };
 }
 
+export interface HoraFijada {
+  franja: Franja;
+  aviso: string | null; // si hubo que ajustar la hora elegida
+}
+
+// Fija la hora exacta (HH:MM de `elegida`, en el día de hoy) de un extremo.
+// Si no es válida la ajusta al valor permitido más cercano y explica por qué.
+export function fijarHora(franja: Franja, extremo: 'inicio' | 'fin', elegida: Date, ahora: Date): HoraFijada {
+  const piso = inicioDelDia(ahora);
+  const techo = sinSegundos(ahora);
+  // Se toma sólo la hora y se pone en el día de hoy: así nunca queda antes de la medianoche.
+  const hora = new Date(piso.getFullYear(), piso.getMonth(), piso.getDate(), elegida.getHours(), elegida.getMinutes());
+  const hhmm = (fecha: Date) => horaMinutos(fecha);
+
+  if (extremo === 'inicio') {
+    const maximo = new Date(Math.max(piso.getTime(), sumarMinutos(franja.fin, -FRANJA_MINIMA_MIN).getTime()));
+    if (hora > maximo) {
+      return {
+        franja: { ...franja, inicio: maximo },
+        aviso: `"Desde" tiene que ser al menos ${FRANJA_MINIMA_MIN} min antes de "Hasta": lo dejamos en ${hhmm(maximo)}.`,
+      };
+    }
+    return { franja: { ...franja, inicio: hora }, aviso: null };
+  }
+
+  const minimo = new Date(Math.min(techo.getTime(), sumarMinutos(franja.inicio, FRANJA_MINIMA_MIN).getTime()));
+  if (hora > techo) {
+    return { franja: { ...franja, fin: techo }, aviso: `No puede ser después de ahora: lo dejamos en ${hhmm(techo)}.` };
+  }
+  if (hora < minimo) {
+    return {
+      franja: { ...franja, fin: minimo },
+      aviso: `"Hasta" tiene que ser al menos ${FRANJA_MINIMA_MIN} min después de "Desde": lo dejamos en ${hhmm(minimo)}.`,
+    };
+  }
+  return { franja: { ...franja, fin: hora }, aviso: null };
+}
+
 // Mensaje de error si la carga no entra en la franja, o null si está bien.
 export function validarCarga(tipo: TipoCarga, valor: number, franja: Franja): string | null {
   const duracion = duracionMin(franja);

@@ -1,4 +1,5 @@
 import { Ionicons } from '@expo/vector-icons';
+import DateTimePicker, { DateTimePickerAndroid } from '@react-native-community/datetimepicker';
 import { useState } from 'react';
 import {
   KeyboardAvoidingView,
@@ -18,6 +19,7 @@ import { formatearNumero } from '../../lib/formato';
 import {
   convertir,
   descontarRegistrado,
+  fijarHora,
   franjaPorDefecto,
   horaMinutos,
   leerValor,
@@ -47,6 +49,8 @@ interface HojaPasosManualesProps {
 
 const UNIDAD: Record<TipoCarga, string> = { km: 'km', minutos: 'min' };
 
+type Extremo = 'inicio' | 'fin';
+
 // Hoja que sube desde abajo para cargar lo que caminaste sin el celu.
 export function HojaPasosManuales({
   visible,
@@ -66,6 +70,9 @@ export function HojaPasosManuales({
   const [franja, setFranja] = useState<Franja>(() => franjaPorDefecto(new Date()));
   const [agregando, setAgregando] = useState(false);
   const [resultado, setResultado] = useState<string | null>(null);
+  const [avisoHora, setAvisoHora] = useState<string | null>(null);
+  // iOS: el selector se muestra dentro de la hoja (abrir otro modal encima no funciona bien).
+  const [editando, setEditando] = useState<{ extremo: Extremo; hora: Date } | null>(null);
 
   const valor = leerValor(texto, tipo);
   const estimado = valor === null ? null : convertir(tipo, valor, perfil);
@@ -78,11 +85,41 @@ export function HojaPasosManuales({
   const alAbrir = () => {
     setFranja(franjaPorDefecto(new Date()));
     setResultado(null);
+    setAvisoHora(null);
+    setEditando(null);
   };
 
-  const mover = (extremo: 'inicio' | 'fin', delta: number) => {
+  // Atajo de ± 15 min.
+  const mover = (extremo: Extremo, delta: number) => {
     setFranja((f) => moverFranja(f, extremo, delta, new Date()));
     setResultado(null);
+    setAvisoHora(null);
+  };
+
+  // Hora exacta elegida en el selector; si no es válida se ajusta y se avisa.
+  const fijar = (extremo: Extremo, hora: Date) => {
+    const { franja: nueva, aviso } = fijarHora(franja, extremo, hora, new Date());
+    setFranja(nueva);
+    setAvisoHora(aviso);
+    setResultado(null);
+  };
+
+  const abrirSelector = (extremo: Extremo) => {
+    if (Platform.OS === 'android') {
+      DateTimePickerAndroid.open({
+        value: franja[extremo],
+        mode: 'time',
+        is24Hour: true,
+        onValueChange: (_evento, hora) => fijar(extremo, hora),
+      });
+      return;
+    }
+    setEditando({ extremo, hora: franja[extremo] });
+  };
+
+  const confirmarSelector = () => {
+    if (editando) fijar(editando.extremo, editando.hora);
+    setEditando(null);
   };
 
   const agregar = async () => {
@@ -133,9 +170,49 @@ export function HojaPasosManuales({
 
             {/* Horario: por defecto la última hora */}
             <View style={styles.franja}>
-              <SelectorHora etiqueta="Desde" fecha={franja.inicio} onMover={(d) => mover('inicio', d)} />
-              <SelectorHora etiqueta="Hasta" fecha={franja.fin} onMover={(d) => mover('fin', d)} />
+              <SelectorHora
+                etiqueta="Desde"
+                fecha={franja.inicio}
+                activo={editando?.extremo === 'inicio'}
+                onMover={(d) => mover('inicio', d)}
+                onElegir={() => abrirSelector('inicio')}
+              />
+              <SelectorHora
+                etiqueta="Hasta"
+                fecha={franja.fin}
+                activo={editando?.extremo === 'fin'}
+                onMover={(d) => mover('fin', d)}
+                onElegir={() => abrirSelector('fin')}
+              />
             </View>
+
+            {editando && (
+              <View style={styles.panelHora}>
+                <DateTimePicker
+                  value={editando.hora}
+                  mode="time"
+                  display="spinner"
+                  minuteInterval={1}
+                  locale="es-AR"
+                  themeVariant="dark"
+                  onValueChange={(_evento, hora) => setEditando({ ...editando, hora })}
+                />
+                <View style={styles.accionesHora}>
+                  <Pressable onPress={() => setEditando(null)} hitSlop={8} accessibilityRole="button">
+                    <Text style={styles.cancelarHora}>Cancelar</Text>
+                  </Pressable>
+                  <Pressable onPress={confirmarSelector} hitSlop={8} accessibilityRole="button">
+                    <Text style={styles.listoHora}>Listo</Text>
+                  </Pressable>
+                </View>
+              </View>
+            )}
+
+            {avisoHora !== null && (
+              <Text style={styles.avisoHora} accessibilityLiveRegion="polite">
+                {avisoHora}
+              </Text>
+            )}
 
             <View style={styles.filaEntrada}>
               <View style={[styles.entrada, marcarError && styles.entradaError]}>
@@ -253,7 +330,15 @@ export function HojaPasosManuales({
   );
 }
 
-function SelectorHora({ etiqueta, fecha, onMover }: { etiqueta: string; fecha: Date; onMover: (delta: number) => void }) {
+interface SelectorHoraProps {
+  etiqueta: string;
+  fecha: Date;
+  activo: boolean; // el selector de esta hora está abierto
+  onMover: (delta: number) => void;
+  onElegir: () => void;
+}
+
+function SelectorHora({ etiqueta, fecha, activo, onMover, onElegir }: SelectorHoraProps) {
   return (
     <View style={styles.selectorHora}>
       <Text style={styles.etiquetaHora}>{etiqueta}</Text>
@@ -267,7 +352,15 @@ function SelectorHora({ etiqueta, fecha, onMover }: { etiqueta: string; fecha: D
         >
           <Ionicons name="remove" size={18} color={colores.texto} />
         </Pressable>
-        <Text style={styles.hora}>{horaMinutos(fecha)}</Text>
+        <Pressable
+          onPress={onElegir}
+          hitSlop={6}
+          style={({ pressed }) => [styles.botonHoraExacta, (pressed || activo) && styles.horaActiva]}
+          accessibilityRole="button"
+          accessibilityLabel={`${etiqueta}: ${horaMinutos(fecha)}. Tocá para elegir la hora exacta`}
+        >
+          <Text style={styles.hora}>{horaMinutos(fecha)}</Text>
+        </Pressable>
         <Pressable
           onPress={() => onMover(PASO_FRANJA_MIN)}
           hitSlop={6}
@@ -297,6 +390,13 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   hora: { color: colores.texto, fontSize: 18, fontWeight: '800' },
+  botonHoraExacta: { paddingHorizontal: 8, paddingVertical: 2, borderRadius: 8 },
+  horaActiva: { backgroundColor: colores.tarjetaElevada },
+  panelHora: { backgroundColor: colores.fondo, borderRadius: 14, paddingBottom: 10 },
+  accionesHora: { flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 16 },
+  cancelarHora: { color: colores.textoSecundario, fontSize: 15, fontWeight: '700' },
+  listoHora: { color: colores.acento, fontSize: 15, fontWeight: '800' },
+  avisoHora: { color: colores.acentoSuave, fontSize: 12, marginTop: -4 },
   resultado: { flexDirection: 'row', alignItems: 'center', gap: 8, backgroundColor: colores.verdeFondo, borderRadius: 12, padding: 12 },
   textoResultado: { flex: 1, color: colores.texto, fontSize: 13, fontWeight: '600' },
   fondo: { flex: 1, backgroundColor: 'rgba(0,0,0,0.6)' },

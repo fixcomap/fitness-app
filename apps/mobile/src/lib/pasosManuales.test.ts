@@ -2,6 +2,7 @@ import {
   borrarCarga,
   descontarRegistrado,
   duracionMin,
+  fijarHora,
   franjaPorDefecto,
   minutosProporcionales,
   moverFranja,
@@ -162,6 +163,46 @@ describe('franja horaria', () => {
     const corta = { inicio: new Date(2026, 10, 25, 14, 0), fin: new Date(2026, 10, 25, 14, 10) };
     expect(moverFranja(corta, 'inicio', 15, AHORA).inicio).toEqual(new Date(2026, 10, 25, 14, 5));
     expect(moverFranja(corta, 'fin', -15, AHORA).fin).toEqual(new Date(2026, 10, 25, 14, 5));
+  });
+});
+
+describe('fijarHora', () => {
+  const AHORA = new Date(2026, 10, 25, 15, 42, 37);
+  const franja = { inicio: new Date(2026, 10, 25, 14, 42), fin: new Date(2026, 10, 25, 15, 42) };
+  const a = (h: number, m: number) => new Date(2026, 10, 25, h, m);
+
+  test('pone la hora exacta, al minuto', () => {
+    expect(fijarHora(franja, 'inicio', a(14, 7), AHORA)).toEqual({ franja: { ...franja, inicio: a(14, 7) }, aviso: null });
+    expect(fijarHora(franja, 'fin', a(15, 1), AHORA)).toEqual({ franja: { ...franja, fin: a(15, 1) }, aviso: null });
+  });
+
+  test('usa sólo la hora: una fecha de otro día queda en hoy', () => {
+    expect(fijarHora(franja, 'inicio', new Date(2020, 0, 1, 9, 30, 45), AHORA).franja.inicio).toEqual(a(9, 30));
+  });
+
+  test('"Hasta" no puede pasar de ahora', () => {
+    expect(fijarHora(franja, 'fin', a(18, 0), AHORA)).toEqual({
+      franja: { ...franja, fin: a(15, 42) },
+      aviso: 'No puede ser después de ahora: lo dejamos en 15:42.',
+    });
+  });
+
+  test('"Desde" tiene que quedar al menos 5 min antes de "Hasta"', () => {
+    expect(fijarHora(franja, 'inicio', a(15, 50), AHORA)).toEqual({
+      franja: { ...franja, inicio: a(15, 37) },
+      aviso: '"Desde" tiene que ser al menos 5 min antes de "Hasta": lo dejamos en 15:37.',
+    });
+  });
+
+  test('"Hasta" tiene que quedar al menos 5 min después de "Desde"', () => {
+    expect(fijarHora(franja, 'fin', a(14, 30), AHORA)).toEqual({
+      franja: { ...franja, fin: a(14, 47) },
+      aviso: '"Hasta" tiene que ser al menos 5 min después de "Desde": lo dejamos en 14:47.',
+    });
+  });
+
+  test('la medianoche es válida para "Desde"', () => {
+    expect(fijarHora(franja, 'inicio', a(0, 0), AHORA)).toEqual({ franja: { ...franja, inicio: a(0, 0) }, aviso: null });
   });
 });
 

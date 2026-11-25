@@ -27,7 +27,8 @@
         {
           "motionPermission": "Usamos el sensor de movimiento para contar tus pasos y tus minutos activos. Los datos no salen de tu celu."
         }
-      ]
+      ],
+      "@react-native-community/datetimepicker"
     ]
   }
 }
