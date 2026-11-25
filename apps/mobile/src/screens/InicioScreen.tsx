@@ -40,7 +40,7 @@ export function InicioScreen({ onEmpezarEntreno, onAbrirCoach }: InicioScreenPro
     cambiarMetaPasos,
     cargasDeHoy,
     totalesDeHoy,
-    agregar,
+    agregarCarga,
     borrar,
     estadoFuente,
     pedirPermiso,
@@ -165,7 +165,8 @@ export function InicioScreen({ onEmpezarEntreno, onAbrirCoach }: InicioScreenPro
         onCerrar={() => setHojaAbierta(false)}
         perfil={perfil}
         cargasDeHoy={cargasDeHoy}
-        onAgregar={agregar}
+        onAgregar={agregarCarga}
+        conPodometro={estadoFuente === 'activa'}
         onBorrar={borrar}
         metaPasos={config.metaPasos}
         onCambiarMeta={cambiarMetaPasos}

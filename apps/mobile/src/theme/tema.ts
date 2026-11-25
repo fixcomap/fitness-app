@@ -13,6 +13,9 @@ export const colores = {
   oro: '#D9A94A', // premium
   oroFondo: '#1D1910',
   oroBorde: '#6B5526',
+  verde: '#5DBE7A', // meta cumplida
+  verdeFondo: '#1F3326',
+  verdePista: '#2C4334',
 } as const;
 
 export const radios = {

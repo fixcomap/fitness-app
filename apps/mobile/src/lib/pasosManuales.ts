@@ -1,17 +1,28 @@
 // Pasos cargados a mano: lo que caminaste sin el celu encima.
 // Todo lo de este archivo son funciones puras; el guardado está en almacenamiento.ts.
 import type { Sexo } from './calorias';
+import { inicioDelDia, sumarMinutos } from './fechas';
+import { formatearNumero } from './formato';
 
 export type TipoCarga = 'km' | 'minutos';
 
 export interface CargaPasos {
   id: string;
   dia: string; // 'AAAA-MM-DD' en hora local
-  hora: string; // 'HH:MM' en hora local
+  hora: string; // 'HH:MM' en hora local (fin de la caminata)
   tipo: TipoCarga;
   valor: number; // km o minutos, según el tipo
-  pasos: number;
+  pasos: number; // los que se suman: estimado − lo que ya contó el celu
   minutos: number; // minutos activos que suma
+  // Desde la carga inteligente (las cargas viejas no los tienen):
+  inicio?: string; // 'HH:MM'
+  estimado?: number; // pasos estimados por km o minutos
+  registrado?: number; // pasos que el celu ya había contado en esa franja
+}
+
+export interface Franja {
+  inicio: Date;
+  fin: Date;
 }
 
 // Largo de paso como fracción de la altura.
@@ -68,14 +79,101 @@ export function claveDia(fecha: Date): string {
   return `${fecha.getFullYear()}-${dosDigitos(fecha.getMonth() + 1)}-${dosDigitos(fecha.getDate())}`;
 }
 
-export function crearCarga(tipo: TipoCarga, valor: number, perfil: DatosPaso, ahora: Date, id: string): CargaPasos {
+export function horaMinutos(fecha: Date): string {
+  return `${dosDigitos(fecha.getHours())}:${dosDigitos(fecha.getMinutes())}`;
+}
+
+// ── Franja horaria de la caminata ──
+
+export const PASO_FRANJA_MIN = 15;
+export const FRANJA_MINIMA_MIN = 5;
+
+const sinSegundos = (fecha: Date) =>
+  new Date(fecha.getFullYear(), fecha.getMonth(), fecha.getDate(), fecha.getHours(), fecha.getMinutes());
+
+// Por defecto: la última hora.
+export function franjaPorDefecto(ahora: Date): Franja {
+  const fin = sinSegundos(ahora);
+  const inicio = sumarMinutos(fin, -60);
+  // Pasada la medianoche no se puede ir al día anterior.
+  return { inicio: inicio < inicioDelDia(fin) ? inicioDelDia(fin) : inicio, fin };
+}
+
+export function duracionMin(franja: Franja): number {
+  return Math.round((franja.fin.getTime() - franja.inicio.getTime()) / 60_000);
+}
+
+// Mueve el inicio o el fin, sin salir de hoy, sin pasar de ahora y dejando al menos 5 minutos.
+export function moverFranja(franja: Franja, extremo: 'inicio' | 'fin', deltaMin: number, ahora: Date): Franja {
+  const piso = inicioDelDia(ahora);
+  const techo = sinSegundos(ahora);
+  const limitar = (fecha: Date, min: Date, max: Date) => new Date(Math.min(Math.max(fecha.getTime(), min.getTime()), max.getTime()));
+  if (extremo === 'inicio') {
+    const max = sumarMinutos(franja.fin, -FRANJA_MINIMA_MIN);
+    return { ...franja, inicio: limitar(sumarMinutos(franja.inicio, deltaMin), piso, max) };
+  }
+  const min = sumarMinutos(franja.inicio, FRANJA_MINIMA_MIN);
+  return { ...franja, fin: limitar(sumarMinutos(franja.fin, deltaMin), min, techo) };
+}
+
+// Mensaje de error si la carga no entra en la franja, o null si está bien.
+export function validarCarga(tipo: TipoCarga, valor: number, franja: Franja): string | null {
+  const duracion = duracionMin(franja);
+  if (duracion < FRANJA_MINIMA_MIN) return 'El horario tiene que durar al menos 5 minutos.';
+  if (tipo === 'minutos' && valor > duracion) return `En ese horario entran como mucho ${duracion} min.`;
+  return null;
+}
+
+// ── Descuento de lo que ya contó el celu ──
+
+export interface Descuento {
+  estimado: number;
+  registrado: number;
+  suma: number; // estimado − registrado, mínimo 0
+}
+
+export function descontarRegistrado(estimado: number, registrado: number): Descuento {
+  const est = Math.max(0, Math.round(estimado));
+  const reg = Math.max(0, Math.round(registrado));
+  return { estimado: est, registrado: reg, suma: Math.max(0, est - reg) };
+}
+
+// Los minutos activos se reducen en la misma proporción que los pasos
+// (si el celu ya contó la mitad de la caminata, también contó la mitad del tiempo).
+export function minutosProporcionales(minutos: number, { estimado, suma }: Descuento): number {
+  if (!(estimado > 0)) return 0;
+  return Math.round((minutos * suma) / estimado);
+}
+
+// "Estimado 4.100 · el celu ya contó 1.300 · se suman 2.800"
+export function textoDescuento({ estimado, registrado, suma }: Descuento, conPodometro: boolean): string {
+  const partes = [`Estimado ${formatearNumero(estimado)}`];
+  if (conPodometro) partes.push(`el celu ya contó ${formatearNumero(registrado)}`);
+  partes.push(`se suman ${formatearNumero(suma)}`);
+  return partes.join(' · ');
+}
+
+export interface NuevaCarga {
+  tipo: TipoCarga;
+  valor: number;
+  franja: Franja;
+  registrado: number; // 0 si no hay podómetro
+}
+
+export function crearCarga({ tipo, valor, franja, registrado }: NuevaCarga, perfil: DatosPaso, id: string): CargaPasos {
+  const { pasos: estimado, minutos } = convertir(tipo, valor, perfil);
+  const descuento = descontarRegistrado(estimado, registrado);
   return {
     id,
-    dia: claveDia(ahora),
-    hora: `${dosDigitos(ahora.getHours())}:${dosDigitos(ahora.getMinutes())}`,
+    dia: claveDia(franja.fin),
+    hora: horaMinutos(franja.fin),
+    inicio: horaMinutos(franja.inicio),
     tipo,
     valor,
-    ...convertir(tipo, valor, perfil),
+    pasos: descuento.suma,
+    minutos: minutosProporcionales(minutos, descuento),
+    estimado: descuento.estimado,
+    registrado: descuento.registrado,
   };
 }
 
@@ -114,6 +212,9 @@ export function leerCargasGuardadas(datos: unknown): CargaPasos[] {
       Number.isFinite(c.pasos) &&
       c.pasos >= 0 &&
       Number.isFinite(c.minutos) &&
-      c.minutos >= 0,
+      c.minutos >= 0 &&
+      (c.inicio === undefined || typeof c.inicio === 'string') &&
+      (c.estimado === undefined || Number.isFinite(c.estimado)) &&
+      (c.registrado === undefined || Number.isFinite(c.registrado)),
   );
 }

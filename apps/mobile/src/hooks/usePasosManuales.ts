@@ -10,7 +10,7 @@ import {
   totalesCargas,
   type CargaPasos,
   type DatosPaso,
-  type TipoCarga,
+  type NuevaCarga,
 } from '../lib/pasosManuales';
 
 const nuevoId = () => `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
@@ -38,8 +38,8 @@ export function usePasosManuales(perfil: DatosPaso) {
   }, [cargas, listo]);
 
   const agregar = useCallback(
-    (tipo: TipoCarga, valor: number) => {
-      const carga = crearCarga(tipo, valor, perfil, new Date(), nuevoId());
+    (nueva: NuevaCarga) => {
+      const carga = crearCarga(nueva, perfil, nuevoId());
       setCargas((actuales) => [...actuales, carga]);
       return carga;
     },
