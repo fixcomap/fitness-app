@@ -7,6 +7,7 @@ import {
   cerrarSesion,
   editarSerie,
   empezarSesion,
+  fraccionDescanso,
   irAEjercicio,
   leerKg,
   leerReps,
@@ -214,6 +215,19 @@ describe('descanso', () => {
   test('restar más de lo que queda lo termina', () => {
     const casiFin = new Date(hoy.getTime() + 80_000);
     expect(ajustarDescanso(conDescanso, -15, casiFin).descanso).toBeNull();
+  });
+
+  test('+15 mantiene el inicio: el anillo se calcula sobre el total nuevo', () => {
+    const s = ajustarDescanso(conDescanso, 15, hoy);
+    expect(s.descanso?.inicio).toBe(hoy.toISOString());
+    expect(fraccionDescanso(s, new Date(hoy.getTime() + 52_500))).toBeCloseTo(0.5);
+  });
+
+  test('fraccionDescanso: de 1 a 0', () => {
+    expect(fraccionDescanso(conDescanso, hoy)).toBe(1);
+    expect(fraccionDescanso(conDescanso, new Date(hoy.getTime() + 45_000))).toBeCloseTo(0.5);
+    expect(fraccionDescanso(conDescanso, new Date(hoy.getTime() + 200_000))).toBe(0);
+    expect(fraccionDescanso(base(), hoy)).toBe(0);
   });
 
   test('cuenta regresiva y saltar', () => {

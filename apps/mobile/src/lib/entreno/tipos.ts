@@ -21,6 +21,7 @@ export interface EjercicioEnCurso {
 }
 
 export interface Descanso {
+  inicio: string; // ISO: cuándo empezó (para mostrar cuánto falta en proporción)
   fin: string; // ISO: cuándo termina
 }
 

@@ -18,6 +18,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { BarraDescanso } from '../components/entreno/BarraDescanso';
 import { Cronometro } from '../components/entreno/Cronometro';
+import { coloresSesion as c, medidasSesion as m } from '../components/entreno/estiloSesion';
 import { PaginaEjercicio } from '../components/entreno/PaginaEjercicio';
 import { buscarEjercicioPorId } from '../data/ejercicios';
 import { useEntreno } from '../estado/Entreno';
@@ -36,10 +37,10 @@ import {
   totalSeriesHechas,
 } from '../lib/entreno/sesion';
 import type { EjercicioEnCurso } from '../lib/entreno/tipos';
-import { colores, espacios, radios } from '../theme/tema';
 
-// Alto aproximado de la barra de descanso, para que no tape el final de la página.
-const ALTO_BARRA_DESCANSO = 90;
+// Alto de la barra de descanso flotante, para que no tape el final de la página.
+const ALTO_BARRA_DESCANSO = 92;
+const MARGEN_BARRA = 10;
 
 interface SesionEnCursoScreenProps {
   onMinimizar: () => void;
@@ -128,7 +129,24 @@ export function SesionEnCursoScreen({ onMinimizar, onTerminada, onDescartada }: 
     ]);
   };
 
-  const espacioAbajo = enCurso.descanso ? ALTO_BARRA_DESCANSO : 0;
+  // ✕: salir sin terminar. Se puede minimizar (la sesión sigue) o descartarla.
+  const pedirSalir = () => {
+    Alert.alert('¿Salir de la sesión?', 'Podés seguirla después desde Entreno o Inicio.', [
+      { text: 'Cancelar', style: 'cancel' },
+      {
+        text: 'Descartar sesión',
+        style: 'destructive',
+        onPress: () => {
+          descartar();
+          onDescartada();
+        },
+      },
+      { text: 'Minimizar', onPress: onMinimizar },
+    ]);
+  };
+
+  const margenAbajo = Math.max(insets.bottom, MARGEN_BARRA);
+  const espacioAbajo = enCurso.descanso ? ALTO_BARRA_DESCANSO + margenAbajo : margenAbajo;
 
   return (
     <View style={[styles.pantalla, { paddingTop: insets.top }]}>
@@ -137,15 +155,16 @@ export function SesionEnCursoScreen({ onMinimizar, onTerminada, onDescartada }: 
         <View style={styles.cabecera}>
           <View style={styles.filaCabecera}>
             <Pressable
-              onPress={onMinimizar}
+              onPress={pedirSalir}
               hitSlop={8}
-              style={styles.botonRedondo}
+              style={({ pressed }) => [styles.botonRedondo, pressed && styles.presionado]}
               accessibilityRole="button"
-              accessibilityLabel="Minimizar la sesión"
+              accessibilityLabel="Salir de la sesión"
+              accessibilityHint="Minimizarla o descartarla"
             >
-              <Ionicons name="chevron-down" size={24} color={colores.texto} />
+              <Ionicons name="close" size={20} color={c.blanco} />
             </Pressable>
-            <View style={styles.flex}>
+            <View style={styles.centroCabecera}>
               <Text style={styles.nombreSesion} numberOfLines={1}>
                 {enCurso.nombre}
               </Text>
@@ -170,8 +189,9 @@ export function SesionEnCursoScreen({ onMinimizar, onTerminada, onDescartada }: 
                 accessibilityLabel={`Ir al ejercicio ${i + 1}`}
                 accessibilityState={{ selected: i === actual }}
               >
+                {/* Hecho: rojo. Actual: blanco. Pendiente: gris, con lo que ya se hizo en rojo. */}
                 <View style={[styles.segmento, i === actual && styles.segmentoActual]}>
-                  <View style={[styles.rellenoSegmento, { width: `${Math.round(p * 100)}%` }]} />
+                  {i !== actual && <View style={[styles.rellenoSegmento, { width: `${Math.round(p * 100)}%` }]} />}
                 </View>
               </Pressable>
             ))}
@@ -221,9 +241,9 @@ export function SesionEnCursoScreen({ onMinimizar, onTerminada, onDescartada }: 
           }}
         />
 
-        {/* Descanso, fijo abajo */}
+        {/* Descanso, flotando abajo */}
         {enCurso.descanso && (
-          <View style={[styles.pie, { paddingBottom: Math.max(insets.bottom, espacios.s) }]}>
+          <View style={[styles.pie, { bottom: margenAbajo }]}>
             <BarraDescanso
               descanso={enCurso.descanso}
               onAjustar={(delta) => actualizar((s) => ajustarDescanso(s, delta, new Date()))}
@@ -237,45 +257,37 @@ export function SesionEnCursoScreen({ onMinimizar, onTerminada, onDescartada }: 
 }
 
 const styles = StyleSheet.create({
-  pantalla: { flex: 1, backgroundColor: colores.fondo },
+  pantalla: { flex: 1, backgroundColor: c.fondo },
   flex: { flex: 1 },
   presionado: { opacity: 0.8 },
 
-  cabecera: { paddingHorizontal: espacios.m, paddingTop: espacios.s, gap: espacios.xs },
-  filaCabecera: { flexDirection: 'row', alignItems: 'center', gap: espacios.s + 4 },
+  cabecera: { paddingHorizontal: m.margen, paddingTop: 8 },
+  filaCabecera: { flexDirection: 'row', alignItems: 'center', gap: 12 },
   botonRedondo: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: colores.tarjeta,
+    width: m.botonRedondo,
+    height: m.botonRedondo,
+    borderRadius: m.botonRedondo / 2,
+    backgroundColor: c.superficie,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  nombreSesion: { color: colores.texto, fontSize: 17, fontWeight: '800' },
-  cronometro: { color: colores.acento, fontSize: 22, fontWeight: '800', fontVariant: ['tabular-nums'] },
+  centroCabecera: { flex: 1, alignItems: 'center' },
+  nombreSesion: { color: c.textoTenue, fontSize: 13 },
+  cronometro: { color: c.blanco, fontSize: 19, fontWeight: '900', marginTop: 2, fontVariant: ['tabular-nums'] },
   botonTerminar: {
-    paddingHorizontal: espacios.m,
-    height: 40,
-    borderRadius: radios.pill,
-    borderWidth: 1,
-    borderColor: colores.borde,
-    backgroundColor: colores.tarjeta,
+    height: m.botonRedondo,
+    paddingHorizontal: 18,
+    borderRadius: m.botonRedondo / 2,
+    backgroundColor: c.superficie,
     justifyContent: 'center',
   },
-  textoTerminar: { color: colores.texto, fontSize: 14, fontWeight: '800' },
-  progreso: { flexDirection: 'row', gap: 4 },
+  textoTerminar: { color: c.blanco, fontSize: 14, fontWeight: '800' },
+  // La línea es fina como en el diseño, pero cada segmento se toca en 34 pt de alto.
+  progreso: { flexDirection: 'row', gap: 5, marginTop: 4 },
   toqueSegmento: { flex: 1, paddingVertical: 14 },
-  segmento: { height: 8, borderRadius: 4, backgroundColor: colores.pista, overflow: 'hidden' },
-  segmentoActual: { borderWidth: 1, borderColor: colores.texto },
-  rellenoSegmento: { height: '100%', backgroundColor: colores.acento },
+  segmento: { height: 5, borderRadius: 2.5, backgroundColor: c.pista, overflow: 'hidden' },
+  segmentoActual: { backgroundColor: c.blanco },
+  rellenoSegmento: { height: '100%', backgroundColor: c.rojo },
 
-  pie: {
-    position: 'absolute',
-    left: 0,
-    right: 0,
-    bottom: 0,
-    paddingHorizontal: espacios.m,
-    paddingTop: espacios.s,
-    backgroundColor: colores.fondo,
-  },
+  pie: { position: 'absolute', left: MARGEN_BARRA, right: MARGEN_BARRA },
 });

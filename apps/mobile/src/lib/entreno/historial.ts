@@ -9,6 +9,7 @@ import type {
   SesionEnCurso,
   SesionGuardada,
 } from './tipos';
+import { DESCANSO_POR_DEFECTO_S } from './sesion';
 
 // Para no crecer sin límite: se guardan las últimas sesiones.
 export const MAXIMO_SESIONES = 1000;
@@ -94,7 +95,12 @@ export function leerEnCursoGuardada(datos: unknown): SesionEnCurso | null {
   ) {
     return null;
   }
-  return datos as unknown as SesionEnCurso;
+  const sesion = datos as unknown as SesionEnCurso;
+  const { descanso } = sesion;
+  if (!descanso || esFecha(descanso.inicio)) return sesion;
+  // Las sesiones guardadas antes de que el descanso tuviera inicio: se supone el de por defecto.
+  const inicio = new Date(Date.parse(descanso.fin) - DESCANSO_POR_DEFECTO_S * 1000).toISOString();
+  return { ...sesion, descanso: { inicio, fin: descanso.fin } };
 }
 
 // Agrega una sesión al historial, de la más nueva a la más vieja.

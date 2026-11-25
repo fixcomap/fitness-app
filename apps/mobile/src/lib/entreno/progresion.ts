@@ -96,12 +96,22 @@ export function cuandoFue(fecha: Date, ahora: Date): string {
   return `El ${fecha.getDate()} ${MESES_CORTOS[fecha.getMonth()]}`;
 }
 
-// Aviso que se muestra arriba de las series, o null si nunca se hizo el ejercicio.
-// "La semana pasada: 3×10 con 12 kg. Probá 14 kg."
-export function textoProgresion(ultima: UltimaVez | null, equipo: Equipo, ahora: Date): string | null {
+// Un tramo del aviso: normal, en negrita, o destacado (el peso nuevo a probar).
+export interface ParteTexto {
+  texto: string;
+  estilo: 'normal' | 'fuerte' | 'acento';
+}
+
+const normal = (texto: string): ParteTexto => ({ texto, estilo: 'normal' });
+const fuerte = (texto: string): ParteTexto => ({ texto, estilo: 'fuerte' });
+
+// Aviso que se muestra arriba de las series, en tramos para darles formato, o null
+// si nunca se hizo el ejercicio.
+// "La semana pasada: **3×10 con 12 kg**. Probá **14 kg**."
+export function partesProgresion(ultima: UltimaVez | null, equipo: Equipo, ahora: Date): ParteTexto[] | null {
   if (!ultima) return null;
   const { ejercicio, fecha } = ultima;
-  const cuando = cuandoFue(fecha, ahora);
+  const cuando = normal(`${cuandoFue(fecha, ahora)}: `);
   const series = resumirSeries(ejercicio.series);
   const anterior = pesoMaximo(ejercicio.series);
   const sugerido = pesoSugerido(ejercicio, equipo);
@@ -109,9 +119,18 @@ export function textoProgresion(ultima: UltimaVez | null, equipo: Equipo, ahora:
   if (sugerido === null || anterior === null) {
     const objetivo = `${ejercicio.seriesTotales}×${ejercicio.series[0].repsObjetivo}`;
     return completoTodo(ejercicio)
-      ? `${cuando}: ${series}. Completaste todo: probá sumar una repetición.`
-      : `${cuando}: ${series}. Buscá completar ${objetivo}.`;
+      ? [cuando, fuerte(series), normal('. Completaste todo: probá sumar una repetición.')]
+      : [cuando, fuerte(series), normal('. Buscá completar '), fuerte(objetivo), normal('.')];
   }
-  const hecho = `${cuando}: ${series} con ${formatearKg(anterior)} kg.`;
-  return sugerido > anterior ? `${hecho} Probá ${formatearKg(sugerido)} kg.` : `${hecho} Repetí ${formatearKg(sugerido)} kg.`;
+  const hecho = [cuando, fuerte(`${series} con ${formatearKg(anterior)} kg`)];
+  return sugerido > anterior
+    ? [...hecho, normal('. Probá '), { texto: `${formatearKg(sugerido)} kg`, estilo: 'acento' }, normal('.')]
+    : [...hecho, normal('. Repetí '), fuerte(`${formatearKg(sugerido)} kg`), normal('.')];
+}
+
+// El mismo aviso como texto plano.
+// "La semana pasada: 3×10 con 12 kg. Probá 14 kg."
+export function textoProgresion(ultima: UltimaVez | null, equipo: Equipo, ahora: Date): string | null {
+  const partes = partesProgresion(ultima, equipo, ahora);
+  return partes ? partes.map((p) => p.texto).join('') : null;
 }

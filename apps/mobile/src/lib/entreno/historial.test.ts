@@ -60,13 +60,20 @@ describe('leerEnCursoGuardada', () => {
     nombre: 'Pecho',
     inicio: '2026-11-25T18:00:00Z',
     actual: 0,
-    descanso: { fin: '2026-11-25T18:05:00Z' },
+    descanso: { inicio: '2026-11-25T18:03:30Z', fin: '2026-11-25T18:05:00Z' },
     ejercicios: [{ ejercicioId: 'press', series: [{ kg: '12', reps: '10', repsObjetivo: 10, hecha: true }] }],
   };
 
   test('se retoma tal cual', () => {
     expect(leerEnCursoGuardada(JSON.parse(JSON.stringify(enCurso)))).toEqual(enCurso);
     expect(leerEnCursoGuardada({ ...enCurso, descanso: null })).toEqual({ ...enCurso, descanso: null });
+  });
+
+  test('una guardada sin inicio del descanso supone los 90 s por defecto', () => {
+    expect(leerEnCursoGuardada({ ...enCurso, descanso: { fin: '2026-11-25T18:05:00Z' } })?.descanso).toEqual({
+      inicio: '2026-11-25T18:03:30.000Z',
+      fin: '2026-11-25T18:05:00Z',
+    });
   });
 
   test('si algo no cierra, no se retoma', () => {

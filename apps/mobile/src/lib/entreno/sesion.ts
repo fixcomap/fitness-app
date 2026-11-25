@@ -180,7 +180,10 @@ export function tildarSerie(
     ...e,
     series: e.series.map((s, i) => (i === indiceSerie ? { ...s, hecha: true } : s)),
   }));
-  return { ...tildada, descanso: { fin: new Date(ahora.getTime() + descansoS * 1000).toISOString() } };
+  return {
+    ...tildada,
+    descanso: { inicio: ahora.toISOString(), fin: new Date(ahora.getTime() + descansoS * 1000).toISOString() },
+  };
 }
 
 export function irAEjercicio(sesion: SesionEnCurso, indice: number): SesionEnCurso {
@@ -195,12 +198,20 @@ export function segundosRestantes(sesion: Pick<SesionEnCurso, 'descanso'>, ahora
   return Math.max(0, Math.ceil((Date.parse(sesion.descanso.fin) - ahora.getTime()) / 1000));
 }
 
+// Qué parte del descanso falta, entre 0 y 1 (para el anillo). Sin descanso, 0.
+export function fraccionDescanso(sesion: Pick<SesionEnCurso, 'descanso'>, ahora: Date): number {
+  if (!sesion.descanso) return 0;
+  const total = Date.parse(sesion.descanso.fin) - Date.parse(sesion.descanso.inicio);
+  if (!(total > 0)) return 0;
+  return Math.min(1, Math.max(0, (Date.parse(sesion.descanso.fin) - ahora.getTime()) / total));
+}
+
 // Suma o resta segundos al descanso. Si queda en 0 o menos, se termina.
 export function ajustarDescanso(sesion: SesionEnCurso, deltaS: number, ahora: Date): SesionEnCurso {
   if (!sesion.descanso) return sesion;
   const fin = Date.parse(sesion.descanso.fin) + deltaS * 1000;
   if (fin <= ahora.getTime()) return { ...sesion, descanso: null };
-  return { ...sesion, descanso: { fin: new Date(fin).toISOString() } };
+  return { ...sesion, descanso: { ...sesion.descanso, fin: new Date(fin).toISOString() } };
 }
 
 export function terminarDescanso(sesion: SesionEnCurso): SesionEnCurso {

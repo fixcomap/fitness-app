@@ -2,6 +2,7 @@ import {
   completoTodo,
   cuandoFue,
   formatearKg,
+  partesProgresion,
   pesoMaximo,
   pesoSugerido,
   resumirSeries,
@@ -153,5 +154,22 @@ describe('textoProgresion', () => {
 
   test('sin historial no hay aviso', () => {
     expect(textoProgresion(null, 'barra', ahora)).toBeNull();
+    expect(partesProgresion(null, 'barra', ahora)).toBeNull();
+  });
+
+  test('en tramos: lo hecho en negrita y el peso nuevo destacado', () => {
+    expect(partesProgresion({ fecha: haceUnaSemana, ejercicio: hecho(series(12, 10, 10, 10)) }, 'mancuernas', ahora)).toEqual([
+      { texto: 'La semana pasada: ', estilo: 'normal' },
+      { texto: '3×10 con 12 kg', estilo: 'fuerte' },
+      { texto: '. Probá ', estilo: 'normal' },
+      { texto: '14 kg', estilo: 'acento' },
+      { texto: '.', estilo: 'normal' },
+    ]);
+  });
+
+  test('en tramos: si repite el peso, no se destaca', () => {
+    const partes = partesProgresion({ fecha: haceUnaSemana, ejercicio: hecho(series(40, 10, 10, 8)) }, 'barra', ahora);
+    expect(partes?.some((p) => p.estilo === 'acento')).toBe(false);
+    expect(partes?.[3]).toEqual({ texto: '40 kg', estilo: 'fuerte' });
   });
 });

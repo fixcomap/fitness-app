@@ -6,10 +6,18 @@ import { colores, radios } from '../../theme/tema';
 import { miniaturaVideo } from '../MediaEjercicio/medio';
 
 // Cuadrado con la miniatura del video del ejercicio, o un ícono si no tiene.
-export function Miniatura({ ejercicio, tamano = 48 }: { ejercicio: Pick<Ejercicio, 'youtubeId'>; tamano?: number }) {
+export function Miniatura({
+  ejercicio,
+  tamano = 48,
+  radio = radios.chico,
+}: {
+  ejercicio: Pick<Ejercicio, 'youtubeId'>;
+  tamano?: number;
+  radio?: number;
+}) {
   const videoId = ejercicio.youtubeId.trim();
   return (
-    <View style={[styles.marco, { width: tamano, height: tamano }]}>
+    <View style={[styles.marco, { width: tamano, height: tamano, borderRadius: radio }]}>
       {videoId ? (
         <Image source={{ uri: miniaturaVideo(videoId) }} style={StyleSheet.absoluteFill} resizeMode="cover" />
       ) : (
@@ -21,7 +29,6 @@ export function Miniatura({ ejercicio, tamano = 48 }: { ejercicio: Pick<Ejercici
 
 const styles = StyleSheet.create({
   marco: {
-    borderRadius: radios.chico,
     backgroundColor: colores.tarjetaElevada,
     overflow: 'hidden',
     alignItems: 'center',

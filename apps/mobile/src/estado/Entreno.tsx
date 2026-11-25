@@ -26,7 +26,6 @@ import {
   moverEnLaSesion,
   quitarDeLaSesion,
   sesionVacia,
-  terminarDescanso,
 } from '../lib/entreno/sesion';
 import type { SesionArmada, SesionEnCurso, SesionGuardada } from '../lib/entreno/tipos';
 import { useDatosDelDia } from './DatosDelDia';
@@ -88,7 +87,8 @@ export function ProveedorEntreno({ children }: { children: ReactNode }) {
   }, [historial, listo]);
 
   // Fin del descanso: notificación programada por si la app pasa a segundo plano y,
-  // con la app abierta, vibración al llegar a 0.
+  // con la app abierta, vibración al llegar a 0. El descanso no se borra al terminar:
+  // la pantalla muestra "¡Dale!" hasta la próxima serie o hasta que se toque Saltar.
   const finDescanso = enCurso?.descanso?.fin ?? null;
   useEffect(() => {
     if (!finDescanso) {
@@ -97,15 +97,12 @@ export function ProveedorEntreno({ children }: { children: ReactNode }) {
     }
     const fin = Date.parse(finDescanso);
     programarAvisoDescanso(new Date(fin));
-    const temporizador = setTimeout(
-      () => {
-        if (AppState.currentState === 'active' && Date.now() - fin < MARGEN_VIBRACION_MS) {
-          Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success).catch(() => {});
-        }
-        setEnCurso((s) => (s && s.descanso?.fin === finDescanso ? terminarDescanso(s) : s));
-      },
-      Math.max(0, fin - Date.now()),
-    );
+    if (fin <= Date.now()) return;
+    const temporizador = setTimeout(() => {
+      if (AppState.currentState === 'active' && Date.now() - fin < MARGEN_VIBRACION_MS) {
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success).catch(() => {});
+      }
+    }, fin - Date.now());
     return () => clearTimeout(temporizador);
   }, [finDescanso]);
 

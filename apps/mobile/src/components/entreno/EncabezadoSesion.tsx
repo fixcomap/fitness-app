@@ -3,6 +3,7 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { colores, espacios } from '../../theme/tema';
+import { coloresSesion, medidasSesion } from './estiloSesion';
 
 interface EncabezadoSesionProps {
   titulo: string;
@@ -20,11 +21,11 @@ export function EncabezadoSesion({ titulo, icono, etiquetaBoton, onPress }: Enca
       <Pressable
         onPress={onPress}
         hitSlop={8}
-        style={({ pressed }) => [styles.boton, pressed && styles.presionado]}
+        style={({ pressed }) => [styles.boton, styles.botonRelleno, pressed && styles.presionado]}
         accessibilityRole="button"
         accessibilityLabel={etiquetaBoton}
       >
-        <Ionicons name={icono} size={22} color={colores.texto} />
+        <Ionicons name={icono} size={20} color={colores.texto} />
       </Pressable>
       <Text style={styles.titulo} numberOfLines={1} accessibilityRole="header">
         {titulo}
@@ -43,7 +44,14 @@ const styles = StyleSheet.create({
     paddingHorizontal: espacios.m,
     paddingBottom: espacios.s,
   },
-  boton: { width: 40, height: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center' },
-  presionado: { backgroundColor: colores.tarjeta },
+  boton: {
+    width: medidasSesion.botonRedondo,
+    height: medidasSesion.botonRedondo,
+    borderRadius: medidasSesion.botonRedondo / 2,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  botonRelleno: { backgroundColor: coloresSesion.superficie },
+  presionado: { opacity: 0.8 },
   titulo: { flex: 1, textAlign: 'center', color: colores.texto, fontSize: 17, fontWeight: '800' },
 });
