@@ -1,0 +1,15 @@
+# Estándar fixcomap (scripts/higiene.sh de platform): nunca se versionan
+CLAUDE.md
+CLAUDE.local.md
+.claude/
+AGENTS.md
+GEMINI.md
+.cursor/
+.env
+.env.*
+!.env.example
+node_modules/
+.DS_Store
+Thumbs.db
+*.log
+coverage/
