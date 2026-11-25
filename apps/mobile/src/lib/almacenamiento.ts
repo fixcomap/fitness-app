@@ -2,11 +2,13 @@
 // funciones de validación, así un dato corrupto no rompe la app.
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
+import { leerHistorialGuardado, type RegistroDia } from './actividad/historial';
 import { leerConfiguracion, type Configuracion } from './configuracion';
 import { leerCargasGuardadas, type CargaPasos } from './pasosManuales';
 
 const CLAVE_CARGAS = 'pasosManuales:v1';
 const CLAVE_CONFIGURACION = 'configuracion:v1';
+const CLAVE_HISTORIAL = 'historialActividad:v1';
 
 async function leerJson(clave: string): Promise<unknown> {
   try {
@@ -31,4 +33,12 @@ export async function leerConfiguracionGuardada(): Promise<Configuracion> {
 
 export async function guardarConfiguracion(config: Configuracion): Promise<void> {
   await AsyncStorage.setItem(CLAVE_CONFIGURACION, JSON.stringify(config));
+}
+
+export async function leerHistorial(): Promise<RegistroDia[]> {
+  return leerHistorialGuardado(await leerJson(CLAVE_HISTORIAL));
+}
+
+export async function guardarHistorial(historial: readonly RegistroDia[]): Promise<void> {
+  await AsyncStorage.setItem(CLAVE_HISTORIAL, JSON.stringify(historial));
 }
