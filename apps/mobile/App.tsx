@@ -3,7 +3,8 @@ import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { ProveedorDatosDelDia } from './src/estado/DatosDelDia';
-import { Tabs } from './src/navigation/Tabs';
+import { ProveedorEntreno } from './src/estado/Entreno';
+import { Raiz } from './src/navigation/Raiz';
 import { colores } from './src/theme/tema';
 
 const tema: Theme = {
@@ -22,9 +23,11 @@ export default function App() {
   return (
     <SafeAreaProvider>
       <ProveedorDatosDelDia>
-        <NavigationContainer theme={tema}>
-          <Tabs />
-        </NavigationContainer>
+        <ProveedorEntreno>
+          <NavigationContainer theme={tema}>
+            <Raiz />
+          </NavigationContainer>
+        </ProveedorEntreno>
       </ProveedorDatosDelDia>
       <StatusBar style="light" />
     </SafeAreaProvider>

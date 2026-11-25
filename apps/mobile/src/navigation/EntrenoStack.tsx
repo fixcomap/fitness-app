@@ -1,18 +1,32 @@
 import { createNativeStackNavigator, type NativeStackScreenProps } from '@react-navigation/native-stack';
 
+import { useEntreno } from '../estado/Entreno';
 import { CatalogoScreen } from '../screens/CatalogoScreen';
 import { DetalleEjercicioScreen } from '../screens/DetalleEjercicioScreen';
+import { HistorialSesionesScreen } from '../screens/HistorialSesionesScreen';
 import { colores } from '../theme/tema';
+import { useNavegacionRaiz } from './tiposRaiz';
 
 export type EntrenoStackParamList = {
   Catalogo: undefined;
   Detalle: { id: string };
+  Historial: undefined;
 };
 
 const Stack = createNativeStackNavigator<EntrenoStackParamList>();
 
 function CatalogoRuta({ navigation }: NativeStackScreenProps<EntrenoStackParamList, 'Catalogo'>) {
-  return <CatalogoScreen onAbrirEjercicio={(e) => navigation.navigate('Detalle', { id: e.id })} />;
+  const { armada, enCurso } = useEntreno();
+  // Las pantallas de la sesión están en la navegación de arriba (Raiz).
+  const raiz = useNavegacionRaiz();
+  return (
+    <CatalogoScreen
+      onAbrirEjercicio={(e) => navigation.navigate('Detalle', { id: e.id })}
+      onAbrirHistorial={() => navigation.navigate('Historial')}
+      sesion={{ ejercicios: armada.ejercicios.length, enCurso: enCurso !== null }}
+      onAbrirSesion={() => raiz.navigate(enCurso ? 'SesionEnCurso' : 'SesionArmada')}
+    />
+  );
 }
 
 function DetalleRuta({ route }: NativeStackScreenProps<EntrenoStackParamList, 'Detalle'>) {
@@ -31,6 +45,11 @@ export function EntrenoStack() {
     >
       <Stack.Screen name="Catalogo" component={CatalogoRuta} options={{ headerShown: false }} />
       <Stack.Screen name="Detalle" component={DetalleRuta} options={{ title: '', headerBackTitle: 'Entreno' }} />
+      <Stack.Screen
+        name="Historial"
+        component={HistorialSesionesScreen}
+        options={{ title: 'Mis rutinas', headerBackTitle: 'Entreno' }}
+      />
     </Stack.Navigator>
   );
 }

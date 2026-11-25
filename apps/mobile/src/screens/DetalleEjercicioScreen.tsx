@@ -1,3 +1,4 @@
+import { Ionicons } from '@expo/vector-icons';
 import { useMemo } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
@@ -6,11 +7,22 @@ import { COLOR_PRINCIPAL, COLOR_SECUNDARIO, MapaMuscular } from '../components/M
 import { MediaEjercicio, medioDeEjercicio, ReportarVideo } from '../components/MediaEjercicio';
 import { buscarEjercicioPorId } from '../data/ejercicios';
 import { NOMBRE_EQUIPO, NOMBRE_MUSCULO, NOMBRE_NIVEL } from '../data/nombres';
+import { useEntreno } from '../estado/Entreno';
+import { ultimasSesionesDe } from '../lib/entreno/historial';
+import { formatearKg, textoSeries } from '../lib/entreno/progresion';
+import { mejorPeso } from '../lib/entreno/resumen';
+import { formatearFechaCorta } from '../lib/formato';
 import { colores, espacios, radios } from '../theme/tema';
+
+const CANTIDAD_ULTIMAS = 3;
 
 export function DetalleEjercicioScreen({ id }: { id: string }) {
   const ejercicio = buscarEjercicioPorId(id);
   const principales = useMemo(() => (ejercicio ? [ejercicio.musculoPrincipal] : []), [ejercicio]);
+  const { armada, historial, agregar, quitar } = useEntreno();
+  const ultimas = useMemo(() => ultimasSesionesDe(historial, id, CANTIDAD_ULTIMAS), [historial, id]);
+  const mejor = useMemo(() => mejorPeso(historial, id), [historial, id]);
+  const enLaSesion = armada.ejercicios.includes(id);
 
   if (!ejercicio) {
     return (
@@ -49,6 +61,21 @@ export function DetalleEjercicioScreen({ id }: { id: string }) {
           </View>
         </View>
 
+        {ultimas.length > 0 && (
+          <View style={styles.tarjeta}>
+            <View style={styles.filaTitulo}>
+              <Text style={styles.tituloSeccion}>Tus últimas sesiones</Text>
+              {mejor !== null && <Text style={styles.mejor}>Mejor: {formatearKg(mejor)} kg</Text>}
+            </View>
+            {ultimas.map((u) => (
+              <View key={u.sesionId} style={styles.sesionPasada}>
+                <Text style={styles.fechaSesion}>{formatearFechaCorta(u.fecha)}</Text>
+                <Text style={styles.textoSecundario}>{textoSeries(u.series)}</Text>
+              </View>
+            ))}
+          </View>
+        )}
+
         <View style={styles.tarjeta}>
           <Text style={styles.tituloSeccion}>Técnica</Text>
           {ejercicio.tecnica.map((paso, i) => (
@@ -81,14 +108,26 @@ export function DetalleEjercicioScreen({ id }: { id: string }) {
       </ScrollView>
 
       <View style={styles.pie}>
-        {/* Por ahora sin funcionalidad: la sesión de entreno llega más adelante. */}
-        <Pressable
-          style={({ pressed }) => [styles.boton, pressed && styles.botonPresionado]}
-          accessibilityRole="button"
-          onPress={() => {}}
-        >
-          <Text style={styles.textoBoton}>Agregar a la sesión</Text>
-        </Pressable>
+        {enLaSesion ? (
+          <Pressable
+            style={({ pressed }) => [styles.boton, styles.botonAgregado, pressed && styles.botonPresionado]}
+            accessibilityRole="button"
+            accessibilityHint="Lo saca de la sesión de hoy"
+            onPress={() => quitar(ejercicio.id)}
+          >
+            <Ionicons name="checkmark-circle" size={20} color={colores.verde} />
+            <Text style={styles.textoBoton}>En la sesión · Quitar</Text>
+          </Pressable>
+        ) : (
+          <Pressable
+            style={({ pressed }) => [styles.boton, pressed && styles.botonPresionado]}
+            accessibilityRole="button"
+            onPress={() => agregar(ejercicio.id)}
+          >
+            <Ionicons name="add" size={20} color={colores.texto} />
+            <Text style={styles.textoBoton}>Agregar a la sesión</Text>
+          </Pressable>
+        )}
       </View>
     </View>
   );
@@ -136,7 +175,20 @@ const styles = StyleSheet.create({
     borderTopWidth: StyleSheet.hairlineWidth,
     borderTopColor: colores.borde,
   },
-  boton: { backgroundColor: colores.acento, borderRadius: radios.medio, paddingVertical: espacios.m, alignItems: 'center' },
+  filaTitulo: { flexDirection: 'row', alignItems: 'baseline', justifyContent: 'space-between', gap: espacios.s },
+  mejor: { color: colores.oro, fontSize: 14, fontWeight: '800' },
+  sesionPasada: { gap: 2 },
+  fechaSesion: { color: colores.texto, fontSize: 14, fontWeight: '700' },
+  boton: {
+    flexDirection: 'row',
+    gap: espacios.s,
+    backgroundColor: colores.acento,
+    borderRadius: radios.medio,
+    paddingVertical: espacios.m,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  botonAgregado: { backgroundColor: colores.tarjetaElevada },
   botonPresionado: { opacity: 0.85 },
   textoBoton: { color: colores.texto, fontSize: 17, fontWeight: '800' },
 });
