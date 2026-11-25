@@ -1,15 +1,34 @@
-// Qué se muestra arriba del detalle de un ejercicio. Hoy sólo hay videos de
-// YouTube; para sumar GIFs o imágenes se agrega una variante acá y su vista en
-// MediaEjercicio.tsx, sin tocar las pantallas.
+// Qué se muestra en el detalle de un ejercicio: un video de YouTube o, si no
+// tiene, dos imágenes locales que se alternan. Para sumar otro tipo se agrega una
+// variante acá y su vista en MediaEjercicio.tsx, sin tocar las pantallas.
+import { IMAGENES_EJERCICIOS, type ParImagenes } from '../../data/imagenesEjercicios';
 import type { Ejercicio, FormatoVideo } from '../../data/tipos';
 
-export type Medio = { tipo: 'youtube'; videoId: string; formato: FormatoVideo } | { tipo: 'ninguno' };
+export type Medio =
+  | { tipo: 'youtube'; videoId: string; formato: FormatoVideo }
+  | { tipo: 'imagenes'; imagenes: ParImagenes }
+  | { tipo: 'ninguno' };
 
-export function medioDeEjercicio(ejercicio: Pick<Ejercicio, 'youtubeId' | 'videoFormato'>): Medio {
+// El video tiene prioridad; las imágenes son para los ejercicios sin video.
+export function medioDeEjercicio(
+  ejercicio: Pick<Ejercicio, 'id' | 'youtubeId' | 'videoFormato'>,
+  imagenes: Readonly<Record<string, ParImagenes>> = IMAGENES_EJERCICIOS,
+): Medio {
   const videoId = ejercicio.youtubeId.trim();
-  if (!videoId) return { tipo: 'ninguno' };
+  if (!videoId) {
+    const par = imagenes[ejercicio.id];
+    return par ? { tipo: 'imagenes', imagenes: par } : { tipo: 'ninguno' };
+  }
   // Sin formato guardado se asume horizontal (16:9), como los videos comunes.
   return { tipo: 'youtube', videoId, formato: ejercicio.videoFormato === 'vertical' ? 'vertical' : 'horizontal' };
+}
+
+// Cada cuánto se cambia de imagen en un medio de tipo 'imagenes'.
+export const INTERVALO_IMAGENES_MS = 1000;
+
+// Índice de la imagen que sigue a `actual` (0 → 1 → 0 …).
+export function siguienteImagen(actual: 0 | 1): 0 | 1 {
+  return actual === 0 ? 1 : 0;
 }
 
 // Proporción ancho / alto de cada formato.

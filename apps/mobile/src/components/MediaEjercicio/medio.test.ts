@@ -1,8 +1,13 @@
-import { dimensionesVideo, medioDeEjercicio, miniaturaVideo } from './medio';
+import type { ParImagenes } from '../../data/imagenesEjercicios';
+import { dimensionesVideo, INTERVALO_IMAGENES_MS, medioDeEjercicio, miniaturaVideo, siguienteImagen } from './medio';
 
 describe('medioDeEjercicio', () => {
+  // En la app son números que devuelve require(); acá alcanza con cualquier fuente.
+  const par: ParImagenes = [{ uri: 'inicio.png' }, { uri: 'fin.png' }];
+  const imagenes = { 'con-imagenes': par };
+
   test('con youtubeId muestra el video con su formato', () => {
-    expect(medioDeEjercicio({ youtubeId: ' abc123 ', videoFormato: 'vertical' })).toEqual({
+    expect(medioDeEjercicio({ id: 'x', youtubeId: ' abc123 ', videoFormato: 'vertical' })).toEqual({
       tipo: 'youtube',
       videoId: 'abc123',
       formato: 'vertical',
@@ -10,12 +15,35 @@ describe('medioDeEjercicio', () => {
   });
 
   test('sin formato guardado es horizontal', () => {
-    expect(medioDeEjercicio({ youtubeId: 'abc123' })).toEqual({ tipo: 'youtube', videoId: 'abc123', formato: 'horizontal' });
+    expect(medioDeEjercicio({ id: 'x', youtubeId: 'abc123' })).toEqual({ tipo: 'youtube', videoId: 'abc123', formato: 'horizontal' });
   });
 
-  test('sin youtubeId no hay medio', () => {
-    expect(medioDeEjercicio({ youtubeId: '' })).toEqual({ tipo: 'ninguno' });
-    expect(medioDeEjercicio({ youtubeId: '   ', videoFormato: 'vertical' })).toEqual({ tipo: 'ninguno' });
+  test('sin youtubeId ni imágenes no hay medio', () => {
+    expect(medioDeEjercicio({ id: 'x', youtubeId: '' }, imagenes)).toEqual({ tipo: 'ninguno' });
+    expect(medioDeEjercicio({ id: 'x', youtubeId: '   ', videoFormato: 'vertical' }, imagenes)).toEqual({ tipo: 'ninguno' });
+  });
+
+  test('sin youtubeId y con imágenes muestra las dos imágenes', () => {
+    expect(medioDeEjercicio({ id: 'con-imagenes', youtubeId: '' }, imagenes)).toEqual({ tipo: 'imagenes', imagenes: par });
+  });
+
+  test('si tiene video, el video gana sobre las imágenes', () => {
+    expect(medioDeEjercicio({ id: 'con-imagenes', youtubeId: 'abc123' }, imagenes).tipo).toBe('youtube');
+  });
+
+  test('por ahora ningún ejercicio del catálogo tiene imágenes', () => {
+    expect(medioDeEjercicio({ id: 'dominadas-triangulo', youtubeId: '' })).toEqual({ tipo: 'ninguno' });
+  });
+});
+
+describe('alternancia de imágenes', () => {
+  test('cambia cada 1 segundo', () => {
+    expect(INTERVALO_IMAGENES_MS).toBe(1000);
+  });
+
+  test('va de una imagen a la otra y vuelve', () => {
+    expect(siguienteImagen(0)).toBe(1);
+    expect(siguienteImagen(1)).toBe(0);
   });
 });
 
