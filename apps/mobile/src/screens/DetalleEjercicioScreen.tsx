@@ -26,11 +26,6 @@ export function DetalleEjercicioScreen({ id }: { id: string }) {
   return (
     <View style={styles.pantalla}>
       <ScrollView contentContainerStyle={styles.contenido}>
-        <View style={styles.video}>
-          <MediaEjercicio medio={medio} />
-          {medio.tipo === 'youtube' && <ReportarVideo ejercicioId={ejercicio.id} youtubeId={medio.videoId} />}
-        </View>
-
         <View style={styles.bloque}>
           <Text style={styles.nombre}>{ejercicio.nombre}</Text>
           <View style={styles.fila}>
@@ -74,6 +69,14 @@ export function DetalleEjercicioScreen({ id }: { id: string }) {
               <Text style={styles.textoItem}>{error}</Text>
             </View>
           ))}
+        </View>
+
+        <View style={styles.tarjeta}>
+          <Text style={styles.tituloSeccion}>Mirá cómo se hace</Text>
+          <View style={styles.video}>
+            <MediaEjercicio medio={medio} />
+            {medio.tipo === 'youtube' && <ReportarVideo ejercicioId={ejercicio.id} youtubeId={medio.videoId} />}
+          </View>
         </View>
       </ScrollView>
 

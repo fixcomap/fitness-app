@@ -1,4 +1,4 @@
-import { dimensionesVideo, medioDeEjercicio } from './medio';
+import { dimensionesVideo, medioDeEjercicio, miniaturaVideo } from './medio';
 
 describe('medioDeEjercicio', () => {
   test('con youtubeId muestra el video con su formato', () => {
@@ -36,4 +36,8 @@ describe('dimensionesVideo', () => {
   test('sin ancho medido todavía da 0', () => {
     expect(dimensionesVideo(0, 'vertical', 448)).toEqual({ ancho: 0, alto: 0 });
   });
+});
+
+test('miniaturaVideo arma la URL de la miniatura de YouTube', () => {
+  expect(miniaturaVideo('Hbt2fEa2cTU')).toBe('https://i.ytimg.com/vi/Hbt2fEa2cTU/hqdefault.jpg');
 });

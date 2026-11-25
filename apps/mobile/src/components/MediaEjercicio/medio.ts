@@ -33,3 +33,9 @@ export function dimensionesVideo(anchoDisponible: number, formato: FormatoVideo,
   const alto = Math.min(anchoDisponible / proporcion, altoMaximo > 0 ? altoMaximo : Infinity);
   return { ancho: Math.round(alto * proporcion), alto: Math.round(alto) };
 }
+
+// Miniatura que muestra YouTube para el video. hqdefault existe siempre; en los
+// Shorts trae el cuadro vertical centrado, que con "cover" llena el recuadro 9:16.
+export function miniaturaVideo(videoId: string): string {
+  return `https://i.ytimg.com/vi/${encodeURIComponent(videoId)}/hqdefault.jpg`;
+}
