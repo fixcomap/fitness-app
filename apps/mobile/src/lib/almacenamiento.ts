@@ -4,6 +4,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import { leerHistorialGuardado, type RegistroDia } from './actividad/historial';
 import { leerConfiguracion, type Configuracion } from './configuracion';
+import { leerArmadaGuardada, leerEnCursoGuardada, leerSesionesGuardadas } from './entreno/historial';
+import type { SesionArmada, SesionEnCurso, SesionGuardada } from './entreno/tipos';
 import { leerCargasGuardadas, type CargaPasos } from './pasosManuales';
 import { leerReportesGuardados, type VideoReportado } from './videosReportados';
 
@@ -11,6 +13,9 @@ const CLAVE_CARGAS = 'pasosManuales:v1';
 const CLAVE_CONFIGURACION = 'configuracion:v1';
 const CLAVE_HISTORIAL = 'historialActividad:v1';
 const CLAVE_VIDEOS_REPORTADOS = 'videosReportados:v1';
+const CLAVE_SESION_ARMADA = 'sesionArmada:v1';
+const CLAVE_SESION_EN_CURSO = 'sesionEnCurso:v1';
+const CLAVE_HISTORIAL_ENTRENO = 'historialEntreno:v1';
 
 async function leerJson(clave: string): Promise<unknown> {
   try {
@@ -51,4 +56,30 @@ export async function leerVideosReportados(): Promise<VideoReportado[]> {
 
 export async function guardarVideosReportados(reportes: readonly VideoReportado[]): Promise<void> {
   await AsyncStorage.setItem(CLAVE_VIDEOS_REPORTADOS, JSON.stringify(reportes));
+}
+
+export async function leerSesionArmada(): Promise<SesionArmada | null> {
+  return leerArmadaGuardada(await leerJson(CLAVE_SESION_ARMADA));
+}
+
+export async function guardarSesionArmada(armada: SesionArmada): Promise<void> {
+  await AsyncStorage.setItem(CLAVE_SESION_ARMADA, JSON.stringify(armada));
+}
+
+export async function leerSesionEnCurso(): Promise<SesionEnCurso | null> {
+  return leerEnCursoGuardada(await leerJson(CLAVE_SESION_EN_CURSO));
+}
+
+// null borra la sesión en curso (se terminó o se descartó).
+export async function guardarSesionEnCurso(sesion: SesionEnCurso | null): Promise<void> {
+  if (sesion === null) await AsyncStorage.removeItem(CLAVE_SESION_EN_CURSO);
+  else await AsyncStorage.setItem(CLAVE_SESION_EN_CURSO, JSON.stringify(sesion));
+}
+
+export async function leerHistorialEntreno(): Promise<SesionGuardada[]> {
+  return leerSesionesGuardadas(await leerJson(CLAVE_HISTORIAL_ENTRENO));
+}
+
+export async function guardarHistorialEntreno(historial: readonly SesionGuardada[]): Promise<void> {
+  await AsyncStorage.setItem(CLAVE_HISTORIAL_ENTRENO, JSON.stringify(historial));
 }
