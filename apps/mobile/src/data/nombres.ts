@@ -34,6 +34,10 @@ export const NOMBRE_EQUIPO: Record<Equipo, string> = {
   mancuernas: 'Mancuernas',
   barra: 'Barra',
   bandas: 'Bandas',
+  kettlebell: 'Kettlebell',
+  'barra-z': 'Barra Z',
+  maquina: 'Máquina',
+  polea: 'Polea',
 };
 
 export const NOMBRE_NIVEL: Record<Nivel, string> = {

@@ -86,7 +86,12 @@ export function CatalogoScreen({ onAbrirEjercicio }: CatalogoScreenProps) {
           </View>
         )}
 
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.chips}>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          style={styles.filaChips}
+          contentContainerStyle={styles.chips}
+        >
           {OPCIONES_EQUIPO.map((equipo) => (
             <Chip
               key={equipo}
@@ -163,7 +168,9 @@ const styles = StyleSheet.create({
   },
   ayuda: { color: colores.textoSecundario, fontSize: 13, marginTop: espacios.s },
   fila: { flexDirection: 'row', alignItems: 'center', gap: espacios.s },
-  chips: { gap: espacios.s },
+  // Sale del padding de la pantalla para que los chips se deslicen hasta el borde.
+  filaChips: { marginHorizontal: -espacios.m },
+  chips: { gap: espacios.s, paddingHorizontal: espacios.m },
   vacio: { color: colores.textoSecundario, textAlign: 'center', marginTop: espacios.l },
   tarjeta: { backgroundColor: colores.tarjeta, borderRadius: radios.grande, overflow: 'hidden' },
   cabeceraGrupo: {
