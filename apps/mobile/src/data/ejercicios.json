@@ -21,7 +21,9 @@
       "Usar las piernas para impulsar las mancuernas.",
       "Bajar sólo hasta la frente y acortar el recorrido."
     ],
-    "youtubeId": ""
+    "youtubeId": "Hbt2fEa2cTU",
+    "videoCanal": "Your House Fitness",
+    "videoFormato": "vertical"
   },
   {
     "id": "elevaciones-laterales",
@@ -44,7 +46,9 @@
       "Subir los hombros hacia las orejas y cargar el trapecio.",
       "Usar demasiado peso y perder el control al bajar."
     ],
-    "youtubeId": ""
+    "youtubeId": "V3LaKO8iZUE",
+    "videoCanal": "Your House Fitness",
+    "videoFormato": "horizontal"
   },
   {
     "id": "pike-push-up",
@@ -93,7 +97,9 @@
       "Abrir los codos en forma de T.",
       "Bajar sólo la cabeza en lugar de todo el cuerpo."
     ],
-    "youtubeId": ""
+    "youtubeId": "zrDwwnY5GBc",
+    "videoCanal": "BlueGym Animation",
+    "videoFormato": "vertical"
   },
   {
     "id": "press-banca-barra",
@@ -117,7 +123,9 @@
       "Despegar la cola del banco.",
       "Entrenar pesado sin alguien que te asista."
     ],
-    "youtubeId": ""
+    "youtubeId": "TAH8RxOS0VI",
+    "videoCanal": "BlueGym Animation",
+    "videoFormato": "horizontal"
   },
   {
     "id": "aperturas-piso-mancuernas",
@@ -165,7 +173,9 @@
       "No bajar del todo entre repeticiones.",
       "Estirar el cuello para llegar con el mentón."
     ],
-    "youtubeId": ""
+    "youtubeId": "pT9ZCIeJhEM",
+    "videoCanal": "Your House Fitness",
+    "videoFormato": "horizontal"
   },
   {
     "id": "remo-barra",
@@ -190,7 +200,9 @@
       "Enderezar el torso en cada repetición para ayudarte.",
       "Tirar con los brazos en lugar de con la espalda."
     ],
-    "youtubeId": ""
+    "youtubeId": "VBhFIZWMKUs",
+    "videoCanal": "Your House Fitness",
+    "videoFormato": "horizontal"
   },
   {
     "id": "remo-mancuerna-una-mano",
@@ -214,7 +226,9 @@
       "Tirar la mancuerna hacia el pecho en lugar de la cadera.",
       "Encoger el hombro."
     ],
-    "youtubeId": ""
+    "youtubeId": "KnzXB0y8wb8",
+    "videoCanal": "Your House Fitness",
+    "videoFormato": "vertical"
   },
   {
     "id": "curl-barra",
@@ -260,7 +274,9 @@
       "Mover los codos hacia adelante.",
       "Hacer las repeticiones demasiado rápido."
     ],
-    "youtubeId": ""
+    "youtubeId": "WOxdd51XqVU",
+    "videoCanal": "Your House Fitness",
+    "videoFormato": "vertical"
   },
   {
     "id": "extension-triceps-banda",
@@ -307,7 +323,9 @@
       "Levantar los talones del piso.",
       "Redondear la espalda abajo de todo."
     ],
-    "youtubeId": ""
+    "youtubeId": "-kI7v2ts5d0",
+    "videoCanal": "BlueGym Animation",
+    "videoFormato": "vertical"
   },
   {
     "id": "zancadas-mancuernas",
@@ -332,7 +350,9 @@
       "Inclinar el torso hacia adelante.",
       "Dejar que la rodilla de adelante se vaya hacia adentro."
     ],
-    "youtubeId": ""
+    "youtubeId": "kk8KFb5UyXo",
+    "videoCanal": "Your House Fitness",
+    "videoFormato": "vertical"
   },
   {
     "id": "elevacion-talones",
@@ -377,7 +397,9 @@
       "Apoyar los pies demasiado lejos y cargar los isquiotibiales.",
       "Subir rápido sin pausa arriba."
     ],
-    "youtubeId": ""
+    "youtubeId": "B9Me4gKiU-g",
+    "videoCanal": "Sergio Orduz",
+    "videoFormato": "vertical"
   },
   {
     "id": "peso-muerto-rumano-mancuernas",
@@ -401,7 +423,9 @@
       "Flexionar demasiado las rodillas y convertirlo en sentadilla.",
       "Alejar las mancuernas del cuerpo."
     ],
-    "youtubeId": ""
+    "youtubeId": "3MjvPlbGmfY",
+    "videoCanal": "Sergio Orduz",
+    "videoFormato": "vertical"
   },
   {
     "id": "puente-gluteo-banda",
@@ -518,7 +542,9 @@
       "Ayudarte con las piernas.",
       "Llevar la barra muy adelante de la cabeza."
     ],
-    "youtubeId": "",
+    "youtubeId": "6YG2ETOwDR8",
+    "videoCanal": "Sergio Orduz",
+    "videoFormato": "vertical",
     "fuente": "free-exercise-db (Unlicense)"
   },
   {
@@ -542,7 +568,9 @@
       "Despegar la espalda del respaldo.",
       "Acortar el recorrido abajo."
     ],
-    "youtubeId": "",
+    "youtubeId": "JdMgGoAPKjg",
+    "videoCanal": "Your House Fitness",
+    "videoFormato": "horizontal",
     "fuente": "free-exercise-db (Unlicense)"
   },
   {
@@ -566,7 +594,9 @@
       "Trabar los codos arriba.",
       "Despegar la espalda del respaldo."
     ],
-    "youtubeId": "",
+    "youtubeId": "G4JyG7bW_uY",
+    "videoCanal": "Vitar Club",
+    "videoFormato": "vertical",
     "fuente": "free-exercise-db (Unlicense)"
   },
   {
@@ -685,7 +715,9 @@
       "Subir más arriba de la cabeza.",
       "Usar demasiado peso."
     ],
-    "youtubeId": "",
+    "youtubeId": "kLbvYQ-l4BA",
+    "videoCanal": "Your House Fitness",
+    "videoFormato": "horizontal",
     "fuente": "free-exercise-db (Unlicense)"
   },
   {
@@ -732,7 +764,9 @@
       "Subir los brazos por encima de los hombros.",
       "Hacer el movimiento rápido y sin control."
     ],
-    "youtubeId": "",
+    "youtubeId": "SaoW-iSUxfk",
+    "videoCanal": "BlueGym Animation",
+    "videoFormato": "vertical",
     "fuente": "free-exercise-db (Unlicense)"
   },
   {
@@ -843,7 +877,9 @@
       "Bajar los codos.",
       "Inclinarte hacia atrás para mover más peso."
     ],
-    "youtubeId": "",
+    "youtubeId": "y73pzFKQ6MU",
+    "videoCanal": "BlueGym Animation",
+    "videoFormato": "vertical",
     "fuente": "free-exercise-db (Unlicense)"
   },
   {
@@ -938,7 +974,9 @@
       "Flexionar los codos.",
       "Hacer el recorrido corto."
     ],
-    "youtubeId": "",
+    "youtubeId": "I0ylf3VmA0I",
+    "videoCanal": "Your House Fitness",
+    "videoFormato": "vertical",
     "fuente": "free-exercise-db (Unlicense)"
   },
   {
@@ -959,7 +997,9 @@
       "Mover la cabeza hacia adelante.",
       "Usar los brazos para tirar."
     ],
-    "youtubeId": "",
+    "youtubeId": "FHZRCBlTtyc",
+    "videoCanal": "BlueGym Animation",
+    "videoFormato": "vertical",
     "fuente": "free-exercise-db (Unlicense)"
   },
   {
@@ -1184,7 +1224,9 @@
       "Chocar las mancuernas arriba.",
       "Bajar poco y acortar el recorrido."
     ],
-    "youtubeId": "",
+    "youtubeId": "rzVYOes3YV4",
+    "videoCanal": "Your House Fitness",
+    "videoFormato": "vertical",
     "fuente": "free-exercise-db (Unlicense)"
   },
   {
@@ -1208,7 +1250,9 @@
       "Despegar la espalda del banco.",
       "Bajar sin control."
     ],
-    "youtubeId": "",
+    "youtubeId": "oTD5g77GgSA",
+    "videoCanal": "Your House Fitness",
+    "videoFormato": "horizontal",
     "fuente": "free-exercise-db (Unlicense)"
   },
   {
@@ -1275,7 +1319,9 @@
       "Estirar del todo los codos.",
       "Bajar sin control."
     ],
-    "youtubeId": "",
+    "youtubeId": "nMIkFPpWoHg",
+    "videoCanal": "Your House Fitness",
+    "videoFormato": "vertical",
     "fuente": "free-exercise-db (Unlicense)"
   },
   {
@@ -1321,7 +1367,9 @@
       "Trabar los codos al empujar.",
       "Despegar los hombros del respaldo."
     ],
-    "youtubeId": "",
+    "youtubeId": "qbkrwo9fTiw",
+    "videoCanal": "Vitar Club",
+    "videoFormato": "vertical",
     "fuente": "free-exercise-db (Unlicense)"
   },
   {
@@ -1416,7 +1464,9 @@
       "Usar el peso del cuerpo para tirar.",
       "Dejar que los cables te lleven los brazos atrás de golpe."
     ],
-    "youtubeId": "",
+    "youtubeId": "Jokaz7dBJNg",
+    "videoCanal": "Your House Fitness",
+    "videoFormato": "vertical",
     "fuente": "free-exercise-db (Unlicense)"
   },
   {
@@ -1729,7 +1779,9 @@
       "No bajar del todo.",
       "Estirar el cuello para llegar con el mentón."
     ],
-    "youtubeId": "",
+    "youtubeId": "rfMaANCbzx8",
+    "videoCanal": "Your House Fitness",
+    "videoFormato": "horizontal",
     "fuente": "free-exercise-db (Unlicense)"
   },
   {
@@ -1777,7 +1829,9 @@
       "Tirarte hacia atrás para mover más peso.",
       "Soltar la barra de golpe al subir."
     ],
-    "youtubeId": "",
+    "youtubeId": "lRTkrkKbxek",
+    "videoCanal": "Your House Fitness",
+    "videoFormato": "vertical",
     "fuente": "free-exercise-db (Unlicense)"
   },
   {
@@ -1918,7 +1972,9 @@
       "Redondear la espalda al volver.",
       "Encoger los hombros."
     ],
-    "youtubeId": "",
+    "youtubeId": "AYbQCI4zs6g",
+    "videoCanal": "Vitar Club",
+    "videoFormato": "vertical",
     "fuente": "free-exercise-db (Unlicense)"
   },
   {
@@ -1986,7 +2042,9 @@
       "Despegar el pecho del apoyo.",
       "Hacer el recorrido corto."
     ],
-    "youtubeId": "",
+    "youtubeId": "bTTb9gtlqpo",
+    "videoCanal": "Vitar Club",
+    "videoFormato": "vertical",
     "fuente": "free-exercise-db (Unlicense)"
   },
   {
@@ -2056,7 +2114,9 @@
       "Redondear la espalda baja.",
       "Levantar el torso en cada repetición."
     ],
-    "youtubeId": "",
+    "youtubeId": "4JQwpboqPmM",
+    "videoCanal": "Your House Fitness",
+    "videoFormato": "vertical",
     "fuente": "free-exercise-db (Unlicense)"
   },
   {
@@ -2208,7 +2268,9 @@
       "Alejar la barra del cuerpo.",
       "Tirar con los brazos."
     ],
-    "youtubeId": "",
+    "youtubeId": "D2KCG4jnW8Q",
+    "videoCanal": "Your House Fitness",
+    "videoFormato": "vertical",
     "fuente": "free-exercise-db (Unlicense)"
   },
   {
@@ -2325,7 +2387,9 @@
       "Despegar los codos.",
       "Bajar sólo hasta la mitad."
     ],
-    "youtubeId": "",
+    "youtubeId": "zPBxDAF3ObY",
+    "videoCanal": "Your House Fitness",
+    "videoFormato": "vertical",
     "fuente": "free-exercise-db (Unlicense)"
   },
   {
@@ -2369,7 +2433,9 @@
       "Mover el hombro para ayudarte.",
       "Despegar el codo del muslo."
     ],
-    "youtubeId": "",
+    "youtubeId": "SIptz0BXimU",
+    "videoCanal": "Your House Fitness",
+    "videoFormato": "vertical",
     "fuente": "free-exercise-db (Unlicense)"
   },
   {
@@ -2579,7 +2645,9 @@
       "Mover los codos hacia adelante.",
       "Usar el peso del cuerpo."
     ],
-    "youtubeId": "",
+    "youtubeId": "Fv7v6IAHc0I",
+    "videoCanal": "Vitar Club",
+    "videoFormato": "horizontal",
     "fuente": "free-exercise-db (Unlicense)"
   },
   {
@@ -2689,7 +2757,9 @@
       "Bajar de más y forzar los hombros.",
       "Inclinar mucho el torso (pasa a trabajar pecho)."
     ],
-    "youtubeId": "",
+    "youtubeId": "K0Zj0XSf0xE",
+    "videoCanal": "Your House Fitness",
+    "videoFormato": "vertical",
     "fuente": "free-exercise-db (Unlicense)"
   },
   {
@@ -2754,7 +2824,9 @@
       "Abrir los codos.",
       "Arquear la zona lumbar."
     ],
-    "youtubeId": "",
+    "youtubeId": "1YciidUsQhE",
+    "videoCanal": "Your House Fitness",
+    "videoFormato": "vertical",
     "fuente": "free-exercise-db (Unlicense)"
   },
   {
@@ -2956,7 +3028,9 @@
       "Trabar las rodillas arriba.",
       "Juntar las rodillas al empujar."
     ],
-    "youtubeId": "",
+    "youtubeId": "bNsrqXUIJqc",
+    "videoCanal": "BlueGym Animation",
+    "videoFormato": "horizontal",
     "fuente": "free-exercise-db (Unlicense)"
   },
   {
@@ -3004,7 +3078,9 @@
       "Patear con impulso.",
       "Despegar la cola del asiento."
     ],
-    "youtubeId": "",
+    "youtubeId": "N-euKPQgO84",
+    "videoCanal": "BlueGym Animation",
+    "videoFormato": "vertical",
     "fuente": "free-exercise-db (Unlicense)"
   },
   {
@@ -3046,7 +3122,9 @@
       "Despegar la espalda del respaldo.",
       "Hacer las repeticiones rápido."
     ],
-    "youtubeId": "",
+    "youtubeId": "POgzKaM92X4",
+    "videoCanal": "Vitar Club",
+    "videoFormato": "vertical",
     "fuente": "free-exercise-db (Unlicense)"
   },
   {
@@ -3254,7 +3332,9 @@
       "Pie de adelante muy cerca del banco.",
       "Rodilla de adelante hacia adentro."
     ],
-    "youtubeId": "",
+    "youtubeId": "dQRUSMeaRG0",
+    "videoCanal": "Your House Fitness",
+    "videoFormato": "vertical",
     "fuente": "free-exercise-db (Unlicense)"
   },
   {
@@ -3305,7 +3385,9 @@
       "Levantar los talones.",
       "Redondear la espalda."
     ],
-    "youtubeId": "",
+    "youtubeId": "SBuOaFE1vMA",
+    "videoCanal": "Vitar Club",
+    "videoFormato": "vertical",
     "fuente": "free-exercise-db (Unlicense)"
   },
   {
@@ -3671,7 +3753,9 @@
       "Arquear la zona lumbar.",
       "Empujar con las puntas de los pies."
     ],
-    "youtubeId": "",
+    "youtubeId": "PsJlP8ju5yM",
+    "videoCanal": "Your House Fitness",
+    "videoFormato": "vertical",
     "fuente": "free-exercise-db (Unlicense)"
   },
   {
@@ -3693,7 +3777,9 @@
       "Dejar caer la cadera hacia un costado.",
       "Arquear la espalda."
     ],
-    "youtubeId": "",
+    "youtubeId": "JLAmkRUD9Ng",
+    "videoCanal": "Your House Fitness",
+    "videoFormato": "vertical",
     "fuente": "free-exercise-db (Unlicense)"
   },
   {
@@ -3851,7 +3937,9 @@
       "Mover el torso para empujar.",
       "Soltar el peso de golpe."
     ],
-    "youtubeId": "",
+    "youtubeId": "VFIecEc7gsk",
+    "videoCanal": "Vitar Club",
+    "videoFormato": "vertical",
     "fuente": "free-exercise-db (Unlicense)"
   },
   {
@@ -3902,7 +3990,9 @@
       "Girar la cadera hacia afuera.",
       "Redondear la espalda."
     ],
-    "youtubeId": "",
+    "youtubeId": "Yl0K7pFsBoY",
+    "videoCanal": "Your House Fitness",
+    "videoFormato": "vertical",
     "fuente": "free-exercise-db (Unlicense)"
   },
   {
@@ -3971,7 +4061,9 @@
       "Tirar del cuello con las manos.",
       "Subir con impulso."
     ],
-    "youtubeId": "",
+    "youtubeId": "UbPhmo0PXgo",
+    "videoCanal": "Sergio Orduz",
+    "videoFormato": "vertical",
     "fuente": "free-exercise-db (Unlicense)"
   },
   {
@@ -4051,7 +4143,9 @@
       "Hacerlo muy rápido.",
       "Arquear la espalda baja."
     ],
-    "youtubeId": "",
+    "youtubeId": "NjDxe-oT9Lk",
+    "videoCanal": "Your House Fitness",
+    "videoFormato": "vertical",
     "fuente": "free-exercise-db (Unlicense)"
   },
   {
@@ -4262,7 +4356,9 @@
       "Inclinarte hacia adelante o atrás.",
       "Usar mancuernas en las dos manos (se compensan)."
     ],
-    "youtubeId": "",
+    "youtubeId": "IPsRnpFJPQI",
+    "videoCanal": "BlueGym Animation",
+    "videoFormato": "vertical",
     "fuente": "free-exercise-db (Unlicense)"
   },
   {
