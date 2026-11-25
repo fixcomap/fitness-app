@@ -1,7 +1,8 @@
 // Resumen del día: lo que muestra la pantalla Inicio.
 // Es el punto de encuentro de todas las secciones (Comida, Actividad, Entreno).
-// Ya son reales: los pasos y los minutos activos (sensor + manuales) y las kcal de actividad.
-// Siguen de ejemplo: objetivo y comido, macros y entreno.
+// Ya son reales: los pasos y los minutos activos (sensor + manuales), las kcal de
+// actividad (caminata + entrenamientos) y el entreno de hoy.
+// Siguen de ejemplo: objetivo y comido, y macros.
 import { kcalCaminata } from './actividad/calculos';
 
 // Recomendación de la OMS para adultos: 150 minutos de actividad moderada por semana.
@@ -33,7 +34,14 @@ export interface ResumenDia {
     hoy: number;
     metaSemana: number;
   };
-  entreno: { nombre: string; duracionMin: number } | null;
+  entreno: EntrenoDeHoy | null; // null: todavía no se armó la sesión
+}
+
+// La sesión armada (o en curso) de hoy.
+export interface EntrenoDeHoy {
+  nombre: string;
+  ejercicios: number;
+  enCurso: boolean;
 }
 
 export interface DatosDelDia {
@@ -42,17 +50,29 @@ export interface DatosDelDia {
   pasosManuales: number; // cargados a mano hoy
   minutos: { hoy: number; semana: number }; // minutos activos reales (sensor + manuales)
   perfil: { alturaCm: number; pesoKg: number };
+  kcalEntreno?: number; // de los entrenamientos terminados hoy (estimadas)
+  entreno?: EntrenoDeHoy | null;
 }
 
 // Arma el resumen con los datos reales que ya hay y completa el resto con ejemplos.
-export function armarResumenDia({ metaPasos, pasosAutomaticos, pasosManuales, minutos, perfil }: DatosDelDia): ResumenDia {
+export function armarResumenDia({
+  metaPasos,
+  pasosAutomaticos,
+  pasosManuales,
+  minutos,
+  perfil,
+  kcalEntreno = 0,
+  entreno = null,
+}: DatosDelDia): ResumenDia {
   const pasosDelDia = pasosAutomaticos + pasosManuales;
   const base = resumenDeEjemplo(metaPasos);
+  const actividad = kcalCaminata(pasosDelDia, perfil.alturaCm, perfil.pesoKg) + Math.max(0, Math.round(kcalEntreno));
   return {
     ...base,
-    kcal: { ...base.kcal, actividad: kcalCaminata(pasosDelDia, perfil.alturaCm, perfil.pesoKg) },
+    kcal: { ...base.kcal, actividad },
     pasos: { automaticos: pasosAutomaticos, manuales: pasosManuales, meta: metaPasos },
     minutosActivos: { ...base.minutosActivos, hoy: minutos.hoy, semana: minutos.semana },
+    entreno,
   };
 }
 
@@ -67,7 +87,7 @@ export function resumenDeEjemplo(metaPasos: number): ResumenDia {
     },
     pasos: { automaticos: 7842, manuales: 0, meta: metaPasos },
     minutosActivos: { semana: 110, hoy: 34, metaSemana: META_MINUTOS_SEMANA_OMS },
-    entreno: { nombre: 'Empuje: pecho y hombros', duracionMin: 45 },
+    entreno: { nombre: 'Empuje: pecho y hombros', ejercicios: 5, enCurso: false },
   };
 }
 
