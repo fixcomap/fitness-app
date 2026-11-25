@@ -49,5 +49,10 @@ export interface Ejercicio {
   tecnica: string[]; // pasos en orden
   erroresComunes: string[];
   youtubeId: string; // vacío si todavía no hay video
+  videoCanal?: string; // author_name del video en YouTube (oEmbed)
+  videoFormato?: FormatoVideo; // vertical para Shorts
   fuente?: string; // de dónde salen los datos, si no son propios
 }
+
+export const FORMATOS_VIDEO = ['vertical', 'horizontal'] as const;
+export type FormatoVideo = (typeof FORMATOS_VIDEO)[number];

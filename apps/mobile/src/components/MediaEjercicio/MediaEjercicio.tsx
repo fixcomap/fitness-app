@@ -1,29 +1,85 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useState } from 'react';
-import { ActivityIndicator, StyleSheet, Text, View, type LayoutChangeEvent } from 'react-native';
+import {
+  ActivityIndicator,
+  Image,
+  Pressable,
+  StyleSheet,
+  Text,
+  useWindowDimensions,
+  View,
+  type LayoutChangeEvent,
+} from 'react-native';
 import YoutubePlayer from 'react-native-youtube-iframe';
 
 import { colores, radios } from '../../theme/tema';
-import type { Medio } from './medio';
+import { dimensionesVideo, FRACCION_ALTO_MAXIMO, miniaturaVideo, type Medio } from './medio';
 
-// Recuadro 16:9 con el video, el GIF o las imágenes del ejercicio.
+// El HTML de react-native-youtube-iframe fija el contenedor del iframe en 16:9 del ancho
+// (padding-bottom: 56.25%), así que un Short en un recuadro 9:16 quedaba en la franja de
+// arriba. Esto hace que el contenedor y el iframe ocupen todo el WebView.
+const AJUSTE_IFRAME = `(function () {
+  var css = 'html,body{height:100%;margin:0;background:#000}' +
+    '.container{height:100vh!important;padding-bottom:0!important}' +
+    '.container iframe{position:absolute;top:0;left:0;width:100%!important;height:100%!important}';
+  var estilo = document.createElement('style');
+  estilo.appendChild(document.createTextNode(css));
+  document.head.appendChild(estilo);
+})();
+true;`;
+
+// Recuadro con el video del ejercicio: 16:9 para videos comunes y 9:16 (centrado,
+// con un alto máximo) para Shorts.
 export function MediaEjercicio({ medio }: { medio: Medio }) {
-  const [ancho, setAncho] = useState(0);
-  const alto = Math.round((ancho * 9) / 16);
-  const medir = (e: LayoutChangeEvent) => setAncho(e.nativeEvent.layout.width);
+  const [anchoDisponible, setAnchoDisponible] = useState(0);
+  const [idCargado, setIdCargado] = useState<string | null>(null);
+  const { height: altoPantalla } = useWindowDimensions();
+  const medir = (e: LayoutChangeEvent) => setAnchoDisponible(e.nativeEvent.layout.width);
+
+  if (medio.tipo !== 'youtube') {
+    return (
+      <View style={[styles.marco, styles.vacio]}>
+        <Ionicons name="videocam-outline" size={32} color={colores.textoSecundario} />
+        <Text style={styles.textoVacio}>Video próximamente</Text>
+      </View>
+    );
+  }
+
+  const { ancho, alto } = dimensionesVideo(anchoDisponible, medio.formato, Math.round(altoPantalla * FRACCION_ALTO_MAXIMO));
+  // El reproductor (un WebView) recién se crea al tocar la miniatura, así el
+  // detalle abre rápido. Se guarda el id para volver a la miniatura si cambia el video.
+  const cargado = idCargado === medio.videoId;
 
   return (
-    <View style={[styles.marco, { aspectRatio: 16 / 9 }]} onLayout={medir}>
-      {medio.tipo === 'youtube' ? (
-        ancho > 0 ? (
-          <YoutubePlayer height={alto} width={ancho} videoId={medio.videoId} />
-        ) : (
-          <ActivityIndicator color={colores.acento} />
-        )
+    <View style={styles.contenedor} onLayout={medir}>
+      {ancho > 0 ? (
+        <View style={[styles.marco, styles.negro, { width: ancho, height: alto }]}>
+          {cargado ? (
+            <YoutubePlayer
+              height={alto}
+              width={ancho}
+              videoId={medio.videoId}
+              play
+              webViewStyle={styles.negro}
+              webViewProps={{ injectedJavaScript: AJUSTE_IFRAME }}
+            />
+          ) : (
+            <Pressable
+              style={styles.miniatura}
+              onPress={() => setIdCargado(medio.videoId)}
+              accessibilityRole="button"
+              accessibilityLabel="Reproducir video"
+            >
+              <Image source={{ uri: miniaturaVideo(medio.videoId) }} style={StyleSheet.absoluteFill} resizeMode="cover" />
+              <View style={styles.play}>
+                <Ionicons name="play" size={30} color={colores.texto} style={styles.iconoPlay} />
+              </View>
+            </Pressable>
+          )}
+        </View>
       ) : (
-        <View style={styles.vacio}>
-          <Ionicons name="videocam-outline" size={32} color={colores.textoSecundario} />
-          <Text style={styles.textoVacio}>Video próximamente</Text>
+        <View style={[styles.marco, styles.cargando]}>
+          <ActivityIndicator color={colores.acento} />
         </View>
       )}
     </View>
@@ -31,14 +87,26 @@ export function MediaEjercicio({ medio }: { medio: Medio }) {
 }
 
 const styles = StyleSheet.create({
+  contenedor: { width: '100%', alignItems: 'center' },
   marco: {
-    width: '100%',
     borderRadius: radios.grande,
     backgroundColor: colores.tarjeta,
     overflow: 'hidden',
     alignItems: 'center',
     justifyContent: 'center',
   },
-  vacio: { alignItems: 'center', gap: 8 },
+  negro: { backgroundColor: '#000' },
+  miniatura: { width: '100%', height: '100%', alignItems: 'center', justifyContent: 'center' },
+  play: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    backgroundColor: colores.acento,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  iconoPlay: { marginLeft: 4 },
+  cargando: { width: '100%', aspectRatio: 16 / 9 },
+  vacio: { width: '100%', aspectRatio: 16 / 9, gap: 8 },
   textoVacio: { color: colores.textoSecundario, fontSize: 15, fontWeight: '600' },
 });

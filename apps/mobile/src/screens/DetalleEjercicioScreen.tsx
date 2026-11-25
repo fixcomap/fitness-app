@@ -3,7 +3,7 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { Chip } from '../components/Chip';
 import { COLOR_PRINCIPAL, COLOR_SECUNDARIO, MapaMuscular } from '../components/MapaMuscular';
-import { MediaEjercicio, medioDeEjercicio } from '../components/MediaEjercicio';
+import { MediaEjercicio, medioDeEjercicio, ReportarVideo } from '../components/MediaEjercicio';
 import { buscarEjercicioPorId } from '../data/ejercicios';
 import { NOMBRE_EQUIPO, NOMBRE_MUSCULO, NOMBRE_NIVEL } from '../data/nombres';
 import { colores, espacios, radios } from '../theme/tema';
@@ -21,12 +21,11 @@ export function DetalleEjercicioScreen({ id }: { id: string }) {
   }
 
   const secundarios = ejercicio.musculosSecundarios;
+  const medio = medioDeEjercicio(ejercicio);
 
   return (
     <View style={styles.pantalla}>
       <ScrollView contentContainerStyle={styles.contenido}>
-        <MediaEjercicio medio={medioDeEjercicio(ejercicio)} />
-
         <View style={styles.bloque}>
           <Text style={styles.nombre}>{ejercicio.nombre}</Text>
           <View style={styles.fila}>
@@ -71,6 +70,14 @@ export function DetalleEjercicioScreen({ id }: { id: string }) {
             </View>
           ))}
         </View>
+
+        <View style={styles.tarjeta}>
+          <Text style={styles.tituloSeccion}>Mirá cómo se hace</Text>
+          <View style={styles.video}>
+            <MediaEjercicio medio={medio} />
+            {medio.tipo === 'youtube' && <ReportarVideo ejercicioId={ejercicio.id} youtubeId={medio.videoId} />}
+          </View>
+        </View>
       </ScrollView>
 
       <View style={styles.pie}>
@@ -104,6 +111,7 @@ const styles = StyleSheet.create({
   centrado: { alignItems: 'center', justifyContent: 'center' },
   contenido: { padding: espacios.m, paddingBottom: 110, gap: espacios.m },
   bloque: { gap: espacios.s + 4 },
+  video: { gap: espacios.s },
   nombre: { color: colores.texto, fontSize: 30, fontWeight: '800' },
   fila: { flexDirection: 'row', gap: espacios.s },
   tarjeta: { backgroundColor: colores.tarjeta, borderRadius: radios.grande, padding: espacios.m + 4, gap: espacios.m },
