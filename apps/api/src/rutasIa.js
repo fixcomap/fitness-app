@@ -5,14 +5,19 @@ const { z } = require('zod');
 const { crearLimitador } = require('./limites');
 const { exigirDispositivo, respuestaLimiteDiario } = require('./uso');
 const { COMIDAS, esJpeg, leerResultadoFoto } = require('./ia/foto');
+const { esquemaPedidoCoach, erroresPedido, leerRespuestaCoach } = require('./ia/coach');
 const { ErrorIa } = require('./ia/proveedor');
 
 const MAXIMO_FOTO = '2mb';
+// El contexto del coach trae el catálogo de ejercicios (~12 KB) y el resumen de la semana.
+const MAXIMO_COACH = '100kb';
 const esquemaComida = z.enum(COMIDAS).optional();
 
 const MENSAJES_ERROR = {
   foto: 'No pudimos analizar la foto, probá de nuevo en un momento',
   rechazoFoto: 'No pudimos analizar esta foto. Probá con otra',
+  coach: 'El coach no pudo responder, probá de nuevo en un momento',
+  rechazoCoach: 'El coach no puede responder eso. Probá preguntarlo de otra forma',
 };
 
 function crearRutasIa({ ia, uso, limitesDiarios, limites }) {
@@ -58,6 +63,29 @@ function crearRutasIa({ ia, uso, limitesDiarios, limites }) {
         'fotos',
         async () => leerResultadoFoto((await ia.analizarFoto(req.body, { comida: comida.data ?? null })).datos),
         { rechazo: MENSAJES_ERROR.rechazoFoto, otro: MENSAJES_ERROR.foto },
+      );
+    },
+  );
+
+  router.post(
+    '/coach',
+    limitadorIa,
+    exigirDispositivo,
+    iaDisponible,
+    express.json({ limit: MAXIMO_COACH }),
+    async (req, res) => {
+      const pedido = esquemaPedidoCoach.safeParse(req.body);
+      if (!pedido.success) {
+        return res.status(400).json({ error: 'Pedido inválido', detalles: erroresPedido(pedido.error) });
+      }
+      const { mensajes, contexto } = pedido.data;
+
+      await conUsoDiario(
+        req,
+        res,
+        'mensajes',
+        async () => leerRespuestaCoach((await ia.responderCoach(mensajes, contexto)).datos, contexto.catalogo),
+        { rechazo: MENSAJES_ERROR.rechazoCoach, otro: MENSAJES_ERROR.coach },
       );
     },
   );
