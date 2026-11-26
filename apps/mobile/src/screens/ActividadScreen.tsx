@@ -24,12 +24,11 @@ import { formatearNumero, nombreDia } from '../lib/formato';
 import { porcentaje } from '../lib/resumenDia';
 import { colores } from '../theme/tema';
 
-export function ActividadScreen() {
+export function ActividadScreen({ onAbrirPerfil }: { onAbrirPerfil: () => void }) {
   const hoy = new Date();
   const {
     perfil,
     config,
-    cambiarMetaPasos,
     cargasDeHoy,
     totalesDeHoy,
     agregarCarga,
@@ -157,7 +156,7 @@ export function ActividadScreen() {
         conPodometro={activa}
         onBorrar={borrar}
         metaPasos={meta}
-        onCambiarMeta={cambiarMetaPasos}
+        onAbrirPerfil={onAbrirPerfil}
       />
     </SafeAreaView>
   );

@@ -14,6 +14,7 @@ export type RaizParamList = {
   ResumenSesion: { id: string };
   // Sin id: rutina nueva (con `dia` ya marcado, si viene).
   EditarRutina: { id?: string; dia?: DiaSemana } | undefined;
+  Perfil: undefined;
 };
 
 export type NavegacionRaiz = NativeStackNavigationProp<RaizParamList>;

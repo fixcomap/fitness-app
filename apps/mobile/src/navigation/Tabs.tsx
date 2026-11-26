@@ -46,8 +46,14 @@ function InicioRuta({ navigation }: BottomTabScreenProps<TabsParamList, 'Inicio'
       }}
       onArmarSesion={() => navigation.navigate('Entreno')}
       onAbrirCoach={() => navigation.navigate('Coach')}
+      onAbrirPerfil={() => raiz.navigate('Perfil')}
     />
   );
+}
+
+function ActividadRuta() {
+  const raiz = useNavegacionRaiz();
+  return <ActividadScreen onAbrirPerfil={() => raiz.navigate('Perfil')} />;
 }
 
 const Comida = () => <PantallaTitulo titulo="Comida" />;
@@ -89,7 +95,7 @@ export function Tabs() {
       <Tab.Screen name="Inicio" component={InicioRuta} />
       <Tab.Screen name="Entreno" component={EntrenoStack} />
       <Tab.Screen name="Comida" component={Comida} />
-      <Tab.Screen name="Actividad" component={ActividadScreen} />
+      <Tab.Screen name="Actividad" component={ActividadRuta} />
       <Tab.Screen name="Coach" component={Coach} />
     </Tab.Navigator>
   );
