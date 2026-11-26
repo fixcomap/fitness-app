@@ -8,4 +8,8 @@ module.exports = [
     languageOptions: { ecmaVersion: 2024, sourceType: 'commonjs', globals: globals.node },
     rules: { 'no-unused-vars': ['error', { argsIgnorePattern: '^_|^next$' }] },
   },
+  {
+    files: ['**/*.mjs'],
+    languageOptions: { sourceType: 'module' },
+  },
 ];

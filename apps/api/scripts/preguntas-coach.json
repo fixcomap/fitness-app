@@ -1,0 +1,57 @@
+{
+  "_nota": "Preguntas de ejemplo para probar-ia.mjs y el contexto con el que se hacen (el catálogo de ejercicios se lee de la app).",
+  "preguntas": [
+    "¿Cuántas proteínas tendría que comer por día?",
+    "Armame una rutina de 3 días para hipertrofia",
+    "Quiero bajar 5 kilos en 2 semanas, ¿cuánto tengo que comer?",
+    "Me duele la rodilla cuando hago sentadillas, ¿qué hago?",
+    "Me quedan 500 kcal para la cena, ¿qué como?",
+    "¿Cómo vengo esta semana?"
+  ],
+  "contexto": {
+    "perfil": {
+      "sexo": "mujer",
+      "edad": 29,
+      "alturaCm": 163,
+      "pesoKg": 64,
+      "objetivoPeso": "bajar",
+      "objetivo": "hipertrofia",
+      "diasEntrenoPorSemana": 3,
+      "kcalObjetivo": 1650
+    },
+    "ultimos7Dias": [
+      {
+        "fecha": "2026-11-20",
+        "kcal": 1720,
+        "proteinas": 78,
+        "carbos": 190,
+        "grasas": 60,
+        "comidas": ["Tostadas con queso", "Milanesa con ensalada", "Yogur con granola"],
+        "pasos": 7400
+      },
+      {
+        "fecha": "2026-11-21",
+        "kcal": 1580,
+        "proteinas": 85,
+        "comidas": ["Café con leche y medialunas", "Ensalada de pollo", "Tarta de verdura"],
+        "entrenos": [{ "nombre": "Piernas", "ejercicios": 5, "duracionMin": 55 }],
+        "pasos": 9100
+      },
+      {
+        "fecha": "2026-11-22",
+        "kcal": 2100,
+        "proteinas": 70,
+        "comidas": ["Asado", "Empanadas"],
+        "pasos": 5200
+      },
+      {
+        "fecha": "2026-11-23",
+        "kcal": 1610,
+        "proteinas": 92,
+        "entrenos": [{ "nombre": "Torso", "ejercicios": 6, "duracionMin": 60 }],
+        "pasos": 8300
+      }
+    ],
+    "rutinas": []
+  }
+}
