@@ -1,6 +1,6 @@
 // Gemini, con clave (Gemini API) o en Vertex AI (cuenta de servicio). Mismo SDK para los dos.
 const { esquemaSalidaCoach, esquemaSalidaFoto, jsonSchema } = require('./esquemas');
-const { SISTEMA_COACH, SISTEMA_FOTO, contextoCoach, textoFoto } = require('./prompts');
+const { SISTEMA_COACH, SISTEMA_FOTO, MANUAL_COACH, contextoCoach, textoFoto } = require('./prompts');
 const { ErrorIa, historialDesdeUsuario } = require('./proveedor');
 
 const ESPERA_MS = 60 * 1000;
@@ -70,7 +70,9 @@ function crearProveedorGemini({ cliente, modeloFoto, modeloCoach, nombre = 'gemi
         role: m.rol === 'usuario' ? 'user' : 'model',
         parts: [{ text: m.texto }],
       }));
-      return pedir(modeloCoach, `${SISTEMA_COACH}\n\n${contextoCoach(contexto)}`, contents, esquemaSalidaCoach);
+      // Gemini cachea solo los prefijos repetidos: instrucciones y manual primero, el contexto al final.
+      const sistema = `${SISTEMA_COACH}\n\n${MANUAL_COACH}\n\n${contextoCoach(contexto)}`;
+      return pedir(modeloCoach, sistema, contents, esquemaSalidaCoach);
     },
   };
 }

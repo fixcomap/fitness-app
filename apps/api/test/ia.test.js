@@ -6,7 +6,7 @@ const { crearProveedor } = require('../src/ia');
 const { crearProveedorGemini } = require('../src/ia/gemini');
 const { crearClientesClaude, crearProveedorClaude } = require('../src/ia/claude');
 const { ErrorIa, historialDesdeUsuario } = require('../src/ia/proveedor');
-const { MINIMO_KCAL, SISTEMA_COACH, SISTEMA_FOTO, textoFoto } = require('../src/ia/prompts');
+const { MINIMO_KCAL, SISTEMA_COACH, SISTEMA_FOTO, MANUAL_COACH, textoFoto } = require('../src/ia/prompts');
 
 const imagen = Buffer.from([0xff, 0xd8, 0xff, 0xe0, 1, 2, 3]);
 const contexto = { perfil: { sexo: 'mujer' }, catalogo: [{ id: 'sentadilla', nombre: 'Sentadilla' }] };
@@ -106,6 +106,15 @@ test('el prompt del coach tiene los mínimos de kcal y la derivación a un profe
   assert.match(SISTEMA_COACH, /rioplatense/);
 });
 
+test('el prompt del coach: suplementos sin dosis personalizadas, menores derivados y el manual primero', () => {
+  assert.match(SISTEMA_COACH, /No des dosis personalizadas/);
+  assert.match(SISTEMA_COACH, /menor de 18 años/);
+  assert.match(SISTEMA_COACH, /embarazo, la lactancia o una medicación/);
+  assert.match(SISTEMA_COACH, /priorizá el manual/);
+  assert.match(SISTEMA_COACH, /nombrá la fuente/);
+  assert.match(MANUAL_COACH, /^# Manual del coach de UnaMás/);
+});
+
 test('el historial para la IA arranca con un mensaje del usuario', () => {
   assert.deepStrictEqual(historialDesdeUsuario(mensajes), mensajes.slice(1));
   assert.deepStrictEqual(historialDesdeUsuario([{ rol: 'coach', texto: 'hola' }]), []);
@@ -161,8 +170,10 @@ test('Gemini: el coach manda el historial con roles user/model y el contexto en 
     pedido.contents.map((c) => c.role),
     ['user', 'model', 'user'],
   );
-  assert.ok(pedido.config.systemInstruction.startsWith(SISTEMA_COACH));
-  assert.ok(pedido.config.systemInstruction.includes('"sentadilla"'));
+  // Lo fijo primero (instrucciones y manual) y el contexto al final.
+  const sistema = pedido.config.systemInstruction;
+  assert.ok(sistema.startsWith(`${SISTEMA_COACH}\n\n${MANUAL_COACH}\n\n`));
+  assert.ok(sistema.endsWith(JSON.stringify(contexto)));
 });
 
 test('Gemini: bloqueo, respuesta cortada o JSON inválido son ErrorIa', async () => {
@@ -216,7 +227,7 @@ test('Claude: manda la foto en base64 con salida estructurada y lee tokens', asy
   assert.strictEqual(texto.text, textoFoto('desayuno'));
 });
 
-test('Claude: el coach manda el historial con roles user/assistant y el contexto aparte', async () => {
+test('Claude: el coach manda el historial, el manual cacheado y el contexto aparte', async () => {
   const { pedidos, clientePara } = clientesClaude(respuestaClaude({ texto: 'Dale', rutinas: [] }));
   const ia = crearProveedorClaude({ clientePara, modeloFoto: 'm-foto', modeloCoach: 'm-coach' });
   await ia.responderCoach(mensajes, contexto);
@@ -225,8 +236,14 @@ test('Claude: el coach manda el historial con roles user/assistant y el contexto
     pedido.messages.map((m) => m.role),
     ['user', 'assistant', 'user'],
   );
-  assert.strictEqual(pedido.system[0].text, SISTEMA_COACH);
-  assert.ok(pedido.system[1].text.includes('"sentadilla"'));
+  assert.deepStrictEqual(pedido.system.slice(0, 2), [
+    { type: 'text', text: SISTEMA_COACH },
+    { type: 'text', text: MANUAL_COACH, cache_control: { type: 'ephemeral' } },
+  ]);
+  // El contexto va después del punto de caché y sin cache_control: cambia en cada pedido.
+  assert.strictEqual(pedido.system.length, 3);
+  assert.ok(pedido.system[2].text.includes('"sentadilla"'));
+  assert.strictEqual(pedido.system[2].cache_control, undefined);
 });
 
 test('Claude: rechazo, respuesta cortada o sin JSON son ErrorIa', async () => {

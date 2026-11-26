@@ -1,7 +1,7 @@
 // Claude, con clave de Anthropic o en Vertex AI (cuenta de servicio). Misma forma de pedido para los dos.
 const { zodOutputFormat } = require('@anthropic-ai/sdk/helpers/zod');
 const { esquemaSalidaCoach, esquemaSalidaFoto } = require('./esquemas');
-const { SISTEMA_COACH, SISTEMA_FOTO, contextoCoach, textoFoto } = require('./prompts');
+const { SISTEMA_COACH, SISTEMA_FOTO, MANUAL_COACH, contextoCoach, textoFoto } = require('./prompts');
 const { ErrorIa, historialDesdeUsuario } = require('./proveedor');
 
 const ESPERA_MS = 60 * 1000;
@@ -82,8 +82,11 @@ function crearProveedorClaude({ clientePara, modeloFoto, modeloCoach, nombre = '
         role: m.rol === 'usuario' ? 'user' : 'assistant',
         content: m.texto,
       }));
+      // Instrucciones y manual son fijos: el punto de caché va al final del manual, así se reusan
+      // entre pedidos (y entre usuarios). El contexto cambia en cada pedido y va después.
       const system = [
         { type: 'text', text: SISTEMA_COACH },
+        { type: 'text', text: MANUAL_COACH, cache_control: { type: 'ephemeral' } },
         { type: 'text', text: contextoCoach(contexto) },
       ];
       return pedir(modeloCoach, system, messages, esquemaSalidaCoach);
