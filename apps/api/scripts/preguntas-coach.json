@@ -1,0 +1,109 @@
+{
+  "_nota": "Preguntas de ejemplo para probar-ia.mjs y el contexto con el que se hacen (el catálogo de ejercicios se lee de la app). kcalObjetivo sale de la fórmula de la app (apps/mobile/src/lib/calorias.ts).",
+  "preguntas": [
+    "¿Cuántas proteínas tendría que comer por día?",
+    "Armame una rutina de 3 días para hipertrofia",
+    "Quiero bajar 5 kilos en 2 semanas, ¿cuánto tengo que comer?",
+    "Me duele la rodilla cuando hago sentadillas, ¿qué hago?",
+    "Me quedan 500 kcal para la cena, ¿qué como?",
+    "¿Cómo vengo esta semana?",
+    "¿Sirve la creatina? ¿Es segura o hace mal a los riñones?",
+    "¿Cuánta proteína conviene en cada comida y cada cuánto?",
+    "¿Cuánta agua tengo que tomar cuando entreno?",
+    "¿Es mejor comer antes o después de entrenar? ¿Hay una ventana de 30 minutos?",
+    "Tengo hipotiroidismo y tomo levotiroxina. ¿Puedo tomar creatina y un pre-entreno con cafeína?",
+    "¿Cuántas series por semana tengo que hacer para pecho?",
+    "¿Cuánto tengo que descansar entre series?",
+    "¿Cuántas horas tengo que dormir?",
+    "quiero estar marcado y grandote, me hacés una rutina por cada día que entreno? entreno lunes, miércoles y viernes 2 horas",
+    "qué puedo comer para llegar a mis macros sin que sea repetitivo?",
+    "cuánto debería dormir?",
+    "es verdad que necesito prote justo después de entrenar?",
+    "me sirve o necesito creatina?",
+    "necesito comprar proteína?",
+    "cuánto tiempo debería entrenar por semana si quiero algo desafiante?",
+    "está bien ir corriendo al gym?",
+    "qué pasa si no llego a los pasos de la OMS?"
+  ],
+  "contexto": {
+    "perfil": {
+      "sexo": "hombre",
+      "edad": 24,
+      "alturaCm": 180,
+      "pesoKg": 78,
+      "objetivoPeso": "bajar",
+      "objetivo": "hipertrofia",
+      "diasEntrenoPorSemana": 3,
+      "kcalObjetivo": 1748
+    },
+    "ultimos7Dias": [
+      {
+        "fecha": "2026-11-19",
+        "kcal": 1820,
+        "proteinas": 74,
+        "carbos": 235,
+        "grasas": 64,
+        "comidas": ["Café con leche y tostadas", "Fideos con tuco", "Sándwich de jamón y queso", "Banana"],
+        "pasos": 6800
+      },
+      {
+        "fecha": "2026-11-20",
+        "kcal": 1910,
+        "proteinas": 78,
+        "carbos": 250,
+        "grasas": 66,
+        "comidas": ["Mate con galletitas", "Milanesa con puré", "Yogur con cereales", "Pizza (2 porciones)"],
+        "entrenos": [{ "nombre": "Full body A", "ejercicios": 7, "duracionMin": 115 }],
+        "pasos": 8900
+      },
+      {
+        "fecha": "2026-11-21",
+        "kcal": 2150,
+        "proteinas": 72,
+        "carbos": 270,
+        "grasas": 85,
+        "comidas": ["Medialunas", "Hamburguesa con papas", "Helado"],
+        "pasos": 4200
+      },
+      {
+        "fecha": "2026-11-22",
+        "kcal": 1980,
+        "proteinas": 80,
+        "carbos": 210,
+        "grasas": 82,
+        "comidas": ["Café con leche", "Asado con ensalada", "Empanadas (2)"],
+        "pasos": 3900
+      },
+      {
+        "fecha": "2026-11-23",
+        "kcal": 1760,
+        "proteinas": 76,
+        "carbos": 225,
+        "grasas": 58,
+        "comidas": ["Tostadas con queso crema", "Arroz con pollo", "Fruta", "Tarta de verdura"],
+        "entrenos": [{ "nombre": "Full body B", "ejercicios": 7, "duracionMin": 120 }],
+        "pasos": 9400
+      },
+      {
+        "fecha": "2026-11-24",
+        "kcal": 1700,
+        "proteinas": 70,
+        "carbos": 220,
+        "grasas": 55,
+        "comidas": ["Mate con galletitas", "Ñoquis con salsa", "Sándwich de miga (3)"],
+        "pasos": 5600
+      },
+      {
+        "fecha": "2026-11-25",
+        "kcal": 1840,
+        "proteinas": 79,
+        "carbos": 240,
+        "grasas": 60,
+        "comidas": ["Avena con leche", "Fideos con atún", "Yogur", "Pollo al horno con papas"],
+        "entrenos": [{ "nombre": "Full body A", "ejercicios": 7, "duracionMin": 118 }],
+        "pasos": 8700
+      }
+    ],
+    "rutinas": []
+  }
+}
