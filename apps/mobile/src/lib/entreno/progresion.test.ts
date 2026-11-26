@@ -132,9 +132,9 @@ describe('textoProgresion', () => {
   const haceUnaSemana = new Date(2026, 10, 18, 18, 0);
 
   test('completo: sugiere subir', () => {
-    expect(textoProgresion({ fecha: haceUnaSemana, ejercicio: hecho(series(12, 10, 10, 10)) }, 'mancuernas', ahora)).toBe(
-      'La semana pasada: 3×10 con 12 kg. Probá 14 kg.',
-    );
+    expect(
+      textoProgresion({ fecha: haceUnaSemana, ejercicio: hecho(series(12, 10, 10, 10)) }, 'mancuernas', ahora),
+    ).toBe('La semana pasada: 3×10 con 12 kg. Probá 14 kg.');
   });
 
   test('incompleto: mismo peso', () => {
@@ -144,12 +144,12 @@ describe('textoProgresion', () => {
   });
 
   test('peso corporal: habla de repeticiones', () => {
-    expect(textoProgresion({ fecha: haceUnaSemana, ejercicio: hecho(series(null, 10, 10, 10)) }, 'peso-corporal', ahora)).toBe(
-      'La semana pasada: 3×10. Completaste todo: probá sumar una repetición.',
-    );
-    expect(textoProgresion({ fecha: haceUnaSemana, ejercicio: hecho(series(null, 10, 7), 3) }, 'peso-corporal', ahora)).toBe(
-      'La semana pasada: 2 series (10, 7). Buscá completar 3×10.',
-    );
+    expect(
+      textoProgresion({ fecha: haceUnaSemana, ejercicio: hecho(series(null, 10, 10, 10)) }, 'peso-corporal', ahora),
+    ).toBe('La semana pasada: 3×10. Completaste todo: probá sumar una repetición.');
+    expect(
+      textoProgresion({ fecha: haceUnaSemana, ejercicio: hecho(series(null, 10, 7), 3) }, 'peso-corporal', ahora),
+    ).toBe('La semana pasada: 2 series (10, 7). Buscá completar 3×10.');
   });
 
   test('sin historial no hay aviso', () => {
@@ -158,7 +158,9 @@ describe('textoProgresion', () => {
   });
 
   test('en tramos: lo hecho en negrita y el peso nuevo destacado', () => {
-    expect(partesProgresion({ fecha: haceUnaSemana, ejercicio: hecho(series(12, 10, 10, 10)) }, 'mancuernas', ahora)).toEqual([
+    expect(
+      partesProgresion({ fecha: haceUnaSemana, ejercicio: hecho(series(12, 10, 10, 10)) }, 'mancuernas', ahora),
+    ).toEqual([
       { texto: 'La semana pasada: ', estilo: 'normal' },
       { texto: '3×10 con 12 kg', estilo: 'fuerte' },
       { texto: '. Probá ', estilo: 'normal' },
