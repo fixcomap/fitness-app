@@ -5,6 +5,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { leerHistorialGuardado, type RegistroDia } from './actividad/historial';
 import { leerConfiguracion, type Configuracion } from './configuracion';
 import { leerArmadaGuardada, leerEnCursoGuardada, leerSesionesGuardadas } from './entreno/historial';
+import { leerRutinasGuardadas, type Rutina } from './entreno/rutinas';
 import type { SesionArmada, SesionEnCurso, SesionGuardada } from './entreno/tipos';
 import { leerCargasGuardadas, type CargaPasos } from './pasosManuales';
 import { leerReportesGuardados, type VideoReportado } from './videosReportados';
@@ -16,6 +17,7 @@ const CLAVE_VIDEOS_REPORTADOS = 'videosReportados:v1';
 const CLAVE_SESION_ARMADA = 'sesionArmada:v1';
 const CLAVE_SESION_EN_CURSO = 'sesionEnCurso:v1';
 const CLAVE_HISTORIAL_ENTRENO = 'historialEntreno:v1';
+const CLAVE_RUTINAS = 'rutinas:v1';
 
 async function leerJson(clave: string): Promise<unknown> {
   try {
@@ -82,4 +84,12 @@ export async function leerHistorialEntreno(): Promise<SesionGuardada[]> {
 
 export async function guardarHistorialEntreno(historial: readonly SesionGuardada[]): Promise<void> {
   await AsyncStorage.setItem(CLAVE_HISTORIAL_ENTRENO, JSON.stringify(historial));
+}
+
+export async function leerRutinas(): Promise<Rutina[]> {
+  return leerRutinasGuardadas(await leerJson(CLAVE_RUTINAS));
+}
+
+export async function guardarRutinas(rutinas: readonly Rutina[]): Promise<void> {
+  await AsyncStorage.setItem(CLAVE_RUTINAS, JSON.stringify(rutinas));
 }

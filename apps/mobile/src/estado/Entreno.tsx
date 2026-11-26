@@ -1,6 +1,6 @@
 // Estado del entreno compartido por todas las pantallas: la sesión armada de hoy,
-// la sesión en curso (se guarda en cada cambio, así se retoma si se cierra la app)
-// y el historial de sesiones terminadas.
+// la sesión en curso (se guarda en cada cambio, así se retoma si se cierra la app),
+// el historial de sesiones terminadas y las rutinas.
 import * as Haptics from 'expo-haptics';
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
 import { AppState } from 'react-native';
@@ -9,15 +9,25 @@ import { buscarEjercicioPorId } from '../data/ejercicios';
 import type { Ejercicio } from '../data/tipos';
 import {
   guardarHistorialEntreno,
+  guardarRutinas,
   guardarSesionArmada,
   guardarSesionEnCurso,
   leerHistorialEntreno,
+  leerRutinas,
   leerSesionArmada,
   leerSesionEnCurso,
 } from '../lib/almacenamiento';
 import { cancelarAvisoDescanso, pedirPermisoAvisos, programarAvisoDescanso } from '../lib/avisoDescanso';
 import { agregarAlHistorial, ordenarHistorial } from '../lib/entreno/historial';
 import { duracionMs, kcalEntreno } from '../lib/entreno/resumen';
+import {
+  asignarDia as asignarDiaA,
+  borrarRutina as borrarDeLasRutinas,
+  guardarRutina as guardarEnLasRutinas,
+  planesDeRutina,
+  type DiaSemana,
+  type Rutina,
+} from '../lib/entreno/rutinas';
 import {
   agregarALaSesion,
   armadaDeHoy,
@@ -42,11 +52,17 @@ export interface EntrenoValor {
   ejerciciosArmados: Ejercicio[];
   enCurso: SesionEnCurso | null;
   historial: SesionGuardada[];
+  rutinas: Rutina[];
   agregar: (ejercicioId: string) => void;
   quitar: (ejercicioId: string) => void;
   mover: (indice: number, delta: number) => void;
   // Arma la sesión en curso con los ejercicios de la armada. false si no hay ninguno.
   empezar: () => boolean;
+  // Arma la sesión en curso con la rutina. false si no tiene ejercicios del catálogo.
+  empezarRutina: (rutina: Rutina) => boolean;
+  guardarRutina: (rutina: Rutina) => void;
+  borrarRutina: (id: string) => void;
+  asignarDia: (rutinaId: string, dia: DiaSemana) => void;
   actualizar: (cambio: (sesion: SesionEnCurso) => SesionEnCurso) => void;
   // Guarda la sesión en el historial y devuelve lo guardado (null si no había sesión).
   terminar: () => SesionGuardada | null;
@@ -60,15 +76,17 @@ export function ProveedorEntreno({ children }: { children: ReactNode }) {
   const [armada, setArmada] = useState<SesionArmada>(() => sesionVacia(new Date()));
   const [enCurso, setEnCurso] = useState<SesionEnCurso | null>(null);
   const [historial, setHistorial] = useState<SesionGuardada[]>([]);
+  const [rutinas, setRutinas] = useState<Rutina[]>([]);
   const [listo, setListo] = useState(false);
 
   useEffect(() => {
     let vigente = true;
-    Promise.all([leerSesionArmada(), leerSesionEnCurso(), leerHistorialEntreno()]).then(([a, c, h]) => {
+    Promise.all([leerSesionArmada(), leerSesionEnCurso(), leerHistorialEntreno(), leerRutinas()]).then(([a, c, h, r]) => {
       if (!vigente) return;
       setArmada(armadaDeHoy(a, new Date()));
       setEnCurso(c);
       setHistorial(ordenarHistorial(h));
+      setRutinas(r);
       setListo(true);
     });
     return () => {
@@ -86,6 +104,9 @@ export function ProveedorEntreno({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (listo) guardarHistorialEntreno(historial).catch(() => {});
   }, [historial, listo]);
+  useEffect(() => {
+    if (listo) guardarRutinas(rutinas).catch(() => {});
+  }, [rutinas, listo]);
 
   // Fin del descanso: notificación programada por si la app pasa a segundo plano y,
   // con la app abierta, vibración al llegar a 0. El descanso no se borra al terminar:
@@ -127,6 +148,21 @@ export function ProveedorEntreno({ children }: { children: ReactNode }) {
     return true;
   }, [ejerciciosArmados, historial, perfil.objetivo]);
 
+  const empezarRutina = useCallback(
+    (rutina: Rutina) => {
+      const planes = planesDeRutina(rutina, buscarEjercicioPorId);
+      if (planes.length === 0) return false;
+      setEnCurso((actual) => actual ?? empezarSesion(planes, historial, new Date(), nuevoId(), rutina.nombre));
+      pedirPermisoAvisos();
+      return true;
+    },
+    [historial],
+  );
+
+  const guardarRutina = useCallback((rutina: Rutina) => setRutinas((r) => guardarEnLasRutinas(r, rutina)), []);
+  const borrarRutina = useCallback((id: string) => setRutinas((r) => borrarDeLasRutinas(r, id)), []);
+  const asignarDia = useCallback((id: string, dia: DiaSemana) => setRutinas((r) => asignarDiaA(r, id, dia)), []);
+
   const actualizar = useCallback((cambio: (s: SesionEnCurso) => SesionEnCurso) => {
     setEnCurso((s) => (s ? cambio(s) : s));
   }, []);
@@ -153,15 +189,38 @@ export function ProveedorEntreno({ children }: { children: ReactNode }) {
       ejerciciosArmados,
       enCurso,
       historial,
+      rutinas,
       agregar,
       quitar,
       mover,
       empezar,
+      empezarRutina,
+      guardarRutina,
+      borrarRutina,
+      asignarDia,
       actualizar,
       terminar,
       descartar,
     }),
-    [listo, armada, ejerciciosArmados, enCurso, historial, agregar, quitar, mover, empezar, actualizar, terminar, descartar],
+    [
+      listo,
+      armada,
+      ejerciciosArmados,
+      enCurso,
+      historial,
+      rutinas,
+      agregar,
+      quitar,
+      mover,
+      empezar,
+      empezarRutina,
+      guardarRutina,
+      borrarRutina,
+      asignarDia,
+      actualizar,
+      terminar,
+      descartar,
+    ],
   );
 
   return <Contexto.Provider value={valor}>{children}</Contexto.Provider>;
