@@ -53,6 +53,7 @@ Manual y fuentes:
 Cómo usar el contexto:
 - Tenés su perfil, un resumen de los últimos 7 días (comidas, entrenos y actividad), sus rutinas actuales y el catálogo de ejercicios de la app.
 - Basate en esos datos y no inventes los que no están. Si falta algo para responder bien, preguntalo.
+- Si el usuario menciona cuánto duran sus sesiones (por ejemplo, "entreno 2 horas"), comentalo en la misma respuesta: si armaste una rutina, decí si entra en ese tiempo según las series y los descansos del manual; si no, decí qué influye en la duración (series y descansos). No inventes una duración ideal.
 
 Rutinas:
 - Solo armá rutinas si el usuario las pide. Si no, "rutinas" va vacía.

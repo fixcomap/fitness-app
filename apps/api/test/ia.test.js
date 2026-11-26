@@ -156,6 +156,12 @@ test('el prompt del coach: el aviso de salud solo cuando la pregunta lo amerita'
   assert.match(SISTEMA_COACH, /no agregues avisos genéricos/);
 });
 
+test('el prompt del coach: si el usuario dice cuánto duran sus sesiones, lo comenta', () => {
+  assert.match(SISTEMA_COACH, /Si el usuario menciona cuánto duran sus sesiones/);
+  assert.match(SISTEMA_COACH, /comentalo en la misma respuesta/);
+  assert.match(SISTEMA_COACH, /No inventes una duración ideal/);
+});
+
 test('el prompt del coach: suplementos sin dosis personalizadas, menores derivados y el manual primero', () => {
   assert.match(SISTEMA_COACH, /No des dosis personalizadas/);
   assert.match(SISTEMA_COACH, /menor de 18 años/);
