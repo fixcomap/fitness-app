@@ -7,6 +7,14 @@ import { ALIMENTOS_CASEROS, type Alimento } from './alimentos';
 import {
   alimentoDesdeOff,
   buscarGuardados,
+  duracionCacheCodigo,
+  errorLimite,
+  esErrorLimite,
+  esRespuestaLimite,
+  guardarCache,
+  leerCache,
+  MAXIMO_CACHE,
+  type CacheOff,
   buscarPorCodigo,
   codigoValido,
   combinarResultados,
@@ -191,5 +199,45 @@ describe('productos guardados', () => {
     const [casera] = ALIMENTOS_CASEROS;
     expect(leerProductosGuardados([a, { ...b, kcal: null }, casera])).toEqual([a] as Alimento[]);
     expect(leerProductosGuardados('x')).toEqual([]);
+  });
+});
+
+describe('límites de Open Food Facts', () => {
+  test('respuestas de corte', () => {
+    expect(esRespuestaLimite(429, '')).toBe(true);
+    expect(esRespuestaLimite(503, '')).toBe(true);
+    expect(esRespuestaLimite(200, '\n<html><h1>Too many requests</h1>')).toBe(true);
+    expect(esRespuestaLimite(200, '{"status":1}')).toBe(false);
+    expect(esRespuestaLimite(404, '{"status":0}')).toBe(false);
+  });
+
+  test('error de límite', () => {
+    expect(esErrorLimite(errorLimite())).toBe(true);
+    expect(esErrorLimite(new Error('Network request failed'))).toBe(false);
+    expect(esErrorLimite('ErrorLimiteOff')).toBe(false);
+  });
+
+  test('caché: vence y se renueva', () => {
+    let cache: CacheOff<string> = new Map();
+    cache = guardarCache(cache, 'a', 'uno', 1000);
+    expect(leerCache(cache, 'a', 999)).toBe('uno');
+    expect(leerCache(cache, 'a', 1000)).toBeUndefined();
+    expect(leerCache(cache, 'b', 0)).toBeUndefined();
+    cache = guardarCache(cache, 'a', 'dos', 2000);
+    expect(leerCache(cache, 'a', 1500)).toBe('dos');
+  });
+
+  test('caché: a lo sumo el máximo, se van las más viejas', () => {
+    let cache: CacheOff<number> = new Map();
+    for (let i = 0; i <= MAXIMO_CACHE; i++) cache = guardarCache(cache, `c${i}`, i, 10);
+    expect(cache.size).toBe(MAXIMO_CACHE);
+    expect(leerCache(cache, 'c0', 0)).toBeUndefined();
+    expect(leerCache(cache, `c${MAXIMO_CACHE}`, 0)).toBe(MAXIMO_CACHE);
+  });
+
+  test('lo que no se encontró dura menos', () => {
+    expect(duracionCacheCodigo({ tipo: 'no-encontrado' })).toBeLessThan(
+      duracionCacheCodigo(leerRespuestaProducto(productoOk)),
+    );
   });
 });

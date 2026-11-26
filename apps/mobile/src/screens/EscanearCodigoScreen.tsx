@@ -10,7 +10,7 @@ import { useComidas } from '../estado/Comidas';
 import { subtituloAlimento, type Alimento } from '../lib/comida/alimentos';
 import { pedirProducto } from '../lib/comida/clienteOff';
 import { textoAgregarA, type Comida } from '../lib/comida/diario';
-import { buscarPorCodigo, codigoValido } from '../lib/comida/openFoodFacts';
+import { buscarPorCodigo, codigoValido, esErrorLimite } from '../lib/comida/openFoodFacts';
 import { cantidadInicial, nutrientesCantidad, type Cantidad } from '../lib/comida/porciones';
 import { formatearNumero } from '../lib/formato';
 import { colores, radios } from '../theme/tema';
@@ -19,7 +19,7 @@ type Lectura =
   | { tipo: 'buscando'; codigo: string }
   | { tipo: 'encontrado'; codigo: string; alimento: Alimento; cantidad: Cantidad }
   | { tipo: 'no-encontrado'; codigo: string; sinKcal: boolean }
-  | { tipo: 'sin-conexion'; codigo: string };
+  | { tipo: 'error'; codigo: string; limite: boolean }; // sin conexión, o Open Food Facts cortó por muchos pedidos
 
 interface EscanearCodigoScreenProps {
   dia: string;
@@ -63,8 +63,8 @@ export function EscanearCodigoScreen({ dia, comida, onCerrar, onBuscarPorNombre,
           setLectura({ tipo: 'no-encontrado', codigo, sinKcal: r.tipo === 'sin-kcal' });
         }
       })
-      .catch(() => {
-        if (!control.signal.aborted) setLectura({ tipo: 'sin-conexion', codigo });
+      .catch((error: unknown) => {
+        if (!control.signal.aborted) setLectura({ tipo: 'error', codigo, limite: esErrorLimite(error) });
       });
   };
 
@@ -181,10 +181,16 @@ export function EscanearCodigoScreen({ dia, comida, onCerrar, onBuscarPorNombre,
             </>
           )}
 
-          {lectura.tipo === 'sin-conexion' && (
+          {lectura.tipo === 'error' && (
             <>
-              <Text style={styles.tituloTarjeta}>No pudimos conectarnos</Text>
-              <Text style={styles.texto}>Revisá tu conexión a internet y probá de nuevo.</Text>
+              <Text style={styles.tituloTarjeta}>
+                {lectura.limite ? 'Probá de nuevo en un momento' : 'No pudimos conectarnos'}
+              </Text>
+              <Text style={styles.texto}>
+                {lectura.limite
+                  ? 'Open Food Facts está recibiendo muchos pedidos.'
+                  : 'Revisá tu conexión a internet y probá de nuevo.'}
+              </Text>
               <Pressable onPress={() => buscar(lectura.codigo)} style={styles.boton} accessibilityRole="button">
                 <Text style={styles.textoBoton}>Reintentar</Text>
               </Pressable>

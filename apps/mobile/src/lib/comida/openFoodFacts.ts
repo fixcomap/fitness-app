@@ -185,3 +185,54 @@ export function leerProductosGuardados(datos: unknown): Alimento[] {
     .filter((a): a is Alimento => a !== null && a.origen === 'envasado')
     .slice(0, MAXIMO_PRODUCTOS_GUARDADOS);
 }
+
+// ── Límites de Open Food Facts ──
+// Pide no hacer muchos pedidos seguidos: si corta, se espera un rato antes de volver a pedir,
+// y lo ya pedido se guarda un tiempo en memoria.
+
+export const NOMBRE_ERROR_LIMITE = 'ErrorLimiteOff';
+
+export function errorLimite(): Error {
+  const error = new Error('Open Food Facts recibió demasiados pedidos');
+  error.name = NOMBRE_ERROR_LIMITE;
+  return error;
+}
+
+export function esErrorLimite(error: unknown): boolean {
+  return error instanceof Error && error.name === NOMBRE_ERROR_LIMITE;
+}
+
+// 429 (demasiados pedidos) o 503 (no da abasto); a veces corta con una página HTML en vez de JSON.
+export function esRespuestaLimite(status: number, cuerpo: string): boolean {
+  return status === 429 || status === 503 || cuerpo.trimStart().startsWith('<');
+}
+
+// Después de un corte, no se pide nada por este tiempo.
+export const PAUSA_LIMITE_MS = 30 * 1000;
+
+const HORA_MS = 60 * 60 * 1000;
+// Lo encontrado vale un día; lo que no está o no tiene kcal, una hora (alguien lo puede completar).
+export function duracionCacheCodigo(r: ResultadoCodigo): number {
+  return r.tipo === 'encontrado' ? 24 * HORA_MS : HORA_MS;
+}
+export const DURACION_CACHE_BUSQUEDA_MS = 10 * 60 * 1000;
+export const MAXIMO_CACHE = 100;
+
+export type CacheOff<T> = ReadonlyMap<string, { valor: T; vence: number }>;
+
+export function leerCache<T>(cache: CacheOff<T>, clave: string, ahora: number): T | undefined {
+  const entrada = cache.get(clave);
+  return entrada && entrada.vence > ahora ? entrada.valor : undefined;
+}
+
+// Agrega (o renueva) una entrada; si se pasa del máximo, saca las más viejas.
+export function guardarCache<T>(cache: CacheOff<T>, clave: string, valor: T, vence: number): CacheOff<T> {
+  const nuevo = new Map(cache);
+  nuevo.delete(clave);
+  nuevo.set(clave, { valor, vence });
+  for (const vieja of nuevo.keys()) {
+    if (nuevo.size <= MAXIMO_CACHE) break;
+    nuevo.delete(vieja);
+  }
+  return nuevo;
+}

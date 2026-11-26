@@ -8,19 +8,20 @@ import { useComidas } from '../estado/Comidas';
 import { buscarCaseras, normalizar, subtituloAlimento, type Alimento } from '../lib/comida/alimentos';
 import { pedirBusqueda } from '../lib/comida/clienteOff';
 import { alimentosRecientes, NOMBRE_COMIDA, textoAgregarA, type Comida } from '../lib/comida/diario';
-import { buscarGuardados, combinarResultados } from '../lib/comida/openFoodFacts';
+import { buscarGuardados, combinarResultados, esErrorLimite } from '../lib/comida/openFoodFacts';
 import { cantidadInicial, type Cantidad } from '../lib/comida/porciones';
 import { colores, radios } from '../theme/tema';
 
 // Se busca en Open Food Facts después de dejar de escribir un rato, y desde 3 letras.
-const ESPERA_BUSQUEDA_MS = 500;
+const ESPERA_BUSQUEDA_MS = 400;
 const MINIMO_LETRAS = 3;
 
 type EstadoEnvasados =
   | { tipo: 'nada' }
   | { tipo: 'buscando'; consulta: string }
   | { tipo: 'listo'; consulta: string; argentina: Alimento[]; mundo: Alimento[] }
-  | { tipo: 'sin-conexion'; consulta: string };
+  | { tipo: 'sin-conexion'; consulta: string }
+  | { tipo: 'limite'; consulta: string }; // Open Food Facts cortó por muchos pedidos
 
 interface BuscarAlimentoScreenProps {
   dia: string;
@@ -39,6 +40,7 @@ export function BuscarAlimentoScreen({ dia, comida, onVolver, onEscanear, onCrea
   const [pestana, setPestana] = useState<'resultados' | 'recientes'>('resultados');
   const [elegido, setElegido] = useState<{ alimento: Alimento; cantidad: Cantidad } | null>(null);
   const [envasados, setEnvasados] = useState<EstadoEnvasados>({ tipo: 'nada' });
+  const [intento, setIntento] = useState(0); // "Reintentar" vuelve a buscar
 
   const consulta = normalizar(texto);
   // Los propios van primero: si alguien lo creó, es lo que busca.
@@ -55,15 +57,16 @@ export function BuscarAlimentoScreen({ dia, comida, onVolver, onEscanear, onCrea
       setEnvasados({ tipo: 'buscando', consulta });
       pedirBusqueda(consulta, control.signal)
         .then((r) => setEnvasados({ tipo: 'listo', consulta, ...r }))
-        .catch(() => {
-          if (!control.signal.aborted) setEnvasados({ tipo: 'sin-conexion', consulta });
+        .catch((error: unknown) => {
+          if (!control.signal.aborted)
+            setEnvasados({ tipo: esErrorLimite(error) ? 'limite' : 'sin-conexion', consulta });
         });
     }, ESPERA_BUSQUEDA_MS);
     return () => {
       clearTimeout(espera);
       control.abort();
     };
-  }, [consulta]);
+  }, [consulta, intento]);
 
   // Sólo vale lo que corresponde a lo que está escrito ahora.
   const actual = consulta.length >= MINIMO_LETRAS && 'consulta' in envasados && envasados.consulta === consulta;
@@ -146,8 +149,15 @@ export function BuscarAlimentoScreen({ dia, comida, onVolver, onEscanear, onCrea
         contentContainerStyle={{ paddingBottom: insets.bottom + 24 }}
         renderItem={({ item }) => <Fila alimento={item} onPress={() => abrir(item)} />}
         ListHeaderComponent={
-          pestana === 'resultados' && actual && envasados.tipo === 'sin-conexion' ? (
+          pestana !== 'resultados' || !actual ? undefined : envasados.tipo === 'sin-conexion' ? (
             <Text style={styles.aviso}>Sin conexión: mostramos las comidas caseras y los productos que ya usaste.</Text>
+          ) : envasados.tipo === 'limite' ? (
+            <Pressable onPress={() => setIntento((i) => i + 1)} accessibilityRole="button">
+              <Text style={styles.aviso}>
+                Open Food Facts está recibiendo muchos pedidos. Probá de nuevo en un momento.{' '}
+                <Text style={styles.reintentar}>Reintentar</Text>
+              </Text>
+            </Pressable>
           ) : undefined
         }
         ListFooterComponent={
@@ -176,7 +186,7 @@ export function BuscarAlimentoScreen({ dia, comida, onVolver, onEscanear, onCrea
               ? 'Acá aparecen los últimos alimentos que cargaste.'
               : consulta.length === 0
                 ? 'Escribí qué comiste, o escaneá el código del envase.'
-                : actual && envasados.tipo !== 'buscando'
+                : actual && envasados.tipo === 'listo'
                   ? 'No encontramos nada con ese nombre.'
                   : ''}
           </Text>
@@ -278,6 +288,7 @@ const styles = StyleSheet.create({
   },
   crear: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 16 },
   textoCrear: { color: colores.acento, fontSize: 16, fontWeight: '800' },
+  reintentar: { color: colores.texto, fontWeight: '800', textDecorationLine: 'underline' },
   aviso: { color: colores.acentoSuave, fontSize: 13, paddingVertical: 10 },
   buscando: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, paddingVertical: 16 },
   textoVacio: { color: colores.textoSecundario, fontSize: 14, textAlign: 'center', paddingVertical: 24 },
