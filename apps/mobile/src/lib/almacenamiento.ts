@@ -3,6 +3,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import { leerHistorialGuardado, type RegistroDia } from './actividad/historial';
+import { leerDiarioGuardado, type RegistroComida } from './comida/diario';
 import { leerConfiguracion, type Configuracion } from './configuracion';
 import { leerPerfilGuardado, type PerfilUsuario } from './perfil';
 import { leerArmadaGuardada, leerEnCursoGuardada, leerSesionesGuardadas } from './entreno/historial';
@@ -20,6 +21,7 @@ const CLAVE_SESION_EN_CURSO = 'sesionEnCurso:v1';
 const CLAVE_HISTORIAL_ENTRENO = 'historialEntreno:v1';
 const CLAVE_RUTINAS = 'rutinas:v1';
 const CLAVE_PERFIL = 'perfil:v1';
+const CLAVE_DIARIO_COMIDAS = 'diarioComidas:v1';
 
 async function leerJson(clave: string): Promise<unknown> {
   try {
@@ -103,4 +105,12 @@ export async function leerRutinas(): Promise<Rutina[]> {
 
 export async function guardarRutinas(rutinas: readonly Rutina[]): Promise<void> {
   await AsyncStorage.setItem(CLAVE_RUTINAS, JSON.stringify(rutinas));
+}
+
+export async function leerDiarioComidas(): Promise<RegistroComida[]> {
+  return leerDiarioGuardado(await leerJson(CLAVE_DIARIO_COMIDAS));
+}
+
+export async function guardarDiarioComidas(registros: readonly RegistroComida[]): Promise<void> {
+  await AsyncStorage.setItem(CLAVE_DIARIO_COMIDAS, JSON.stringify(registros));
 }
