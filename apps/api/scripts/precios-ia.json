@@ -17,6 +17,6 @@
     "claude-opus-5-5": { "entrada": 4.0, "salida": 20.0 },
     "claude-sonnet-5-5": { "entrada": 2.0, "salida": 10.0 },
     "claude-haiku-5-5": { "entrada": 0.1, "salida": 0.5, "_nota": "Hasta 100K tokens de entrada" },
-    "claude-opus-4-8": { "entrada": 5.0, "salida": 25.0, "_nota": "Respaldo si Opus 5.5 rechaza un pedido" }
+    "claude-opus-4-8": { "entrada": 5.0, "salida": 25.0 }
   }
 }

@@ -5,7 +5,7 @@ const USO = `Uso: node scripts/probar-ia.mjs <carpeta-de-fotos> --con <proveedor
 
   <carpeta-de-fotos>  carpeta con fotos .jpg (fuera del repo)
   --con               proveedor y modelo a probar; se puede repetir. Proveedores: gemini, claude,
-                      vertex-gemini, vertex-claude. Ej.: --con gemini:gemini-3.8-flash --con claude:claude-opus-5-5
+                      vertex-gemini, vertex-claude. Ej.: --con gemini:gemini-3.8-flash --con claude:claude-haiku-5-5
   --solo              probar solo las fotos o solo el coach`;
 
 // { carpeta, candidatos: [{ proveedor, modelo }], solo } o { error }.

@@ -14,7 +14,7 @@ const CON_CLAVE = { gemini: 'GEMINI_API_KEY', claude: 'ANTHROPIC_API_KEY' };
 // Modelos por defecto si no se indican IA_MODELO_FOTO / IA_MODELO_COACH.
 const MODELOS_POR_DEFECTO = {
   gemini: 'gemini-3.8-flash',
-  claude: 'claude-opus-5-5',
+  claude: 'claude-haiku-5-5',
 };
 
 const LIMITES_DIARIOS_POR_DEFECTO = { fotos: 10, mensajes: 30 };

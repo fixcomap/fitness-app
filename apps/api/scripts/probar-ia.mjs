@@ -2,7 +2,7 @@
 // Muestra, para cada uno: resultado, tiempo y costo estimado (tokens × precios-ia.json).
 // Llama a la IA de verdad (y gasta): no es un test.
 //
-//   node scripts/probar-ia.mjs ~/fotos-platos --con gemini:gemini-3.8-flash --con claude:claude-opus-5-5
+//   node scripts/probar-ia.mjs ~/fotos-platos --con gemini:gemini-3.8-flash --con claude:claude-haiku-5-5
 //
 // Las claves salen del .env de la raíz (GEMINI_API_KEY, ANTHROPIC_API_KEY). Vertex usa las credenciales
 // de gcloud (gcloud auth application-default login) e IA_VERTEX_PROYECTO.

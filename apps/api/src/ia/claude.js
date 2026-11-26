@@ -7,35 +7,22 @@ const { ErrorIa, historialDesdeUsuario } = require('./proveedor');
 const ESPERA_MS = 60 * 1000;
 const MAXIMO_TOKENS = 16000;
 
-// Si el modelo rechaza un pedido por sus filtros de seguridad (puede pasar con uno inocente),
-// el SDK lo reintenta con este otro modelo.
-const RESPALDO = {
-  'claude-opus-5-5': 'claude-opus-4-8',
-  'claude-opus-5': 'claude-opus-4-8',
-  'claude-fable-5-2': 'claude-opus-4-8',
-  'claude-sonnet-5-5': 'claude-sonnet-5',
-};
-
-// Devuelve una función modelo -> cliente (uno por modelo, por el respaldo).
+// Devuelve una función modelo -> cliente (el mismo para todos los modelos).
+// Sin respaldo: si el modelo rechaza el pedido, se devuelve el error (no se reintenta con otro modelo).
 function crearClientesClaude({ clave, vertex }) {
-  const { default: Anthropic, betaRefusalFallbackMiddleware } = require('@anthropic-ai/sdk');
-  const clientes = new Map();
-  return (modelo) => {
-    if (!clientes.has(modelo)) {
-      const respaldo = RESPALDO[modelo];
-      const opciones = {
-        timeout: ESPERA_MS,
-        maxRetries: 1,
-        middleware: respaldo ? [betaRefusalFallbackMiddleware([{ model: respaldo }])] : [],
-      };
+  const opciones = { timeout: ESPERA_MS, maxRetries: 1 };
+  let cliente;
+  return () => {
+    if (!cliente) {
       if (vertex) {
         const { AnthropicVertex } = require('@anthropic-ai/vertex-sdk');
-        clientes.set(modelo, new AnthropicVertex({ ...opciones, projectId: vertex.proyecto, region: vertex.region }));
+        cliente = new AnthropicVertex({ ...opciones, projectId: vertex.proyecto, region: vertex.region });
       } else {
-        clientes.set(modelo, new Anthropic({ ...opciones, apiKey: clave }));
+        const { default: Anthropic } = require('@anthropic-ai/sdk');
+        cliente = new Anthropic({ ...opciones, apiKey: clave });
       }
     }
-    return clientes.get(modelo);
+    return cliente;
   };
 }
 
@@ -104,4 +91,4 @@ function crearProveedorClaude({ clientePara, modeloFoto, modeloCoach, nombre = '
   };
 }
 
-module.exports = { RESPALDO, crearClientesClaude, crearProveedorClaude };
+module.exports = { crearClientesClaude, crearProveedorClaude };

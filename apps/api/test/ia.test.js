@@ -4,7 +4,7 @@ const assert = require('node:assert');
 const { leerConfigIa, MODELOS_POR_DEFECTO } = require('../src/ia/config');
 const { crearProveedor } = require('../src/ia');
 const { crearProveedorGemini } = require('../src/ia/gemini');
-const { crearProveedorClaude } = require('../src/ia/claude');
+const { crearClientesClaude, crearProveedorClaude } = require('../src/ia/claude');
 const { ErrorIa, historialDesdeUsuario } = require('../src/ia/proveedor');
 const { MINIMO_KCAL, SISTEMA_COACH, SISTEMA_FOTO, textoFoto } = require('../src/ia/prompts');
 
@@ -31,6 +31,26 @@ test('gemini con clave usa los modelos por defecto o los de las variables', () =
   assert.strictEqual(c.modeloFoto, MODELOS_POR_DEFECTO.gemini);
   assert.strictEqual(c.modeloCoach, 'otro');
   assert.strictEqual(c.vertex, null);
+});
+
+test('Claude usa Haiku por defecto para la foto y el coach; Opus solo si se elige por variable', () => {
+  const porDefecto = leerConfigIa({ IA_PROVEEDOR: 'claude', ANTHROPIC_API_KEY: 'x' });
+  assert.strictEqual(porDefecto.modeloFoto, 'claude-haiku-5-5');
+  assert.strictEqual(porDefecto.modeloCoach, 'claude-haiku-5-5');
+  const vertex = leerConfigIa({ IA_PROVEEDOR: 'vertex-claude', IA_VERTEX_PROYECTO: 'p' });
+  assert.strictEqual(vertex.modeloFoto, 'claude-haiku-5-5');
+  assert.strictEqual(vertex.modeloCoach, 'claude-haiku-5-5');
+
+  const elegido = leerConfigIa({ IA_PROVEEDOR: 'claude', ANTHROPIC_API_KEY: 'x', IA_MODELO_COACH: 'claude-opus-5-5' });
+  assert.strictEqual(elegido.modeloFoto, 'claude-haiku-5-5');
+  assert.strictEqual(elegido.modeloCoach, 'claude-opus-5-5');
+});
+
+test('Claude sin reintento con otro modelo: un solo cliente, sin middleware de respaldo', () => {
+  const clientePara = crearClientesClaude({ clave: 'x', vertex: null });
+  const cliente = clientePara('claude-opus-5-5');
+  assert.strictEqual(clientePara('claude-haiku-5-5'), cliente);
+  assert.deepStrictEqual(cliente.middleware, []);
 });
 
 test('claude sin ANTHROPIC_API_KEY queda apagado sin romper', () => {
