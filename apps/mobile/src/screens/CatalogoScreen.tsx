@@ -1,7 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useMemo, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Chip } from '../components/Chip';
 import { MapaMuscular } from '../components/MapaMuscular';
@@ -22,15 +22,32 @@ import { colores, espacios, radios } from '../theme/tema';
 
 const OPCIONES_EQUIPO: FiltroEquipo[] = ['todos', ...EQUIPOS];
 
+// Modo selección (desde el editor de rutinas): se tildan ejercicios y se agregan juntos.
+export interface SeleccionCatalogo {
+  elegidos: ReadonlySet<string>;
+  yaAgregados: ReadonlySet<string>; // los que ya están en la rutina (no se pueden elegir)
+  onAlternar: (ejercicio: Ejercicio) => void;
+  onCancelar: () => void;
+  onListo: () => void;
+}
+
 interface CatalogoScreenProps {
   onAbrirEjercicio?: (ejercicio: Ejercicio) => void;
-  onAbrirHistorial?: () => void;
+  onAbrirRutinas?: () => void;
   // Estado de la sesión de hoy, para la barra de abajo.
   sesion?: { ejercicios: number; enCurso: boolean };
   onAbrirSesion?: () => void;
+  seleccion?: SeleccionCatalogo;
 }
 
-export function CatalogoScreen({ onAbrirEjercicio, onAbrirHistorial, sesion, onAbrirSesion }: CatalogoScreenProps) {
+export function CatalogoScreen({
+  onAbrirEjercicio,
+  onAbrirRutinas,
+  sesion,
+  onAbrirSesion,
+  seleccion,
+}: CatalogoScreenProps) {
+  const insets = useSafeAreaInsets();
   const [filtros, setFiltros] = useState<Filtros>(FILTROS_VACIOS);
   const [abiertos, setAbiertos] = useState<ReadonlySet<Grupo>>(new Set());
 
@@ -42,7 +59,7 @@ export function CatalogoScreen({ onAbrirEjercicio, onAbrirHistorial, sesion, onA
   const filtrando = hayFiltrosActivos(filtros);
   const musculoMarcado = useMemo(() => (filtros.musculo ? [filtros.musculo] : []), [filtros.musculo]);
 
-  const mostrarBarra = !!sesion && !!onAbrirSesion && (sesion.enCurso || sesion.ejercicios > 0);
+  const mostrarBarra = !seleccion && !!sesion && !!onAbrirSesion && (sesion.enCurso || sesion.ejercicios > 0);
 
   const cambiar = (cambios: Partial<Filtros>) => setFiltros((f) => ({ ...f, ...cambios }));
 
@@ -58,24 +75,37 @@ export function CatalogoScreen({ onAbrirEjercicio, onAbrirHistorial, sesion, onA
     });
 
   return (
-    <SafeAreaView style={styles.pantalla} edges={['top']}>
+    <View style={[styles.pantalla, { paddingTop: insets.top }]}>
       <ScrollView
-        contentContainerStyle={[styles.contenido, mostrarBarra && styles.contenidoConBarra]}
+        contentContainerStyle={[styles.contenido, (mostrarBarra || seleccion) && styles.contenidoConBarra]}
         keyboardShouldPersistTaps="handled"
       >
-        <View style={styles.encabezado}>
-          <Text style={styles.titulo}>Entreno</Text>
-          {onAbrirHistorial && (
-            <Pressable
-              onPress={onAbrirHistorial}
-              style={({ pressed }) => [styles.botonRutinas, pressed && styles.presionado]}
-              accessibilityRole="button"
-            >
-              <Ionicons name="calendar-outline" size={16} color={colores.texto} />
-              <Text style={styles.textoRutinas}>Mis rutinas</Text>
+        {seleccion ? (
+          <View style={styles.encabezado}>
+            <Pressable onPress={seleccion.onCancelar} hitSlop={8} accessibilityRole="button">
+              <Text style={styles.textoCancelar}>Cancelar</Text>
             </Pressable>
-          )}
-        </View>
+            <Text style={styles.tituloSeleccion} accessibilityRole="header">
+              Agregar ejercicios
+            </Text>
+            {/* Mismo ancho que "Cancelar", para centrar el título. */}
+            <Text style={[styles.textoCancelar, styles.invisible]}>Cancelar</Text>
+          </View>
+        ) : (
+          <View style={styles.encabezado}>
+            <Text style={styles.titulo}>Entreno</Text>
+            {onAbrirRutinas && (
+              <Pressable
+                onPress={onAbrirRutinas}
+                style={({ pressed }) => [styles.botonRutinas, pressed && styles.presionado]}
+                accessibilityRole="button"
+              >
+                <Ionicons name="calendar-outline" size={16} color={colores.texto} />
+                <Text style={styles.textoRutinas}>Mis rutinas</Text>
+              </Pressable>
+            )}
+          </View>
+        )}
 
         <View style={styles.buscador}>
           <Ionicons name="search" size={18} color={colores.textoSecundario} />
@@ -148,28 +178,56 @@ export function CatalogoScreen({ onAbrirEjercicio, onAbrirHistorial, sesion, onA
               </Pressable>
 
               {abierto &&
-                ejercicios.map((e) => (
-                  <Pressable
-                    key={e.id}
-                    onPress={onAbrirEjercicio ? () => onAbrirEjercicio(e) : undefined}
-                    disabled={!onAbrirEjercicio}
-                    style={({ pressed }) => [styles.itemEjercicio, pressed && styles.presionado]}
-                    accessibilityRole="button"
-                  >
-                    <View style={styles.flex}>
-                      <Text style={styles.nombreEjercicio}>{e.nombre}</Text>
-                      <View style={styles.fila}>
-                        <Text style={styles.detalleEjercicio}>
-                          {NOMBRE_EQUIPO[e.equipo]} · {NOMBRE_MUSCULO[e.musculoPrincipal]}
-                        </Text>
-                        {filtros.musculo && trabajaComoSecundario(e, filtros.musculo) && (
-                          <Text style={styles.etiquetaSecundario}>también trabaja</Text>
-                        )}
+                ejercicios.map((e) => {
+                  const yaEsta = seleccion?.yaAgregados.has(e.id) ?? false;
+                  const elegido = seleccion?.elegidos.has(e.id) ?? false;
+                  const alTocar = seleccion
+                    ? () => seleccion.onAlternar(e)
+                    : onAbrirEjercicio
+                      ? () => onAbrirEjercicio(e)
+                      : undefined;
+                  return (
+                    <Pressable
+                      key={e.id}
+                      onPress={alTocar}
+                      disabled={!alTocar || yaEsta}
+                      style={({ pressed }) => [
+                        styles.itemEjercicio,
+                        pressed && styles.presionado,
+                        yaEsta && styles.yaAgregado,
+                      ]}
+                      accessibilityRole={seleccion ? 'checkbox' : 'button'}
+                      accessibilityState={seleccion ? { checked: elegido || yaEsta, disabled: yaEsta } : undefined}
+                    >
+                      <View style={styles.flex}>
+                        <Text style={styles.nombreEjercicio}>{e.nombre}</Text>
+                        <View style={styles.fila}>
+                          <Text style={styles.detalleEjercicio}>
+                            {NOMBRE_EQUIPO[e.equipo]} · {NOMBRE_MUSCULO[e.musculoPrincipal]}
+                          </Text>
+                          {filtros.musculo && trabajaComoSecundario(e, filtros.musculo) && (
+                            <Text style={styles.etiquetaSecundario}>también trabaja</Text>
+                          )}
+                        </View>
                       </View>
-                    </View>
-                    {onAbrirEjercicio && <Ionicons name="chevron-forward" size={18} color={colores.textoSecundario} />}
-                  </Pressable>
-                ))}
+                      {seleccion ? (
+                        yaEsta ? (
+                          <Text style={styles.detalleEjercicio}>Ya está</Text>
+                        ) : (
+                          <Ionicons
+                            name={elegido ? 'checkmark-circle' : 'ellipse-outline'}
+                            size={24}
+                            color={elegido ? colores.acento : colores.textoSecundario}
+                          />
+                        )
+                      ) : (
+                        onAbrirEjercicio && (
+                          <Ionicons name="chevron-forward" size={18} color={colores.textoSecundario} />
+                        )
+                      )}
+                    </Pressable>
+                  );
+                })}
             </View>
           );
         })}
@@ -192,7 +250,29 @@ export function CatalogoScreen({ onAbrirEjercicio, onAbrirHistorial, sesion, onA
           <Ionicons name="chevron-forward" size={18} color={colores.texto} />
         </Pressable>
       )}
-    </SafeAreaView>
+
+      {/* Modo selección: agregar los elegidos */}
+      {seleccion && (
+        <Pressable
+          onPress={seleccion.onListo}
+          disabled={seleccion.elegidos.size === 0}
+          style={({ pressed }) => [
+            styles.barraSesion,
+            styles.barraAgregar,
+            { bottom: Math.max(insets.bottom, espacios.s + 4) },
+            seleccion.elegidos.size === 0 && styles.barraApagada,
+            pressed && styles.barraPresionada,
+          ]}
+          accessibilityRole="button"
+        >
+          <Text style={styles.textoAgregar}>
+            {seleccion.elegidos.size === 0
+              ? 'Elegí ejercicios'
+              : `Agregar ${seleccion.elegidos.size} ${seleccion.elegidos.size === 1 ? 'ejercicio' : 'ejercicios'}`}
+          </Text>
+        </Pressable>
+      )}
+    </View>
   );
 }
 
@@ -214,6 +294,13 @@ const styles = StyleSheet.create({
     borderColor: colores.borde,
   },
   textoRutinas: { color: colores.texto, fontSize: 14, fontWeight: '700' },
+  textoCancelar: { color: colores.texto, fontSize: 16, fontWeight: '700' },
+  invisible: { opacity: 0 },
+  tituloSeleccion: { color: colores.texto, fontSize: 17, fontWeight: '800' },
+  barraAgregar: { justifyContent: 'center', paddingVertical: 18, borderRadius: radios.pill },
+  barraApagada: { backgroundColor: colores.tarjetaElevada },
+  textoAgregar: { color: colores.texto, fontSize: 17, fontWeight: '800' },
+  yaAgregado: { opacity: 0.5 },
   barraSesion: {
     position: 'absolute',
     left: espacios.m,

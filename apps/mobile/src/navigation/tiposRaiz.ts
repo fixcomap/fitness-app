@@ -3,6 +3,8 @@
 import { useNavigation, type NavigatorScreenParams } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
+import type { DiaSemana } from '../lib/entreno/rutinas';
+
 import type { TabsParamList } from './Tabs';
 
 export type RaizParamList = {
@@ -10,6 +12,8 @@ export type RaizParamList = {
   SesionArmada: undefined;
   SesionEnCurso: undefined;
   ResumenSesion: { id: string };
+  // Sin id: rutina nueva (con `dia` ya marcado, si viene).
+  EditarRutina: { id?: string; dia?: DiaSemana } | undefined;
 };
 
 export type NavegacionRaiz = NativeStackNavigationProp<RaizParamList>;
