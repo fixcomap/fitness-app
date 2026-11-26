@@ -7,6 +7,7 @@ const {
   estaDentro,
   costoEstimado,
   formatoCosto,
+  formatoTokens,
   resumir,
   lineasCoach,
 } = require('../scripts/comparacion');
@@ -64,6 +65,22 @@ test('costo = tokens × precio por millón', () => {
   assert.strictEqual(formatoCosto(null), 'sin precio');
 });
 
+test('los tokens de caché se cobran a su precio (o al de entrada si el modelo no lo tiene)', () => {
+  const precio = { entrada: 1, salida: 5, cacheLectura: 0.1, cacheEscritura: 1.25 };
+  // 1M de entrada: 0,2M normales, 0,7M leídos y 0,1M escritos; 0,1M de salida.
+  const uso = { entrada: 1_000_000, cacheLectura: 700_000, cacheEscritura: 100_000, salida: 100_000 };
+  assert.ok(Math.abs(costoEstimado(uso, precio) - (0.2 + 0.07 + 0.125 + 0.5)) < 1e-12);
+  assert.ok(Math.abs(costoEstimado(uso, { entrada: 1, salida: 5 }) - 1.5) < 1e-12);
+  assert.strictEqual(
+    formatoTokens({ entrada: 26166, cacheLectura: 24000, cacheEscritura: 0, salida: 698 }),
+    '26166 de entrada (24000 leídos de caché, 0 escritos), 698 de salida',
+  );
+  assert.strictEqual(
+    formatoTokens({ entrada: 10, salida: 2 }),
+    '10 de entrada (0 leídos de caché, 0 escritos), 2 de salida',
+  );
+});
+
 test('el resumen promedia el tiempo de los que salieron y suma el costo', () => {
   const r = resumir([
     { ms: 1000, costo: 0.01 },
@@ -80,6 +97,12 @@ test('el resumen promedia el tiempo de los que salieron y suma el costo', () => 
 test('precios-ia.json: cada modelo tiene precio de entrada y de salida', () => {
   for (const [modelo, precio] of Object.entries(precios.modelos)) {
     assert.ok(precio.entrada > 0 && precio.salida > 0, modelo);
+    // Si tiene precios de caché: leer es más barato que la entrada y escribir, más caro.
+    if ('cacheLectura' in precio) assert.ok(precio.cacheLectura > 0 && precio.cacheLectura < precio.entrada, modelo);
+    if ('cacheEscritura' in precio) assert.ok(precio.cacheEscritura > precio.entrada, modelo);
+  }
+  for (const modelo of ['claude-opus-5-5', 'claude-sonnet-5-5', 'claude-haiku-5-5']) {
+    assert.ok(precios.modelos[modelo].cacheLectura && precios.modelos[modelo].cacheEscritura, modelo);
   }
   assert.ok(precios.modelos['claude-opus-5-5']);
   assert.ok(precios.modelos['gemini-3.8-flash']);

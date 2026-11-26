@@ -29,7 +29,10 @@ function leerRespuesta(respuesta, modelo) {
   return {
     datos,
     uso: {
+      // promptTokenCount ya incluye los tokens que salieron de la caché implícita.
       entrada: uso.promptTokenCount ?? 0,
+      cacheLectura: uso.cachedContentTokenCount ?? 0,
+      cacheEscritura: 0,
       salida: (uso.candidatesTokenCount ?? 0) + (uso.thoughtsTokenCount ?? 0),
     },
     modelo,

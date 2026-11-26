@@ -194,14 +194,23 @@ function clienteGemini(respuesta) {
 const respuestaGemini = (texto, finishReason = 'STOP') => ({
   candidates: [{ finishReason }],
   text: texto,
-  usageMetadata: { promptTokenCount: 1000, candidatesTokenCount: 200, thoughtsTokenCount: 50 },
+  usageMetadata: {
+    promptTokenCount: 1000,
+    cachedContentTokenCount: 600,
+    candidatesTokenCount: 200,
+    thoughtsTokenCount: 50,
+  },
 });
 
 test('Gemini: manda la foto con el prompt y lee JSON y tokens (con los de razonamiento)', async () => {
   const cliente = clienteGemini(respuestaGemini('{"items":[]}'));
   const ia = crearProveedorGemini({ cliente, modeloFoto: 'm-foto', modeloCoach: 'm-coach' });
   const r = await ia.analizarFoto(imagen, { comida: 'cena' });
-  assert.deepStrictEqual(r, { datos: { items: [] }, uso: { entrada: 1000, salida: 250 }, modelo: 'm-foto' });
+  assert.deepStrictEqual(r, {
+    datos: { items: [] },
+    uso: { entrada: 1000, cacheLectura: 600, cacheEscritura: 0, salida: 250 },
+    modelo: 'm-foto',
+  });
 
   const [pedido] = cliente.pedidos;
   assert.strictEqual(pedido.model, 'm-foto');
@@ -264,14 +273,18 @@ const respuestaClaude = (parsed_output, stop_reason = 'end_turn') => ({
   model: 'claude-x',
   stop_reason,
   parsed_output,
-  usage: { input_tokens: 800, cache_read_input_tokens: 200, output_tokens: 300 },
+  usage: { input_tokens: 800, cache_read_input_tokens: 200, cache_creation_input_tokens: 100, output_tokens: 300 },
 });
 
 test('Claude: manda la foto en base64 con salida estructurada y lee tokens', async () => {
   const { pedidos, clientePara } = clientesClaude(respuestaClaude({ items: [] }));
   const ia = crearProveedorClaude({ clientePara, modeloFoto: 'm-foto', modeloCoach: 'm-coach' });
   const r = await ia.analizarFoto(imagen, { comida: 'desayuno' });
-  assert.deepStrictEqual(r, { datos: { items: [] }, uso: { entrada: 1000, salida: 300 }, modelo: 'claude-x' });
+  assert.deepStrictEqual(r, {
+    datos: { items: [] },
+    uso: { entrada: 1100, cacheLectura: 200, cacheEscritura: 100, salida: 300 },
+    modelo: 'claude-x',
+  });
 
   const [pedido] = pedidos;
   assert.strictEqual(pedido.cliente, 'm-foto');

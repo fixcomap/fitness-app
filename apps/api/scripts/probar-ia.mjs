@@ -22,7 +22,16 @@ const { crearProveedor } = require('../src/ia');
 const { leerResultadoFoto } = require('../src/ia/foto');
 const { EXTENSIONES, esFoto, fotoAJpeg } = require('./fotos');
 const { leerRespuestaCoach } = require('../src/ia/coach');
-const { USO, leerArgumentos, estaDentro, costoEstimado, formatoCosto, resumir, lineasCoach } = require('./comparacion');
+const {
+  USO,
+  leerArgumentos,
+  estaDentro,
+  costoEstimado,
+  formatoCosto,
+  formatoTokens,
+  resumir,
+  lineasCoach,
+} = require('./comparacion');
 
 const MAXIMO_FOTO = 2 * 1024 * 1024;
 const precios = JSON.parse(fs.readFileSync(path.join(aqui, 'precios-ia.json'), 'utf8')).modelos;
@@ -76,7 +85,7 @@ async function medir(pedido) {
 function mostrar(titulo, r, detalle) {
   console.log(`\n  ▸ ${titulo}  (${r.ms} ms, ${r.error ? 'error' : formatoCosto(r.costo)})`);
   if (r.error) return console.log(`    Error: ${r.error}`);
-  console.log(`    Tokens: ${r.uso.entrada} de entrada, ${r.uso.salida} de salida`);
+  console.log(`    Tokens: ${formatoTokens(r.uso)}`);
   for (const linea of detalle(r)) console.log(`    ${linea}`);
 }
 

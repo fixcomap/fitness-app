@@ -44,10 +44,25 @@ function estaDentro(ruta, raiz) {
   return relativa === '' || (!relativa.startsWith('..') && !path.isAbsolute(relativa));
 }
 
-// Costo en USD de un pedido, o null si no hay precio para el modelo.
+// Costo en USD de un pedido, o null si no hay precio para el modelo. uso.entrada es el total de entrada;
+// la parte leída o escrita en caché se cobra a su precio (si el modelo no lo tiene, al de entrada).
 function costoEstimado(uso, precio) {
   if (!precio) return null;
-  return (uso.entrada * precio.entrada + uso.salida * precio.salida) / 1e6;
+  const lectura = uso.cacheLectura ?? 0;
+  const escritura = uso.cacheEscritura ?? 0;
+  const normal = uso.entrada - lectura - escritura;
+  const usd =
+    normal * precio.entrada +
+    lectura * (precio.cacheLectura ?? precio.entrada) +
+    escritura * (precio.cacheEscritura ?? precio.entrada) +
+    uso.salida * precio.salida;
+  return usd / 1e6;
+}
+
+// "26166 de entrada (24000 leídos de caché, 0 escritos), 698 de salida"
+function formatoTokens(uso) {
+  const cache = ` (${uso.cacheLectura ?? 0} leídos de caché, ${uso.cacheEscritura ?? 0} escritos)`;
+  return `${uso.entrada} de entrada${cache}, ${uso.salida} de salida`;
 }
 
 const formatoCosto = (usd) => (usd === null ? 'sin precio' : `US$ ${usd.toFixed(5)}`);
@@ -90,4 +105,4 @@ function lineasCoach(salida, catalogo) {
   return lineas;
 }
 
-module.exports = { USO, leerArgumentos, estaDentro, costoEstimado, formatoCosto, resumir, lineasCoach };
+module.exports = { USO, leerArgumentos, estaDentro, costoEstimado, formatoCosto, formatoTokens, resumir, lineasCoach };

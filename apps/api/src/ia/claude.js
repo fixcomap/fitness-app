@@ -34,7 +34,10 @@ function leerRespuesta(respuesta) {
   return {
     datos: respuesta.parsed_output,
     uso: {
+      // entrada es el total; cacheLectura y cacheEscritura son la parte que se leyó o se escribió en la caché.
       entrada: (uso.input_tokens ?? 0) + (uso.cache_creation_input_tokens ?? 0) + (uso.cache_read_input_tokens ?? 0),
+      cacheLectura: uso.cache_read_input_tokens ?? 0,
+      cacheEscritura: uso.cache_creation_input_tokens ?? 0,
       salida: uso.output_tokens ?? 0,
     },
     modelo: respuesta.model,
