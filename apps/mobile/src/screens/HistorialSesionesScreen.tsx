@@ -21,7 +21,7 @@ export function HistorialSesionesScreen({ onVolver }: { onVolver: () => void }) 
 
   return (
     <View style={styles.pantalla}>
-      <EncabezadoSesion titulo="Mis rutinas" icono="chevron-back" etiquetaBoton="Volver a Entreno" onPress={onVolver} />
+      <EncabezadoSesion titulo="Historial" icono="chevron-back" etiquetaBoton="Volver a Mis rutinas" onPress={onVolver} />
       <FlatList
         data={historial}
         keyExtractor={(s) => s.id}

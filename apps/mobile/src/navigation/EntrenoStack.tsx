@@ -4,12 +4,14 @@ import { useEntreno } from '../estado/Entreno';
 import { CatalogoScreen } from '../screens/CatalogoScreen';
 import { DetalleEjercicioScreen } from '../screens/DetalleEjercicioScreen';
 import { HistorialSesionesScreen } from '../screens/HistorialSesionesScreen';
+import { RutinasScreen } from '../screens/RutinasScreen';
 import { colores } from '../theme/tema';
 import { useNavegacionRaiz } from './tiposRaiz';
 
 export type EntrenoStackParamList = {
   Catalogo: undefined;
   Detalle: { id: string };
+  Rutinas: undefined;
   Historial: undefined;
 };
 
@@ -22,9 +24,26 @@ function CatalogoRuta({ navigation }: NativeStackScreenProps<EntrenoStackParamLi
   return (
     <CatalogoScreen
       onAbrirEjercicio={(e) => navigation.navigate('Detalle', { id: e.id })}
-      onAbrirHistorial={() => navigation.navigate('Historial')}
+      onAbrirRutinas={() => navigation.navigate('Rutinas')}
       sesion={{ ejercicios: armada.ejercicios.length, enCurso: enCurso !== null }}
       onAbrirSesion={() => raiz.navigate(enCurso ? 'SesionEnCurso' : 'SesionArmada')}
+    />
+  );
+}
+
+function RutinasRuta({ navigation }: NativeStackScreenProps<EntrenoStackParamList, 'Rutinas'>) {
+  const { empezarRutina } = useEntreno();
+  const raiz = useNavegacionRaiz();
+  return (
+    <RutinasScreen
+      onVolver={() => navigation.goBack()}
+      onEmpezar={(rutina) => {
+        if (empezarRutina(rutina)) raiz.navigate('SesionEnCurso');
+      }}
+      onSeguirSesion={() => raiz.navigate('SesionEnCurso')}
+      onEditar={(rutina) => raiz.navigate('EditarRutina', { id: rutina.id })}
+      onNueva={(dia) => raiz.navigate('EditarRutina', { dia })}
+      onVerHistorial={() => navigation.navigate('Historial')}
     />
   );
 }
@@ -49,6 +68,7 @@ export function EntrenoStack() {
     >
       <Stack.Screen name="Catalogo" component={CatalogoRuta} options={{ headerShown: false }} />
       <Stack.Screen name="Detalle" component={DetalleRuta} options={{ title: '', headerBackTitle: 'Entreno' }} />
+      <Stack.Screen name="Rutinas" component={RutinasRuta} options={{ headerShown: false }} />
       <Stack.Screen name="Historial" component={HistorialRuta} options={{ headerShown: false }} />
     </Stack.Navigator>
   );

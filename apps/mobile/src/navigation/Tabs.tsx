@@ -34,12 +34,16 @@ const ICONOS: Record<keyof TabsParamList, NombreIcono> = {
 const Tab = createBottomTabNavigator<TabsParamList>();
 
 function InicioRuta({ navigation }: BottomTabScreenProps<TabsParamList, 'Inicio'>) {
-  const { enCurso } = useEntreno();
+  const { rutinas, empezarRutina } = useEntreno();
   // Las pantallas de la sesión están en la navegación de arriba (Raiz).
   const raiz = useNavegacionRaiz();
   return (
     <InicioScreen
-      onEmpezarEntreno={() => raiz.navigate(enCurso ? 'SesionEnCurso' : 'SesionArmada')}
+      onEmpezarEntreno={(entreno) => {
+        const rutina = entreno.rutinaId ? rutinas.find((r) => r.id === entreno.rutinaId) : undefined;
+        if (entreno.enCurso || (rutina && empezarRutina(rutina))) raiz.navigate('SesionEnCurso');
+        else raiz.navigate('SesionArmada');
+      }}
       onArmarSesion={() => navigation.navigate('Entreno')}
       onAbrirCoach={() => navigation.navigate('Coach')}
     />

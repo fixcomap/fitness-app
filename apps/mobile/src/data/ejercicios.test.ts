@@ -1,5 +1,5 @@
 import { buscarEjercicioPorId, EJERCICIOS } from './ejercicios';
-import { FORMATOS_VIDEO, GRUPOS, MUSCULOS, NIVELES } from './tipos';
+import { FORMATOS_VIDEO, GRUPOS, MUSCULOS, NIVELES, TIPOS_EJERCICIO } from './tipos';
 
 // Lista explícita a propósito: si se agrega un equipo, hay que sumarlo acá también.
 const EQUIPOS_VALIDOS = [
@@ -56,6 +56,7 @@ test.each(EJERCICIOS)('$id tiene datos válidos', (e) => {
     expect(e.videoCanal).toBeUndefined();
     expect(e.videoFormato).toBeUndefined();
   }
+  if (e.tipo !== undefined) expect(TIPOS_EJERCICIO).toContain(e.tipo);
   if (e.fuente !== undefined) expect(e.fuente).toBe('free-exercise-db (Unlicense)');
 });
 

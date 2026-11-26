@@ -4,6 +4,7 @@ import { createNativeStackNavigator, type NativeStackScreenProps } from '@react-
 import { useEffect, useRef } from 'react';
 
 import { useEntreno } from '../estado/Entreno';
+import { EditarRutinaScreen } from '../screens/EditarRutinaScreen';
 import { ResumenSesionScreen } from '../screens/ResumenSesionScreen';
 import { SesionArmadaScreen } from '../screens/SesionArmadaScreen';
 import { SesionEnCursoScreen } from '../screens/SesionEnCursoScreen';
@@ -59,6 +60,10 @@ function ResumenSesionRuta({ navigation, route }: NativeStackScreenProps<RaizPar
   return <ResumenSesionScreen id={route.params.id} onListo={() => navigation.goBack()} />;
 }
 
+function EditarRutinaRuta({ navigation, route }: NativeStackScreenProps<RaizParamList, 'EditarRutina'>) {
+  return <EditarRutinaScreen rutinaId={route.params?.id} dia={route.params?.dia} onCerrar={() => navigation.goBack()} />;
+}
+
 export function Raiz() {
   return (
     <Stack.Navigator
@@ -84,6 +89,11 @@ export function Raiz() {
       <Stack.Screen
         name="ResumenSesion"
         component={ResumenSesionRuta}
+        options={{ headerShown: false, presentation: 'fullScreenModal', gestureEnabled: false }}
+      />
+      <Stack.Screen
+        name="EditarRutina"
+        component={EditarRutinaRuta}
         options={{ headerShown: false, presentation: 'fullScreenModal', gestureEnabled: false }}
       />
     </Stack.Navigator>

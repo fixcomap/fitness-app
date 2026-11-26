@@ -9,7 +9,8 @@ import type {
   SesionEnCurso,
   SesionGuardada,
 } from './tipos';
-import { DESCANSO_POR_DEFECTO_S } from './sesion';
+import { rangoValido, type Rango } from './rangos';
+import { DESCANSO_POR_DEFECTO_S, REPS_POR_DEFECTO } from './sesion';
 
 // Para no crecer sin límite: se guardan las últimas sesiones.
 export const MAXIMO_SESIONES = 1000;
@@ -29,7 +30,16 @@ function esSerieHecha(s: unknown): s is SerieHecha {
   );
 }
 
-function esEjercicioHecho(e: unknown): e is EjercicioHecho {
+// Las sesiones guardadas antes de los rangos tenían reps fijas: el rango es ese número
+// (min = max), así la doble progresión sigue la regla de antes con esas sesiones.
+function rangoGuardado(rango: unknown, series: readonly { repsObjetivo: number }[]): Rango {
+  if (rangoValido(rango)) return rango;
+  const objetivo = Math.max(0, ...series.map((s) => s.repsObjetivo));
+  const reps = objetivo >= 1 && objetivo <= 30 ? objetivo : REPS_POR_DEFECTO;
+  return { min: reps, max: reps };
+}
+
+function esEjercicioHecho(e: unknown): e is Omit<EjercicioHecho, 'rango'> & { rango?: unknown } {
   return (
     esObjeto(e) &&
     esTexto(e.ejercicioId) &&
@@ -39,7 +49,11 @@ function esEjercicioHecho(e: unknown): e is EjercicioHecho {
   );
 }
 
-function esSesionGuardada(s: unknown): s is SesionGuardada {
+function migrarEjercicioHecho(e: Omit<EjercicioHecho, 'rango'> & { rango?: unknown }): EjercicioHecho {
+  return { ...e, rango: rangoGuardado(e.rango, e.series) };
+}
+
+function esSesionGuardada(s: unknown): s is Omit<SesionGuardada, 'ejercicios'> & { ejercicios: unknown[] } {
   return (
     esObjeto(s) &&
     esTexto(s.id) &&
@@ -56,7 +70,10 @@ function esSesionGuardada(s: unknown): s is SesionGuardada {
 
 export function leerSesionesGuardadas(datos: unknown): SesionGuardada[] {
   if (!Array.isArray(datos)) return [];
-  return datos.filter(esSesionGuardada);
+  return datos.filter(esSesionGuardada).map((s) => ({
+    ...s,
+    ejercicios: (s.ejercicios as Parameters<typeof migrarEjercicioHecho>[0][]).map(migrarEjercicioHecho),
+  }));
 }
 
 export function leerArmadaGuardada(datos: unknown): SesionArmada | null {
@@ -75,7 +92,7 @@ function esSerieEnCurso(s: unknown): s is SerieEnCurso {
   );
 }
 
-function esEjercicioEnCurso(e: unknown): e is EjercicioEnCurso {
+function esEjercicioEnCurso(e: unknown): e is Omit<EjercicioEnCurso, 'rango'> & { rango?: unknown } {
   return esObjeto(e) && esTexto(e.ejercicioId) && Array.isArray(e.series) && e.series.every(esSerieEnCurso);
 }
 
@@ -95,7 +112,12 @@ export function leerEnCursoGuardada(datos: unknown): SesionEnCurso | null {
   ) {
     return null;
   }
-  const sesion = datos as unknown as SesionEnCurso;
+  const guardada = datos as unknown as SesionEnCurso;
+  // Las sesiones en curso de antes de los rangos: el rango sale de las reps objetivo.
+  const sesion: SesionEnCurso = {
+    ...guardada,
+    ejercicios: guardada.ejercicios.map((e) => ({ ...e, rango: rangoGuardado(e.rango, e.series) })),
+  };
   const { descanso } = sesion;
   if (!descanso || esFecha(descanso.inicio)) return sesion;
   // Las sesiones guardadas antes de que el descanso tuviera inicio: se supone el de por defecto.

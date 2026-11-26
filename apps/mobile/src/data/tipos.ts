@@ -52,7 +52,13 @@ export interface Ejercicio {
   videoCanal?: string; // author_name del video en YouTube (oEmbed)
   videoFormato?: FormatoVideo; // vertical para Shorts
   fuente?: string; // de dónde salen los datos, si no son propios
+  // Corrige la clasificación automática (ver lib/entreno/rangos) en casos puntuales.
+  tipo?: TipoEjercicio;
 }
+
+// Compuesto: varias articulaciones (press, sentadilla, remo…). Aislamiento: una sola.
+export const TIPOS_EJERCICIO = ['compuesto', 'aislamiento'] as const;
+export type TipoEjercicio = (typeof TIPOS_EJERCICIO)[number];
 
 export const FORMATOS_VIDEO = ['vertical', 'horizontal'] as const;
 export type FormatoVideo = (typeof FORMATOS_VIDEO)[number];

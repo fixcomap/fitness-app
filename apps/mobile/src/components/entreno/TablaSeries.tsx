@@ -1,7 +1,8 @@
 import { Ionicons } from '@expo/vector-icons';
+import { Fragment } from 'react';
 import { Alert, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 
-import { formatearKg } from '../../lib/entreno/progresion';
+import { advertenciaSerie, formatearKg } from '../../lib/entreno/progresion';
 import { leerKg, leerReps } from '../../lib/entreno/sesion';
 import type { SerieEnCurso, SerieHecha } from '../../lib/entreno/tipos';
 import { coloresSesion as c, medidasSesion as m } from './estiloSesion';
@@ -10,6 +11,7 @@ interface TablaSeriesProps {
   series: SerieEnCurso[];
   anteriores: SerieHecha[]; // las de la última vez, en el mismo orden
   conPeso: boolean;
+  mejorKg: number | null; // mejor peso registrado, para avisar si se tipeó de más
   marcadas: ReadonlySet<number>; // series que se quisieron tildar con datos inválidos
   onEditar: (indice: number, cambios: Partial<Pick<SerieEnCurso, 'kg' | 'reps'>>) => void;
   onTildar: (indice: number) => void;
@@ -18,8 +20,19 @@ interface TablaSeriesProps {
 }
 
 // SERIE | ANTERIOR | KG | REPS | ✓. Sin columna KG en los ejercicios sin peso.
-// Para borrar una serie se mantiene apretado su número.
-export function TablaSeries({ series, anteriores, conPeso, marcadas, onEditar, onTildar, onBorrar, onAgregar }: TablaSeriesProps) {
+// Para borrar una serie se mantiene apretado su número. Si los números parecen un
+// error de tipeo, abajo de la serie aparece "¿Seguro?" (se puede tildar igual).
+export function TablaSeries({
+  series,
+  anteriores,
+  conPeso,
+  mejorKg,
+  marcadas,
+  onEditar,
+  onTildar,
+  onBorrar,
+  onAgregar,
+}: TablaSeriesProps) {
   const pedirBorrar = (indice: number) =>
     Alert.alert(`¿Borrar la serie ${indice + 1}?`, undefined, [
       { text: 'Cancelar', style: 'cancel' },
@@ -40,57 +53,65 @@ export function TablaSeries({ series, anteriores, conPeso, marcadas, onEditar, o
         const marcada = marcadas.has(i);
         const kgMal = marcada && conPeso && leerKg(s.kg) === null;
         const repsMal = marcada && leerReps(s.reps) === null;
+        const advertencia = advertenciaSerie(conPeso ? leerKg(s.kg) : null, leerReps(s.reps), mejorKg);
         return (
-          <View key={i} style={[styles.fila, styles.filaSerie, s.hecha && styles.filaHecha]}>
-            <Pressable
-              onLongPress={() => pedirBorrar(i)}
-              delayLongPress={400}
-              style={styles.datosSerie}
-              accessibilityLabel={`Serie ${i + 1}`}
-              accessibilityHint="Mantené apretado para borrarla"
-              accessibilityActions={[{ name: 'borrar', label: 'Borrar serie' }]}
-              onAccessibilityAction={(e) => {
-                if (e.nativeEvent.actionName === 'borrar') pedirBorrar(i);
-              }}
-            >
-              <Text style={[styles.numero, styles.colSerie]}>{i + 1}</Text>
-              <Text style={[styles.anterior, styles.colAnterior]} numberOfLines={1}>
-                {textoAnterior(anteriores[i], conPeso)}
-              </Text>
-            </Pressable>
-            {conPeso && (
+          <Fragment key={i}>
+            <View style={[styles.fila, styles.filaSerie, s.hecha && styles.filaHecha]}>
+              <Pressable
+                onLongPress={() => pedirBorrar(i)}
+                delayLongPress={400}
+                style={styles.datosSerie}
+                accessibilityLabel={`Serie ${i + 1}`}
+                accessibilityHint="Mantené apretado para borrarla"
+                accessibilityActions={[{ name: 'borrar', label: 'Borrar serie' }]}
+                onAccessibilityAction={(e) => {
+                  if (e.nativeEvent.actionName === 'borrar') pedirBorrar(i);
+                }}
+              >
+                <Text style={[styles.numero, styles.colSerie]}>{i + 1}</Text>
+                <Text style={[styles.anterior, styles.colAnterior]} numberOfLines={1}>
+                  {textoAnterior(anteriores[i], conPeso)}
+                </Text>
+              </Pressable>
+              {conPeso && (
+                <TextInput
+                  value={s.kg}
+                  onChangeText={(kg) => onEditar(i, { kg })}
+                  keyboardType="decimal-pad"
+                  selectTextOnFocus
+                  placeholder="–"
+                  placeholderTextColor={c.textoTenue}
+                  style={[styles.casilla, kgMal && styles.casillaMal]}
+                  accessibilityLabel={`Kilos de la serie ${i + 1}`}
+                />
+              )}
               <TextInput
-                value={s.kg}
-                onChangeText={(kg) => onEditar(i, { kg })}
-                keyboardType="decimal-pad"
+                value={s.reps}
+                onChangeText={(reps) => onEditar(i, { reps })}
+                keyboardType="number-pad"
                 selectTextOnFocus
-                placeholder="–"
+                placeholder={String(s.repsObjetivo)}
                 placeholderTextColor={c.textoTenue}
-                style={[styles.casilla, kgMal && styles.casillaMal]}
-                accessibilityLabel={`Kilos de la serie ${i + 1}`}
+                style={[styles.casilla, repsMal && styles.casillaMal]}
+                accessibilityLabel={`Repeticiones de la serie ${i + 1}`}
               />
+              <Pressable
+                onPress={() => onTildar(i)}
+                hitSlop={4}
+                style={[styles.check, s.hecha ? styles.checkHecho : styles.checkPendiente]}
+                accessibilityRole="checkbox"
+                accessibilityState={{ checked: s.hecha }}
+                accessibilityLabel={`Serie ${i + 1} hecha`}
+              >
+                <Ionicons name="checkmark" size={20} color={s.hecha ? c.blanco : c.checkApagado} />
+              </Pressable>
+            </View>
+            {advertencia && (
+              <Text style={styles.advertencia} accessibilityLiveRegion="polite">
+                {advertencia}
+              </Text>
             )}
-            <TextInput
-              value={s.reps}
-              onChangeText={(reps) => onEditar(i, { reps })}
-              keyboardType="number-pad"
-              selectTextOnFocus
-              placeholder={String(s.repsObjetivo)}
-              placeholderTextColor={c.textoTenue}
-              style={[styles.casilla, repsMal && styles.casillaMal]}
-              accessibilityLabel={`Repeticiones de la serie ${i + 1}`}
-            />
-            <Pressable
-              onPress={() => onTildar(i)}
-              hitSlop={4}
-              style={[styles.check, s.hecha ? styles.checkHecho : styles.checkPendiente]}
-              accessibilityRole="checkbox"
-              accessibilityState={{ checked: s.hecha }}
-              accessibilityLabel={`Serie ${i + 1} hecha`}
-            >
-              <Ionicons name="checkmark" size={20} color={s.hecha ? c.blanco : c.checkApagado} />
-            </Pressable>
-          </View>
+          </Fragment>
         );
       })}
 
@@ -115,6 +136,7 @@ const GAP = 8;
 
 const styles = StyleSheet.create({
   tabla: { gap: 6 },
+  advertencia: { color: c.rojoSuave, fontSize: 13, fontWeight: '700', paddingHorizontal: GAP, marginTop: -2 },
   fila: { flexDirection: 'row', alignItems: 'center', gap: GAP, paddingHorizontal: GAP },
   filaCabecera: { paddingBottom: 2 },
   filaSerie: { height: m.alturaFila, borderRadius: 14 },

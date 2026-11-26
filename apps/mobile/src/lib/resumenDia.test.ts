@@ -111,7 +111,7 @@ describe('armarResumenDia', () => {
   test('entreno de hoy: la sesión armada o nada', () => {
     const datos = { metaPasos: 10000, pasosAutomaticos: 0, pasosManuales: 0, minutos: { hoy: 0, semana: 0 }, perfil };
     expect(armarResumenDia(datos).entreno).toBeNull();
-    const entreno = { nombre: 'Pecho y hombros', ejercicios: 4, enCurso: false };
+    const entreno = { nombre: 'Pecho y hombros', ejercicios: 4, enCurso: false, rutinaId: null };
     expect(armarResumenDia({ ...datos, entreno }).entreno).toEqual(entreno);
   });
 

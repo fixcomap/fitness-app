@@ -1126,6 +1126,7 @@
     "grupo": "hombros",
     "equipo": "kettlebell",
     "nivel": "intermedio",
+    "tipo": "compuesto",
     "musculoPrincipal": "deltoids",
     "musculosSecundarios": [
       "abs",
@@ -2851,6 +2852,7 @@
     "grupo": "brazos",
     "equipo": "barra-z",
     "nivel": "principiante",
+    "tipo": "aislamiento",
     "musculoPrincipal": "triceps",
     "musculosSecundarios": [
       "forearm"
@@ -2997,6 +2999,7 @@
     "grupo": "brazos",
     "equipo": "mancuernas",
     "nivel": "intermedio",
+    "tipo": "aislamiento",
     "musculoPrincipal": "triceps",
     "musculosSecundarios": [
       "chest",
@@ -3412,6 +3415,7 @@
     "grupo": "piernas",
     "equipo": "maquina",
     "nivel": "principiante",
+    "tipo": "aislamiento",
     "musculoPrincipal": "calves",
     "musculosSecundarios": [],
     "tecnica": [
@@ -4565,6 +4569,7 @@
     "grupo": "abdomen",
     "equipo": "polea",
     "nivel": "principiante",
+    "tipo": "aislamiento",
     "musculoPrincipal": "abs",
     "musculosSecundarios": [
       "chest",

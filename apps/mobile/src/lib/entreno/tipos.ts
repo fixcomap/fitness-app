@@ -1,5 +1,6 @@
 // Tipos de la sesión de entreno: la que se arma, la que está en curso y las
 // que quedan guardadas en el historial.
+import type { Rango } from './rangos';
 
 // Ejercicios elegidos para entrenar hoy, en orden.
 export interface SesionArmada {
@@ -17,6 +18,7 @@ export interface SerieEnCurso {
 
 export interface EjercicioEnCurso {
   ejercicioId: string;
+  rango: Rango; // reps buscadas en cada serie (doble progresión)
   series: SerieEnCurso[];
 }
 
@@ -43,6 +45,7 @@ export interface SerieHecha {
 
 export interface EjercicioHecho {
   ejercicioId: string;
+  rango: Rango; // el rango con el que se hizo (las sesiones viejas: min = max = reps objetivo)
   series: SerieHecha[]; // sólo las tildadas
   seriesTotales: number; // las que había en la sesión, tildadas o no
 }

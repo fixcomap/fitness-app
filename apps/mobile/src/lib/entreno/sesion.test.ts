@@ -14,6 +14,7 @@ import {
   moverEnLaSesion,
   nombreSesion,
   objetivoDe,
+  planPorDefecto,
   progresoPorEjercicio,
   quitarDeLaSesion,
   segundosRestantes,
@@ -74,10 +75,11 @@ const historial: SesionGuardada[] = [
     ejercicios: [
       {
         ejercicioId: 'press',
+        rango: { min: 8, max: 10 },
         seriesTotales: 3,
         series: [
-          { kg: 12.5, reps: 10, repsObjetivo: 10 },
-          { kg: 12.5, reps: 9, repsObjetivo: 10 },
+          { kg: 12, reps: 10, repsObjetivo: 10 },
+          { kg: 12, reps: 9, repsObjetivo: 9 },
         ],
       },
     ],
@@ -85,27 +87,40 @@ const historial: SesionGuardada[] = [
 ];
 
 describe('empezar', () => {
-  test('sin historial: 3×10 sin peso', () => {
-    expect(seriesIniciales([], { id: 'nuevo', equipo: 'barra' })).toEqual([
-      { kg: '', reps: '10', repsObjetivo: 10, hecha: false },
-      { kg: '', reps: '10', repsObjetivo: 10, hecha: false },
-      { kg: '', reps: '10', repsObjetivo: 10, hecha: false },
+  const press = { id: 'press', equipo: 'mancuernas', grupo: 'pecho', nombre: 'Press plano con mancuernas' } as const;
+  const vuelos = { id: 'vuelos', equipo: 'mancuernas', grupo: 'hombros', nombre: 'Vuelos laterales' } as const;
+
+  test('sin historial: el mínimo del rango y sin peso cargado', () => {
+    expect(seriesIniciales([], { ejercicio: { ...press, id: 'nuevo' }, rango: { min: 8, max: 10 }, series: 3 }, hoy)).toEqual([
+      { kg: '', reps: '8', repsObjetivo: 8, hecha: false },
+      { kg: '', reps: '8', repsObjetivo: 8, hecha: false },
+      { kg: '', reps: '8', repsObjetivo: 8, hecha: false },
     ]);
   });
 
-  test('precarga lo de la vez anterior y repite las series que faltaron', () => {
-    expect(seriesIniciales(historial, { id: 'press', equipo: 'mancuernas' })).toEqual([
-      { kg: '12,5', reps: '10', repsObjetivo: 10, hecha: false },
-      { kg: '12,5', reps: '9', repsObjetivo: 10, hecha: false },
-      { kg: '12,5', reps: '9', repsObjetivo: 10, hecha: false },
+  test('doble progresión: mismo peso, una rep más en la primera serie que no llegó al tope', () => {
+    expect(seriesIniciales(historial, { ejercicio: press, rango: { min: 8, max: 10 }, series: 3 }, hoy)).toEqual([
+      { kg: '12', reps: '10', repsObjetivo: 10, hecha: false },
+      { kg: '12', reps: '10', repsObjetivo: 10, hecha: false },
+      { kg: '12', reps: '8', repsObjetivo: 8, hecha: false },
     ]);
   });
 
-  test('arma la sesión en curso con nombre y ejercicios en orden', () => {
+  test('planPorDefecto: rango por defecto y las series de la última vez', () => {
+    expect(planPorDefecto({ ...press, id: 'nuevo' }, historial, 'hipertrofia')).toEqual({
+      ejercicio: { ...press, id: 'nuevo' },
+      rango: { min: 6, max: 10 },
+      series: 3,
+    });
+    expect(planPorDefecto(press, historial, 'fuerza').rango).toEqual({ min: 8, max: 10 });
+    expect(planPorDefecto(vuelos, [], 'hipertrofia').rango).toEqual({ min: 10, max: 15 });
+  });
+
+  test('arma la sesión en curso con nombre, rango y ejercicios en orden', () => {
     const sesion = empezarSesion(
       [
-        { id: 'press', equipo: 'mancuernas', grupo: 'pecho' },
-        { id: 'vuelos', equipo: 'mancuernas', grupo: 'hombros' },
+        { ejercicio: press, rango: { min: 8, max: 10 }, series: 3 },
+        { ejercicio: vuelos, rango: { min: 10, max: 15 }, series: 2 },
       ],
       historial,
       hoy,
@@ -115,7 +130,15 @@ describe('empezar', () => {
     expect(sesion.inicio).toBe(hoy.toISOString());
     expect(sesion.actual).toBe(0);
     expect(sesion.ejercicios.map((e) => e.ejercicioId)).toEqual(['press', 'vuelos']);
+    expect(sesion.ejercicios[1].rango).toEqual({ min: 10, max: 15 });
+    expect(sesion.ejercicios[1].series).toHaveLength(2);
     expect(sesion.descanso).toBeNull();
+  });
+
+  test('con nombre propio (el de la rutina)', () => {
+    expect(empezarSesion([{ ejercicio: press, rango: { min: 8, max: 10 }, series: 3 }], [], hoy, 'id', 'Empuje').nombre).toBe(
+      'Empuje',
+    );
   });
 });
 
@@ -146,12 +169,13 @@ const base = (): SesionEnCurso => ({
   ejercicios: [
     {
       ejercicioId: 'press',
+      rango: { min: 8, max: 10 },
       series: [
         { kg: '12', reps: '10', repsObjetivo: 10, hecha: false },
         { kg: '', reps: '10', repsObjetivo: 10, hecha: false },
       ],
     },
-    { ejercicioId: 'flexiones', series: [{ kg: '', reps: '12', repsObjetivo: 12, hecha: false }] },
+    { ejercicioId: 'flexiones', rango: { min: 8, max: 15 }, series: [{ kg: '', reps: '12', repsObjetivo: 12, hecha: false }] },
   ],
 });
 
@@ -159,6 +183,11 @@ describe('series', () => {
   test('editar KG y REPS', () => {
     const s = editarSerie(base(), 0, 1, { kg: '14', reps: '8' });
     expect(s.ejercicios[0].series[1]).toEqual({ kg: '14', reps: '8', repsObjetivo: 10, hecha: false });
+  });
+
+  test('agregar sin series usa el mínimo del rango', () => {
+    const vacia = { ...base(), ejercicios: [{ ...base().ejercicios[0], series: [] }] };
+    expect(agregarSerie(vacia, 0).ejercicios[0].series).toEqual([{ kg: '', reps: '8', repsObjetivo: 8, hecha: false }]);
   });
 
   test('agregar copia la última sin tildar; borrar la saca', () => {
@@ -199,8 +228,9 @@ describe('series', () => {
   });
 
   test('objetivoDe', () => {
-    expect(objetivoDe(base().ejercicios[1])).toBe('1×12');
-    expect(objetivoDe({ ejercicioId: 'x', series: [] })).toBe('sin series');
+    expect(objetivoDe(base().ejercicios[0])).toBe('2×8–10');
+    expect(objetivoDe({ ...base().ejercicios[1], rango: { min: 12, max: 12 } })).toBe('1×12');
+    expect(objetivoDe({ ejercicioId: 'x', rango: { min: 8, max: 10 }, series: [] })).toBe('sin series');
   });
 });
 
@@ -247,7 +277,9 @@ describe('cerrarSesion', () => {
       inicio: hoy.toISOString(),
       fin: fin.toISOString(),
       kcal: 375,
-      ejercicios: [{ ejercicioId: 'press', seriesTotales: 2, series: [{ kg: 12, reps: 10, repsObjetivo: 10 }] }],
+      ejercicios: [
+        { ejercicioId: 'press', rango: { min: 8, max: 10 }, seriesTotales: 2, series: [{ kg: 12, reps: 10, repsObjetivo: 10 }] },
+      ],
     });
   });
 });
