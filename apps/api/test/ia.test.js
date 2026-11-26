@@ -143,6 +143,11 @@ test('el contexto del coach suma el día de la semana a cada día de ultimos7Dia
   assert.deepStrictEqual(datos(contextoCoach({ perfil: {} })), { perfil: {} });
 });
 
+test('el prompt del coach: sin cifras fuera del manual o del contexto; alimentos con peso crudo o cocido', () => {
+  assert.match(SISTEMA_COACH, /No agregues cifras que no estén en el manual o en el contexto/);
+  assert.match(SISTEMA_COACH, /si el peso es crudo o cocido/);
+});
+
 test('el prompt del coach: suplementos sin dosis personalizadas, menores derivados y el manual primero', () => {
   assert.match(SISTEMA_COACH, /No des dosis personalizadas/);
   assert.match(SISTEMA_COACH, /menor de 18 años/);
