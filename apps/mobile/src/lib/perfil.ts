@@ -190,16 +190,3 @@ export function leerPerfilGuardado(datos: unknown): PerfilUsuario | null {
     esPremium: d.esPremium === true,
   };
 }
-
-// Perfil de ejemplo, hasta que haya uno guardado.
-export const PERFIL_EJEMPLO: PerfilUsuario = {
-  nombre: 'Elías',
-  sexo: 'hombre',
-  edad: 30,
-  alturaCm: 175,
-  pesoKg: 75,
-  objetivoPeso: 'mantener',
-  objetivo: 'hipertrofia',
-  diasEntrenoPorSemana: 3,
-  esPremium: false,
-};

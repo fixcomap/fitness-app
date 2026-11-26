@@ -15,7 +15,8 @@ import { minutosActivos, type MinutosActivos, type TotalDelDia } from '../lib/ac
 import { inicioDelDia, mismoDia } from '../lib/fechas';
 import type { FuenteActividad } from '../lib/actividad/FuenteActividad';
 import type { CargaPasos, Franja, TipoCarga } from '../lib/pasosManuales';
-import { PERFIL_EJEMPLO, type PerfilUsuario } from '../lib/perfil';
+import type { PerfilUsuario } from '../lib/perfil';
+import { usePerfilActual } from './Perfil';
 
 // Cada cuánto se vuelven a pedir los pasos de hoy mientras la app está abierta.
 const REFRESCO_MS = 60_000;
@@ -44,7 +45,7 @@ export interface DatosDelDiaValor extends Configuracion, Omit<PasosManuales, 'ag
 const Contexto = createContext<DatosDelDiaValor | null>(null);
 
 export function ProveedorDatosDelDia({ children }: { children: ReactNode }) {
-  const perfil = PERFIL_EJEMPLO;
+  const perfil = usePerfilActual();
   const fuente = fuenteActividad;
   const configuracion = useConfiguracion();
   const manuales = usePasosManuales(perfil);
