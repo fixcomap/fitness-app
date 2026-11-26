@@ -1,9 +1,10 @@
 import { Ionicons } from '@expo/vector-icons';
-import { useMemo } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import type { Ejercicio } from '../../data/tipos';
-import { partesProgresion, ultimaVez, usaPeso, type ParteTexto } from '../../lib/entreno/progresion';
+import { partesSugerencia, sugerirProgresion, usaPeso, type ParteTexto } from '../../lib/entreno/progresion';
+import { textoRango } from '../../lib/entreno/rangos';
+import { mejorPeso } from '../../lib/entreno/resumen';
 import type { EjercicioEnCurso, SerieEnCurso, SesionGuardada } from '../../lib/entreno/tipos';
 import { coloresSesion as c, medidasSesion as m } from './estiloSesion';
 import { Miniatura } from './Miniatura';
@@ -48,9 +49,19 @@ export function PaginaEjercicio({
   onTerminar,
   onVerTecnica,
 }: PaginaEjercicioProps) {
-  const ultima = useMemo(() => ultimaVez(historial, ejercicio.ejercicioId), [historial, ejercicio.ejercicioId]);
   const conPeso = datos ? usaPeso(datos.equipo) : true;
-  const aviso = datos ? partesProgresion(ultima, datos.equipo, new Date()) : null;
+  const sugerencia = datos
+    ? sugerirProgresion({
+        historial,
+        ejercicioId: ejercicio.ejercicioId,
+        equipo: datos.equipo,
+        rango: ejercicio.rango,
+        series: ejercicio.series.length,
+        ahora: new Date(),
+      })
+    : null;
+  const aviso = sugerencia ? partesSugerencia(sugerencia) : null;
+  const mejor = mejorPeso(historial, ejercicio.ejercicioId);
   const esPrimero = indice === 0;
 
   return (
@@ -70,7 +81,7 @@ export function PaginaEjercicio({
         {datos && <Miniatura ejercicio={datos} tamano={m.miniatura} radio={14} />}
         <View style={styles.flex}>
           <Text style={styles.contador}>
-            Ejercicio {indice + 1} de {total}
+            Ejercicio {indice + 1} de {total} · {textoRango(ejercicio.rango)} reps
             {datos && <Text style={styles.verTecnica}> · Ver técnica</Text>}
           </Text>
           <Text style={styles.nombreEjercicio}>{datos?.nombre ?? 'Ejercicio'}</Text>
@@ -92,8 +103,9 @@ export function PaginaEjercicio({
 
       <TablaSeries
         series={ejercicio.series}
-        anteriores={ultima?.ejercicio.series ?? []}
+        anteriores={sugerencia?.ultima?.ejercicio.series ?? []}
         conPeso={conPeso}
+        mejorKg={mejor}
         marcadas={marcadas}
         onEditar={onEditar}
         onTildar={onTildar}

@@ -24,6 +24,7 @@ import {
   cerrarSesion,
   empezarSesion,
   moverEnLaSesion,
+  planPorDefecto,
   quitarDeLaSesion,
   sesionVacia,
 } from '../lib/entreno/sesion';
@@ -120,10 +121,11 @@ export function ProveedorEntreno({ children }: { children: ReactNode }) {
 
   const empezar = useCallback(() => {
     if (ejerciciosArmados.length === 0) return false;
-    setEnCurso((actual) => actual ?? empezarSesion(ejerciciosArmados, historial, new Date(), nuevoId()));
+    const planes = ejerciciosArmados.map((e) => planPorDefecto(e, historial, perfil.objetivo));
+    setEnCurso((actual) => actual ?? empezarSesion(planes, historial, new Date(), nuevoId()));
     pedirPermisoAvisos();
     return true;
-  }, [ejerciciosArmados, historial]);
+  }, [ejerciciosArmados, historial, perfil.objetivo]);
 
   const actualizar = useCallback((cambio: (s: SesionEnCurso) => SesionEnCurso) => {
     setEnCurso((s) => (s ? cambio(s) : s));

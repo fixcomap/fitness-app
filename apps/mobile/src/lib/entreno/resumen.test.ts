@@ -11,13 +11,14 @@ import {
 } from './resumen';
 import type { SesionGuardada } from './tipos';
 
-const sesion = (id: string, fin: string, ejercicios: SesionGuardada['ejercicios'], kcal = 0): SesionGuardada => ({
+type SinRango = Omit<SesionGuardada['ejercicios'][number], 'rango'>;
+const sesion = (id: string, fin: string, ejercicios: SinRango[], kcal = 0): SesionGuardada => ({
   id,
   nombre: 'Pecho',
   inicio: '2026-11-25T18:00:00Z',
   fin,
   kcal,
-  ejercicios,
+  ejercicios: ejercicios.map((e) => ({ ...e, rango: { min: 8, max: 12 } })),
 });
 
 const hoy = sesion('hoy', '2026-11-25T19:00:00Z', [

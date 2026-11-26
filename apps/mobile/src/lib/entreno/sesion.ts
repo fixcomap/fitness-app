@@ -3,7 +3,9 @@
 import { NOMBRE_GRUPO } from '../../data/nombres';
 import type { Ejercicio, Grupo } from '../../data/tipos';
 import { claveDia } from '../pasosManuales';
-import { formatearKg, ultimaVez, usaPeso } from './progresion';
+import type { ObjetivoEntreno } from '../perfil';
+import { formatearKg, sugerirProgresion, ultimaVez, usaPeso } from './progresion';
+import { rangoPorDefecto, textoRango, type Rango } from './rangos';
 import type { EjercicioEnCurso, SerieEnCurso, SesionArmada, SesionEnCurso, SesionGuardada } from './tipos';
 
 export const SERIES_POR_DEFECTO = 3;
@@ -59,41 +61,52 @@ export function nombreSesion(ejercicios: readonly Pick<Ejercicio, 'grupo'>[]): s
 
 // ── Empezar ──
 
-const serieVacia = (): SerieEnCurso => ({
-  kg: '',
-  reps: String(REPS_POR_DEFECTO),
-  repsObjetivo: REPS_POR_DEFECTO,
-  hecha: false,
-});
+const serieNueva = (reps: number): SerieEnCurso => ({ kg: '', reps: String(reps), repsObjetivo: reps, hecha: false });
 
-// Series precargadas con lo de la última vez; si nunca se hizo, 3×10 sin peso cargado.
-export function seriesIniciales(historial: readonly SesionGuardada[], ejercicio: Pick<Ejercicio, 'id' | 'equipo'>): SerieEnCurso[] {
-  const ultima = ultimaVez(historial, ejercicio.id);
-  if (!ultima) return Array.from({ length: SERIES_POR_DEFECTO }, serieVacia);
-  const conPeso = usaPeso(ejercicio.equipo);
-  const series: SerieEnCurso[] = ultima.ejercicio.series.map((s) => ({
-    kg: conPeso && s.kg !== null ? formatearKg(s.kg) : '',
-    reps: String(s.reps),
-    repsObjetivo: s.repsObjetivo,
-    hecha: false,
-  }));
-  // Si la última vez quedaron series sin tildar, se vuelven a proponer.
-  while (series.length < ultima.ejercicio.seriesTotales) series.push({ ...series[series.length - 1] });
-  return series;
+// Qué se va a hacer de cada ejercicio: cuántas series y en qué rango de reps.
+export interface PlanEjercicio {
+  ejercicio: Pick<Ejercicio, 'id' | 'equipo' | 'grupo'>;
+  rango: Rango;
+  series: number;
+}
+
+// Plan de un ejercicio suelto (sin rutina): las series de la última vez (o 3) y el
+// rango de la última vez si era un rango; si no, el de por defecto.
+export function planPorDefecto(
+  ejercicio: Pick<Ejercicio, 'id' | 'equipo' | 'grupo' | 'nombre' | 'tipo'>,
+  historial: readonly SesionGuardada[],
+  objetivo: ObjetivoEntreno,
+): PlanEjercicio {
+  const ultima = ultimaVez(historial, ejercicio.id)?.ejercicio;
+  const rango = ultima && ultima.rango.min < ultima.rango.max ? ultima.rango : rangoPorDefecto(ejercicio, objetivo);
+  return { ejercicio, rango, series: ultima?.seriesTotales || SERIES_POR_DEFECTO };
+}
+
+// Series precargadas según la doble progresión (ver sugerirProgresion).
+export function seriesIniciales(historial: readonly SesionGuardada[], plan: PlanEjercicio, ahora: Date): SerieEnCurso[] {
+  const { ejercicio, rango, series } = plan;
+  const sugerencia = sugerirProgresion({ historial, ejercicioId: ejercicio.id, equipo: ejercicio.equipo, rango, series, ahora });
+  const kg = usaPeso(ejercicio.equipo) && sugerencia.kg !== null ? formatearKg(sugerencia.kg) : '';
+  return sugerencia.reps.map((reps) => ({ ...serieNueva(reps), kg }));
 }
 
 export function empezarSesion(
-  ejercicios: readonly Pick<Ejercicio, 'id' | 'equipo' | 'grupo'>[],
+  planes: readonly PlanEjercicio[],
   historial: readonly SesionGuardada[],
   ahora: Date,
   id: string,
+  nombre = nombreSesion(planes.map((p) => p.ejercicio)),
 ): SesionEnCurso {
   return {
     id,
-    nombre: nombreSesion(ejercicios),
+    nombre,
     inicio: ahora.toISOString(),
     actual: 0,
-    ejercicios: ejercicios.map((e) => ({ ejercicioId: e.id, series: seriesIniciales(historial, e) })),
+    ejercicios: planes.map((p) => ({
+      ejercicioId: p.ejercicio.id,
+      rango: p.rango,
+      series: seriesIniciales(historial, p, ahora),
+    })),
     descanso: null,
   };
 }
@@ -144,11 +157,11 @@ export function editarSerie(
   }));
 }
 
-// Copia la última serie (sin tildar); si no hay ninguna, una de 10 reps.
+// Copia la última serie (sin tildar); si no hay ninguna, una con el mínimo del rango.
 export function agregarSerie(sesion: SesionEnCurso, indiceEjercicio: number): SesionEnCurso {
   return cambiarEjercicio(sesion, indiceEjercicio, (e) => {
     const ultima = e.series[e.series.length - 1];
-    const nueva: SerieEnCurso = ultima ? { ...ultima, hecha: false } : serieVacia();
+    const nueva: SerieEnCurso = ultima ? { ...ultima, hecha: false } : serieNueva(e.rango.min);
     return { ...e, series: [...e.series, nueva] };
   });
 }
@@ -233,12 +246,10 @@ export function totalSeriesHechas(sesion: SesionEnCurso): number {
   return sesion.ejercicios.reduce((total, e) => total + seriesHechasDe(e), 0);
 }
 
-// "3×12" si todas las series tienen el mismo objetivo; si no, "4 series".
+// "3×8–10": series y rango de reps.
 export function objetivoDe(ejercicio: EjercicioEnCurso): string {
-  const { series } = ejercicio;
-  if (series.length === 0) return 'sin series';
-  const objetivo = series[0].repsObjetivo;
-  return series.every((s) => s.repsObjetivo === objetivo) ? `${series.length}×${objetivo}` : `${series.length} series`;
+  if (ejercicio.series.length === 0) return 'sin series';
+  return `${ejercicio.series.length}×${textoRango(ejercicio.rango)}`;
 }
 
 // ── Terminar ──
@@ -255,6 +266,7 @@ export function cerrarSesion(sesion: SesionEnCurso, ahora: Date, kcal: number): 
     ejercicios: sesion.ejercicios
       .map((e) => ({
         ejercicioId: e.ejercicioId,
+        rango: e.rango,
         seriesTotales: e.series.length,
         series: e.series
           .filter((s) => s.hecha)
