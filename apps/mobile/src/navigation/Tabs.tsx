@@ -7,6 +7,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useEntreno } from '../estado/Entreno';
 import { usePerfilActual } from '../estado/Perfil';
 import { ActividadScreen } from '../screens/ActividadScreen';
+import { ComidaScreen } from '../screens/ComidaScreen';
 import { InicioScreen } from '../screens/InicioScreen';
 import { PantallaTitulo } from '../screens/PantallaTitulo';
 import { colores } from '../theme/tema';
@@ -56,7 +57,16 @@ function ActividadRuta() {
   return <ActividadScreen onAbrirPerfil={() => raiz.navigate('Perfil')} />;
 }
 
-const Comida = () => <PantallaTitulo titulo="Comida" />;
+function ComidaRuta() {
+  const raiz = useNavegacionRaiz();
+  return (
+    <ComidaScreen
+      onBuscar={(dia, comida) => raiz.navigate('BuscarAlimento', { dia, comida })}
+      onEscanear={(dia, comida) => raiz.navigate('EscanearCodigo', { dia, comida })}
+    />
+  );
+}
+
 const Coach = () => <PantallaTitulo titulo="Coach" />;
 
 function IconoTab({ nombre, color, bloqueado }: { nombre: NombreIcono; color: string; bloqueado: boolean }) {
@@ -94,7 +104,7 @@ export function Tabs() {
     >
       <Tab.Screen name="Inicio" component={InicioRuta} />
       <Tab.Screen name="Entreno" component={EntrenoStack} />
-      <Tab.Screen name="Comida" component={Comida} />
+      <Tab.Screen name="Comida" component={ComidaRuta} />
       <Tab.Screen name="Actividad" component={ActividadRuta} />
       <Tab.Screen name="Coach" component={Coach} />
     </Tab.Navigator>
