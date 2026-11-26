@@ -10,6 +10,8 @@ import {
   buscarPorCodigo,
   codigoValido,
   combinarResultados,
+  consultaBusqueda,
+  etiquetaMarca,
   leerMarca,
   leerPorcionOff,
   leerProductosGuardados,
@@ -31,10 +33,50 @@ test('direcciones', () => {
   expect(urlProducto('7790040613607')).toMatch(
     /^https:\/\/world\.openfoodfacts\.org\/api\/v2\/product\/7790040613607\.json\?fields=code,/,
   );
-  const ar = new URL(urlBusqueda('dulce de leche', true));
+  const ar = new URL(urlBusqueda('alfajor', true));
   expect(ar.host).toBe('search.openfoodfacts.org');
-  expect(ar.searchParams.get('q')).toBe('dulce de leche countries:"en:argentina"');
-  expect(new URL(urlBusqueda('alfajor "x"', false)).searchParams.get('q')).toBe('alfajor  x');
+  expect(ar.searchParams.get('q')).toBe('((alfajor) OR brands:"alfajor") AND countries:"en:argentina"');
+  expect(new URL(urlBusqueda('alfajor', false)).searchParams.get('q')).toBe('(alfajor) OR brands:"alfajor"');
+});
+
+test('marca como la guarda Open Food Facts', () => {
+  expect(etiquetaMarca('La Serenísima')).toBe('la-serenisima');
+  expect(etiquetaMarca("Lay's")).toBe('lay-s');
+  expect(etiquetaMarca('  ')).toBe('');
+});
+
+describe('consulta de búsqueda', () => {
+  test('una palabra: también como marca', () => {
+    expect(consultaBusqueda('Casancrem')).toBe('(casancrem) OR brands:"casancrem"');
+  });
+
+  test('sin apóstrofos ni espacios', () => {
+    expect(consultaBusqueda("Lay's")).toBe(`(lay's) OR (lays) OR brands:"lay-s" OR brands:"lays"`);
+    expect(consultaBusqueda('lay s').split(' OR ')).toEqual(expect.arrayContaining(['(lays)', 'brands:"lays"']));
+  });
+
+  test('producto + marca, en los dos órdenes', () => {
+    const partes = consultaBusqueda('manteca la serenisima').split(' OR ');
+    expect(partes[0]).toBe('(manteca la serenisima)');
+    expect(partes).toContain('(manteca brands:"la-serenisima")');
+    expect(partes).toContain('(la serenisima brands:"manteca")');
+    expect(partes).toContain('(manteca la brands:"serenisima")');
+    expect(consultaBusqueda('papas krachitos').split(' OR ')).toContain('(papas brands:"krachitos")');
+  });
+
+  test('sin operadores de la búsqueda', () => {
+    expect(consultaBusqueda('alfajor "x"').startsWith('(alfajor x)')).toBe(true);
+    expect(consultaBusqueda('coca-cola:*').startsWith('(coca cola)')).toBe(true);
+    expect(consultaBusqueda('a\\b (c)').startsWith('(a b c)')).toBe(true);
+    // "or" escrito por el usuario queda en minúsculas: no es un operador
+    expect(consultaBusqueda('pan OR queso').startsWith('(pan or queso)')).toBe(true);
+    expect(consultaBusqueda(' "" ')).toBe('');
+  });
+
+  test('con más de 5 palabras no se parte', () => {
+    expect(consultaBusqueda('uno dos tres cuatro cinco').split(' OR ')).toHaveLength(12);
+    expect(consultaBusqueda('uno dos tres cuatro cinco seis').split(' OR ')).toHaveLength(4);
+  });
 });
 
 test('marca', () => {

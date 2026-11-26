@@ -25,10 +25,48 @@ export function urlProducto(codigo: string): string {
   return `https://world.openfoodfacts.org/api/v2/product/${encodeURIComponent(codigo.trim())}.json?fields=${CAMPOS}`;
 }
 
+// La marca como la guarda Open Food Facts en brands: "La Serenísima" → "la-serenisima", "Lay's" → "lay-s".
+export function etiquetaMarca(texto: string): string {
+  return normalizar(texto)
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+}
+
+const MAXIMO_PALABRAS = 5;
+
+// La consulta de búsqueda. Como la búsqueda exige todas las palabras en el nombre, se busca
+// también (con OR):
+// - sin apóstrofos ni espacios: "lay's" → "lays";
+// - como marca: brands:"lay-s";
+// - partido en producto + marca: "manteca la serenisima" → manteca brands:"la-serenisima".
+export function consultaBusqueda(texto: string): string {
+  // Sin los caracteres que la búsqueda usa como operadores; en minúsculas, para que "or" no sea OR.
+  const limpio = texto
+    .toLowerCase()
+    .replace(/["\\():*?~^[\]{}!+\-/<>=&|]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+  if (!limpio) return '';
+  // Con muchas palabras, partirla daría demasiadas combinaciones.
+  const palabras = limpio.split(' ');
+  const cortes = palabras.length <= MAXIMO_PALABRAS ? palabras.length : 1;
+  const junto = limpio.replace(/['’\s]/g, '');
+  const partes = new Set([`(${limpio})`]);
+  if (junto && junto !== limpio) partes.add(`(${junto})`);
+  for (const marca of [etiquetaMarca(limpio), etiquetaMarca(junto)]) if (marca) partes.add(`brands:"${marca}"`);
+  for (let corte = 1; corte < cortes; corte++) {
+    const antes = palabras.slice(0, corte).join(' ');
+    const despues = palabras.slice(corte).join(' ');
+    partes.add(`(${antes} brands:"${etiquetaMarca(despues)}")`);
+    partes.add(`(${despues} brands:"${etiquetaMarca(antes)}")`);
+  }
+  return [...partes].join(' OR ');
+}
+
 // Búsqueda por texto (search-a-licious). Con soloArgentina, filtra los productos de Argentina.
 export function urlBusqueda(texto: string, soloArgentina: boolean, cantidad = 20): string {
-  const limpio = texto.replace(/["\\]/g, ' ').trim();
-  const q = soloArgentina ? `${limpio} countries:"en:argentina"` : limpio;
+  const consulta = consultaBusqueda(texto);
+  const q = soloArgentina ? `(${consulta}) AND countries:"en:argentina"` : consulta;
   return `https://search.openfoodfacts.org/search?q=${encodeURIComponent(q)}&page_size=${cantidad}&fields=${CAMPOS}`;
 }
 
