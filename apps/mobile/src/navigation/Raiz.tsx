@@ -7,6 +7,7 @@ import { useEntreno } from '../estado/Entreno';
 import { EditarRutinaScreen } from '../screens/EditarRutinaScreen';
 import { PerfilScreen } from '../screens/PerfilScreen';
 import { BuscarAlimentoScreen } from '../screens/BuscarAlimentoScreen';
+import { EscanearCodigoScreen } from '../screens/EscanearCodigoScreen';
 import { ResumenSesionScreen } from '../screens/ResumenSesionScreen';
 import { SesionArmadaScreen } from '../screens/SesionArmadaScreen';
 import { SesionEnCursoScreen } from '../screens/SesionEnCursoScreen';
@@ -77,6 +78,19 @@ function BuscarAlimentoRuta({ navigation, route }: NativeStackScreenProps<RaizPa
       dia={dia}
       comida={comida}
       onVolver={() => navigation.goBack()}
+      onEscanear={() => navigation.replace('EscanearCodigo', { dia, comida })}
+    />
+  );
+}
+
+function EscanearCodigoRuta({ navigation, route }: NativeStackScreenProps<RaizParamList, 'EscanearCodigo'>) {
+  const { dia, comida } = route.params;
+  return (
+    <EscanearCodigoScreen
+      dia={dia}
+      comida={comida}
+      onCerrar={() => navigation.goBack()}
+      onBuscarPorNombre={() => navigation.replace('BuscarAlimento', { dia, comida })}
     />
   );
 }
@@ -115,6 +129,11 @@ export function Raiz() {
       />
       <Stack.Screen name="Perfil" component={PerfilRuta} options={{ headerShown: false }} />
       <Stack.Screen name="BuscarAlimento" component={BuscarAlimentoRuta} options={{ headerShown: false }} />
+      <Stack.Screen
+        name="EscanearCodigo"
+        component={EscanearCodigoRuta}
+        options={{ headerShown: false, presentation: 'fullScreenModal' }}
+      />
     </Stack.Navigator>
   );
 }

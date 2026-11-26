@@ -26,10 +26,11 @@ interface BuscarAlimentoScreenProps {
   dia: string;
   comida: Comida;
   onVolver: () => void;
+  onEscanear: () => void;
 }
 
 // Buscador: comidas caseras (primero) y productos de Open Food Facts; y los recientes.
-export function BuscarAlimentoScreen({ dia, comida, onVolver }: BuscarAlimentoScreenProps) {
+export function BuscarAlimentoScreen({ dia, comida, onVolver, onEscanear }: BuscarAlimentoScreenProps) {
   const insets = useSafeAreaInsets();
   const { registros, productos, agregar } = useComidas();
   const [texto, setTexto] = useState('');
@@ -105,6 +106,14 @@ export function BuscarAlimentoScreen({ dia, comida, onVolver }: BuscarAlimentoSc
           style={styles.entrada}
           accessibilityLabel="Buscar alimento"
         />
+        <Pressable
+          onPress={onEscanear}
+          hitSlop={8}
+          accessibilityRole="button"
+          accessibilityLabel="Escanear código de barras"
+        >
+          <Ionicons name="barcode-outline" size={22} color={colores.textoSecundario} />
+        </Pressable>
       </View>
 
       <View style={styles.pestanas} accessibilityRole="tablist">
@@ -147,7 +156,7 @@ export function BuscarAlimentoScreen({ dia, comida, onVolver }: BuscarAlimentoSc
             {pestana === 'recientes'
               ? 'Acá aparecen los últimos alimentos que cargaste.'
               : consulta.length === 0
-                ? 'Escribí qué comiste.'
+                ? 'Escribí qué comiste, o escaneá el código del envase.'
                 : actual && envasados.tipo !== 'buscando'
                   ? 'No encontramos nada con ese nombre.'
                   : ''}
