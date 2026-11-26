@@ -7,6 +7,7 @@ import {
   borrarRutina,
   conflictoDeDia,
   diaDeSemana,
+  entrenoDeHoy,
   duracionEstimadaMin,
   errorRutina,
   guardarRutina,
@@ -179,6 +180,38 @@ describe('la lista de rutinas', () => {
       { ejercicio: { id: 'press', equipo: 'barra', grupo: 'pecho' }, series: 3, rango: R(6, 10) },
       { ejercicio: { id: 'vuelos', equipo: 'barra', grupo: 'pecho' }, series: 3, rango: R(10, 15) },
     ]);
+  });
+});
+
+describe('entrenoDeHoy (Inicio)', () => {
+  const armados = [{ grupo: 'pecho' as const }, { grupo: 'hombros' as const }];
+
+  test('primero la sesión en curso', () => {
+    expect(entrenoDeHoy({ nombre: 'Empuje', ejercicios: [1, 2] }, empuje, armados)).toEqual({
+      nombre: 'Empuje',
+      ejercicios: 2,
+      enCurso: true,
+      rutinaId: null,
+    });
+  });
+
+  test('después la rutina del día', () => {
+    expect(entrenoDeHoy(null, empuje, armados)).toEqual({
+      nombre: 'Empuje',
+      ejercicios: 3,
+      enCurso: false,
+      rutinaId: 'empuje',
+    });
+  });
+
+  test('después lo armado a mano; si no hay nada, null', () => {
+    expect(entrenoDeHoy(null, null, armados)).toEqual({
+      nombre: 'Pecho y hombros',
+      ejercicios: 2,
+      enCurso: false,
+      rutinaId: null,
+    });
+    expect(entrenoDeHoy(null, { ...empuje, ejercicios: [] }, [])).toBeNull();
   });
 });
 

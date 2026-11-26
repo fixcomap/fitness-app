@@ -37,11 +37,12 @@ export interface ResumenDia {
   entreno: EntrenoDeHoy | null; // null: todavía no se armó la sesión
 }
 
-// La sesión armada (o en curso) de hoy.
+// Lo que toca entrenar hoy: la sesión en curso, la rutina del día o la sesión armada.
 export interface EntrenoDeHoy {
   nombre: string;
   ejercicios: number;
   enCurso: boolean;
+  rutinaId: string | null; // si es la rutina del día (todavía sin empezar)
 }
 
 export interface DatosDelDia {
@@ -87,7 +88,7 @@ export function resumenDeEjemplo(metaPasos: number): ResumenDia {
     },
     pasos: { automaticos: 7842, manuales: 0, meta: metaPasos },
     minutosActivos: { semana: 110, hoy: 34, metaSemana: META_MINUTOS_SEMANA_OMS },
-    entreno: { nombre: 'Empuje: pecho y hombros', ejercicios: 5, enCurso: false },
+    entreno: { nombre: 'Empuje: pecho y hombros', ejercicios: 5, enCurso: false, rutinaId: null },
   };
 }
 

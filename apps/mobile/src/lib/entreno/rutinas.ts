@@ -1,10 +1,11 @@
 // Rutinas: plantillas de entreno con sus ejercicios (series y rango de reps) y los
 // días de la semana en que se hacen. Un día tiene como mucho una rutina.
 // Funciones puras: cada una devuelve un objeto nuevo y no toca el que recibe.
-import { inicioDeSemana, sumarDias } from '../fechas';
-import { DESCANSO_POR_DEFECTO_S, SERIES_POR_DEFECTO, type PlanEjercicio } from './sesion';
-import { ajustarRango, rangoValido, type Rango } from './rangos';
 import type { Ejercicio } from '../../data/tipos';
+import { inicioDeSemana, sumarDias } from '../fechas';
+import type { EntrenoDeHoy } from '../resumenDia';
+import { ajustarRango, rangoValido, type Rango } from './rangos';
+import { DESCANSO_POR_DEFECTO_S, nombreSesion, SERIES_POR_DEFECTO, type PlanEjercicio } from './sesion';
 
 // Día de la semana: 0 = lunes … 6 = domingo.
 export type DiaSemana = 0 | 1 | 2 | 3 | 4 | 5 | 6;
@@ -206,6 +207,21 @@ export function planesDeRutina(
     const ejercicio = buscar(e.ejercicioId);
     return ejercicio ? [{ ejercicio, rango: e.rango, series: e.series }] : [];
   });
+}
+
+// Qué mostrar en "Entreno de hoy" (Inicio): la sesión en curso; si no, la rutina
+// del día; si no, la sesión armada a mano; si no hay nada, null.
+export function entrenoDeHoy(
+  enCurso: { nombre: string; ejercicios: readonly unknown[] } | null,
+  rutina: Pick<Rutina, 'id' | 'nombre' | 'ejercicios'> | null,
+  armados: readonly Pick<Ejercicio, 'grupo'>[],
+): EntrenoDeHoy | null {
+  if (enCurso) return { nombre: enCurso.nombre, ejercicios: enCurso.ejercicios.length, enCurso: true, rutinaId: null };
+  if (rutina && rutina.ejercicios.length > 0) {
+    return { nombre: rutina.nombre, ejercicios: rutina.ejercicios.length, enCurso: false, rutinaId: rutina.id };
+  }
+  if (armados.length === 0) return null;
+  return { nombre: nombreSesion(armados), ejercicios: armados.length, enCurso: false, rutinaId: null };
 }
 
 // ── Lo guardado ──

@@ -13,7 +13,7 @@ import { formatearFechaCorta, formatearNumero, inicial } from '../lib/formato';
 import { useDatosDelDia } from '../estado/DatosDelDia';
 import { useEntreno } from '../estado/Entreno';
 import { kcalEntrenoDelDia } from '../lib/entreno/resumen';
-import { nombreSesion } from '../lib/entreno/sesion';
+import { entrenoDeHoy as elegirEntrenoDeHoy, rutinaDelDia } from '../lib/entreno/rutinas';
 import { claveDia } from '../lib/pasosManuales';
 import {
   armarResumenDia,
@@ -21,6 +21,7 @@ import {
   pasosTotales,
   porcentaje,
   porcentajeKcal,
+  type EntrenoDeHoy,
   type Meta,
 } from '../lib/resumenDia';
 import { colores } from '../theme/tema';
@@ -32,7 +33,7 @@ const CONSEJO_EJEMPLO = 'Ayer te faltaron 40 g de proteína. Sumá un yogur grie
 const COLOR_MACRO = { proteinas: '#F2F2F2', carbos: '#BDBDBD', grasas: '#8A8A8A' } as const;
 
 interface InicioScreenProps {
-  onEmpezarEntreno: () => void; // abre la sesión armada (o la que está en curso)
+  onEmpezarEntreno: (entreno: EntrenoDeHoy) => void; // la rutina del día, la sesión armada o la que está en curso
   onArmarSesion: () => void; // lleva a Entreno para elegir ejercicios
   onAbrirCoach: () => void;
 }
@@ -58,12 +59,11 @@ export function InicioScreen({ onEmpezarEntreno, onArmarSesion, onAbrirCoach }: 
   // Al volver a esta pestaña, pedimos los pasos actualizados.
   useFocusEffect(refrescarPasos);
 
-  const { ejerciciosArmados, enCurso, historial } = useEntreno();
-  const entrenoDeHoy = useMemo(() => {
-    if (enCurso) return { nombre: enCurso.nombre, ejercicios: enCurso.ejercicios.length, enCurso: true };
-    if (ejerciciosArmados.length === 0) return null;
-    return { nombre: nombreSesion(ejerciciosArmados), ejercicios: ejerciciosArmados.length, enCurso: false };
-  }, [enCurso, ejerciciosArmados]);
+  const { ejerciciosArmados, enCurso, historial, rutinas } = useEntreno();
+  const entrenoDeHoy = useMemo(
+    () => elegirEntrenoDeHoy(enCurso, rutinaDelDia(rutinas, new Date()), ejerciciosArmados),
+    [enCurso, rutinas, ejerciciosArmados],
+  );
 
   // Pasos y minutos del sensor + cargados a mano; las kcal de actividad salen de
   // esos pasos y de los entrenamientos terminados hoy.
@@ -150,7 +150,7 @@ export function InicioScreen({ onEmpezarEntreno, onArmarSesion, onAbrirCoach }: 
         {/* Permiso del podómetro o aviso de Android */}
         <AvisoFuenteActividad estado={estadoFuente} onPermitir={pedirPermiso} />
 
-        {/* Entreno de hoy: la sesión armada o, si no hay, invitación a armarla */}
+        {/* Entreno de hoy: la sesión en curso, la rutina del día o la armada; si no hay, invitación a armarla */}
         <View style={styles.entreno}>
           <View style={styles.flex}>
             <Text style={styles.entrenoEtiqueta}>
@@ -161,7 +161,7 @@ export function InicioScreen({ onEmpezarEntreno, onArmarSesion, onAbrirCoach }: 
             <Text style={styles.entrenoNombre}>{entreno ? entreno.nombre : 'Armá tu sesión'}</Text>
           </View>
           <Pressable
-            onPress={entreno ? onEmpezarEntreno : onArmarSesion}
+            onPress={entreno ? () => onEmpezarEntreno(entreno) : onArmarSesion}
             style={({ pressed }) => [styles.botonEmpezar, pressed && styles.presionado]}
             accessibilityRole="button"
           >
