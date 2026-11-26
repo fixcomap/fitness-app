@@ -2,6 +2,10 @@ const test = require('node:test');
 const assert = require('node:assert');
 const { leerResultadoFoto, MAXIMO_ITEMS } = require('../src/ia/foto');
 const { ErrorIa } = require('../src/ia/proveedor');
+const express = require('express');
+const { crearRutasIa } = require('../src/rutasIa');
+const { LIMITES } = require('../src/limites');
+const { LIMITES_DIARIOS_POR_DEFECTO } = require('../src/ia/config');
 const { DISPOSITIVO, OTRO_DISPOSITIVO, iaFalsa, usoEnMemoria, conApp, jpeg } = require('./ayudas');
 
 const milanesa = {
@@ -93,6 +97,48 @@ test('la comida es opcional', async () => {
     assert.strictEqual(r.status, 200);
     assert.deepStrictEqual(ia.llamadas[0].contexto, { comida: null });
   });
+});
+
+// Parecen el principio de un JPEG (0xff 0xd8 0xff), pero son JSON.
+const JSON_COMO_FOTO = [{ length: 12, 0: 255, 1: 216, 2: 255 }, [255, 216, 255, 224, 0, 0, 0, 0, 0, 0, 0, 0]];
+
+test('un JSON (objeto o array) en vez de la foto: no se lee y da 415, sin llamar a la IA', async () => {
+  const ia = iaFalsa({ foto: { items: [] } });
+  await conApp({ ia, uso: usoEnMemoria() }, async (pedir) => {
+    for (const cuerpo of JSON_COMO_FOTO) {
+      const r = await pedir('POST', '/comida/foto', {
+        headers: { ...conDispositivo(), 'Content-Type': 'application/json' },
+        cuerpo: JSON.stringify(cuerpo),
+      });
+      assert.strictEqual(r.status, 415, JSON.stringify(cuerpo));
+      assert.match(r.body.error, /JPEG o PNG/);
+    }
+    assert.strictEqual(ia.llamadas.length, 0);
+  });
+});
+
+test('si otro parser ya leyó el cuerpo (objeto o array): 400, sin llamar a la IA', async () => {
+  // El parser JSON global va después de las rutas de IA; acá se pone antes para probar el chequeo.
+  const ia = iaFalsa({ foto: { items: [] } });
+  const app = express();
+  app.use(express.json());
+  app.use(crearRutasIa({ ia, uso: usoEnMemoria(), limitesDiarios: LIMITES_DIARIOS_POR_DEFECTO, limites: LIMITES }));
+  const servidor = app.listen(0);
+  try {
+    const { port } = servidor.address();
+    for (const cuerpo of JSON_COMO_FOTO) {
+      const res = await fetch(`http://127.0.0.1:${port}/comida/foto`, {
+        method: 'POST',
+        headers: { 'X-Dispositivo': DISPOSITIVO, 'Content-Type': 'application/json' },
+        body: JSON.stringify(cuerpo),
+      });
+      assert.strictEqual(res.status, 400, JSON.stringify(cuerpo));
+      assert.deepStrictEqual(await res.json(), { error: 'Cuerpo de foto inválido' });
+    }
+    assert.strictEqual(ia.llamadas.length, 0);
+  } finally {
+    servidor.close();
+  }
 });
 
 test('pedidos inválidos: sin dispositivo, otra comida, ni JPEG ni PNG, o más de 2 MB', async () => {
