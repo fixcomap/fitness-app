@@ -6,6 +6,7 @@ import { leerHistorialGuardado, type RegistroDia } from './actividad/historial';
 import type { Alimento } from './comida/alimentos';
 import { leerDiarioGuardado, type RegistroComida } from './comida/diario';
 import { leerProductosGuardados } from './comida/openFoodFacts';
+import { leerPropiosGuardados } from './comida/propios';
 import { leerConfiguracion, type Configuracion } from './configuracion';
 import { leerPerfilGuardado, type PerfilUsuario } from './perfil';
 import { leerArmadaGuardada, leerEnCursoGuardada, leerSesionesGuardadas } from './entreno/historial';
@@ -25,6 +26,7 @@ const CLAVE_RUTINAS = 'rutinas:v1';
 const CLAVE_PERFIL = 'perfil:v1';
 const CLAVE_DIARIO_COMIDAS = 'diarioComidas:v1';
 const CLAVE_PRODUCTOS_OFF = 'productosOff:v1';
+const CLAVE_ALIMENTOS_PROPIOS = 'alimentosPropios:v1';
 
 async function leerJson(clave: string): Promise<unknown> {
   try {
@@ -125,4 +127,13 @@ export async function leerProductosOff(): Promise<Alimento[]> {
 
 export async function guardarProductosOff(productos: readonly Alimento[]): Promise<void> {
   await AsyncStorage.setItem(CLAVE_PRODUCTOS_OFF, JSON.stringify(productos));
+}
+
+// Alimentos creados por el usuario.
+export async function leerAlimentosPropios(): Promise<Alimento[]> {
+  return leerPropiosGuardados(await leerJson(CLAVE_ALIMENTOS_PROPIOS));
+}
+
+export async function guardarAlimentosPropios(propios: readonly Alimento[]): Promise<void> {
+  await AsyncStorage.setItem(CLAVE_ALIMENTOS_PROPIOS, JSON.stringify(propios));
 }

@@ -26,15 +26,16 @@ interface EscanearCodigoScreenProps {
   comida: Comida;
   onCerrar: () => void;
   onBuscarPorNombre: () => void;
+  onCrear: (codigo: string) => void; // crear un alimento propio con ese código
 }
 
 // Escáner de código de barras: al detectar un código, la tarjeta del producto.
-export function EscanearCodigoScreen({ dia, comida, onCerrar, onBuscarPorNombre }: EscanearCodigoScreenProps) {
+export function EscanearCodigoScreen({ dia, comida, onCerrar, onBuscarPorNombre, onCrear }: EscanearCodigoScreenProps) {
   const insets = useSafeAreaInsets();
   const [permiso, pedirPermiso] = useCameraPermissions();
   const [linterna, setLinterna] = useState(false);
   const [lectura, setLectura] = useState<Lectura | null>(null);
-  const { productos, agregar, recordar } = useComidas();
+  const { productos, propios, agregar, recordar } = useComidas();
   const pedido = useRef<AbortController | null>(null);
   // La cámara puede avisar el mismo código varias veces seguidas: se toma el primero.
   const leyendo = useRef(false);
@@ -42,9 +43,9 @@ export function EscanearCodigoScreen({ dia, comida, onCerrar, onBuscarPorNombre 
   useEffect(() => () => pedido.current?.abort(), []);
 
   const buscar = (codigo: string) => {
-    const guardado = buscarPorCodigo(productos, codigo);
+    // Primero los creados por el usuario y los ya usados: andan sin internet.
+    const guardado = buscarPorCodigo(propios, codigo) ?? buscarPorCodigo(productos, codigo);
     if (guardado) {
-      // Ya usado: anda sin internet.
       setLectura({ tipo: 'encontrado', codigo, alimento: guardado, cantidad: cantidadInicial(guardado) });
       return;
     }
@@ -164,10 +165,17 @@ export function EscanearCodigoScreen({ dia, comida, onCerrar, onBuscarPorNombre 
                 {lectura.sinKcal
                   ? `El producto ${lectura.codigo} está en Open Food Facts pero sin las calorías cargadas.`
                   : `El código ${lectura.codigo} no está en Open Food Facts.`}{' '}
-                Probá buscarlo por nombre.
+                Buscalo por nombre o crealo con los datos de la etiqueta.
               </Text>
               <Pressable onPress={onBuscarPorNombre} style={styles.boton} accessibilityRole="button">
                 <Text style={styles.textoBoton}>Buscar por nombre</Text>
+              </Pressable>
+              <Pressable
+                onPress={() => onCrear(lectura.codigo)}
+                style={[styles.boton, styles.botonCrear]}
+                accessibilityRole="button"
+              >
+                <Text style={styles.textoBoton}>Crear alimento</Text>
               </Pressable>
               <BotonTexto texto="Escanear otro" onPress={otraVez} />
             </>
@@ -344,6 +352,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     paddingHorizontal: 24,
   },
+  botonCrear: { backgroundColor: colores.tarjetaElevada },
   botonAgregar: { flexDirection: 'row', justifyContent: 'space-between' },
   textoBoton: { color: colores.texto, fontSize: 17, fontWeight: '800' },
   botonSecundario: {

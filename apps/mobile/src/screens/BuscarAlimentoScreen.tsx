@@ -27,19 +27,25 @@ interface BuscarAlimentoScreenProps {
   comida: Comida;
   onVolver: () => void;
   onEscanear: () => void;
+  onCrear: (nombre: string) => void; // crear un alimento propio
 }
 
-// Buscador: comidas caseras (primero) y productos de Open Food Facts; y los recientes.
-export function BuscarAlimentoScreen({ dia, comida, onVolver, onEscanear }: BuscarAlimentoScreenProps) {
+// Buscador: los alimentos propios y las comidas caseras (primero), y productos de Open Food
+// Facts; y los recientes. Si no está, se puede crear.
+export function BuscarAlimentoScreen({ dia, comida, onVolver, onEscanear, onCrear }: BuscarAlimentoScreenProps) {
   const insets = useSafeAreaInsets();
-  const { registros, productos, agregar } = useComidas();
+  const { registros, productos, propios, agregar } = useComidas();
   const [texto, setTexto] = useState('');
   const [pestana, setPestana] = useState<'resultados' | 'recientes'>('resultados');
   const [elegido, setElegido] = useState<{ alimento: Alimento; cantidad: Cantidad } | null>(null);
   const [envasados, setEnvasados] = useState<EstadoEnvasados>({ tipo: 'nada' });
 
   const consulta = normalizar(texto);
-  const caseras = useMemo(() => buscarCaseras(texto), [texto]);
+  // Los propios van primero: si alguien lo creó, es lo que busca.
+  const locales = useMemo(
+    () => [...(consulta ? buscarGuardados(propios, consulta) : []), ...buscarCaseras(texto)],
+    [consulta, propios, texto],
+  );
   const recientes = useMemo(() => alimentosRecientes(registros), [registros]);
 
   useEffect(() => {
@@ -62,11 +68,12 @@ export function BuscarAlimentoScreen({ dia, comida, onVolver, onEscanear }: Busc
   // Sólo vale lo que corresponde a lo que está escrito ahora.
   const actual = consulta.length >= MINIMO_LETRAS && 'consulta' in envasados && envasados.consulta === consulta;
   const resultados = useMemo(() => {
-    if (actual && envasados.tipo === 'listo') return combinarResultados(caseras, envasados.argentina, envasados.mundo);
+    if (actual && envasados.tipo === 'listo') return combinarResultados(locales, envasados.argentina, envasados.mundo);
     // Sin conexión (o mientras busca), también los productos ya usados que coinciden.
-    return combinarResultados(caseras, consulta ? buscarGuardados(productos, consulta) : [], []);
-  }, [actual, envasados, caseras, consulta, productos]);
+    return combinarResultados(locales, consulta ? buscarGuardados(productos, consulta) : [], []);
+  }, [actual, envasados, locales, consulta, productos]);
 
+  const buscando = consulta.length >= MINIMO_LETRAS && (!actual || envasados.tipo === 'buscando');
   const lista = pestana === 'resultados' ? resultados : recientes;
   const abrir = (alimento: Alimento) => setElegido({ alimento, cantidad: cantidadInicial(alimento) });
 
@@ -144,12 +151,24 @@ export function BuscarAlimentoScreen({ dia, comida, onVolver, onEscanear }: Busc
           ) : undefined
         }
         ListFooterComponent={
-          pestana === 'resultados' && consulta.length >= MINIMO_LETRAS && (!actual || envasados.tipo === 'buscando') ? (
+          pestana !== 'resultados' || consulta.length === 0 ? undefined : buscando ? (
             <View style={styles.buscando}>
               <ActivityIndicator color={colores.textoSecundario} />
               <Text style={styles.textoVacio}>Buscando productos…</Text>
             </View>
-          ) : undefined
+          ) : (
+            <Pressable
+              onPress={() => onCrear(texto.trim())}
+              style={({ pressed }) => [styles.crear, pressed && styles.presionado]}
+              accessibilityRole="button"
+            >
+              <Ionicons name="create-outline" size={22} color={colores.acento} />
+              <View style={styles.flex}>
+                <Text style={styles.textoCrear}>Crear alimento</Text>
+                <Text style={styles.subtitulo}>¿No está? Cargalo con los datos de la etiqueta.</Text>
+              </View>
+            </Pressable>
+          )
         }
         ListEmptyComponent={
           <Text style={styles.textoVacio}>
@@ -257,6 +276,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  crear: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 16 },
+  textoCrear: { color: colores.acento, fontSize: 16, fontWeight: '800' },
   aviso: { color: colores.acentoSuave, fontSize: 13, paddingVertical: 10 },
   buscando: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, paddingVertical: 16 },
   textoVacio: { color: colores.textoSecundario, fontSize: 14, textAlign: 'center', paddingVertical: 24 },

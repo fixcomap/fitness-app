@@ -18,6 +18,7 @@ export type RaizParamList = {
   Perfil: undefined;
   BuscarAlimento: { dia: string; comida: Comida };
   EscanearCodigo: { dia: string; comida: Comida };
+  CrearAlimento: { dia: string; comida: Comida; nombre?: string; codigo?: string };
 };
 
 export type NavegacionRaiz = NativeStackNavigationProp<RaizParamList>;

@@ -7,6 +7,7 @@ import { useEntreno } from '../estado/Entreno';
 import { EditarRutinaScreen } from '../screens/EditarRutinaScreen';
 import { PerfilScreen } from '../screens/PerfilScreen';
 import { BuscarAlimentoScreen } from '../screens/BuscarAlimentoScreen';
+import { CrearAlimentoScreen } from '../screens/CrearAlimentoScreen';
 import { EscanearCodigoScreen } from '../screens/EscanearCodigoScreen';
 import { ResumenSesionScreen } from '../screens/ResumenSesionScreen';
 import { SesionArmadaScreen } from '../screens/SesionArmadaScreen';
@@ -79,6 +80,7 @@ function BuscarAlimentoRuta({ navigation, route }: NativeStackScreenProps<RaizPa
       comida={comida}
       onVolver={() => navigation.goBack()}
       onEscanear={() => navigation.replace('EscanearCodigo', { dia, comida })}
+      onCrear={(nombre) => navigation.navigate('CrearAlimento', { dia, comida, nombre })}
     />
   );
 }
@@ -91,6 +93,22 @@ function EscanearCodigoRuta({ navigation, route }: NativeStackScreenProps<RaizPa
       comida={comida}
       onCerrar={() => navigation.goBack()}
       onBuscarPorNombre={() => navigation.replace('BuscarAlimento', { dia, comida })}
+      onCrear={(codigo) => navigation.replace('CrearAlimento', { dia, comida, codigo })}
+    />
+  );
+}
+
+function CrearAlimentoRuta({ navigation, route }: NativeStackScreenProps<RaizParamList, 'CrearAlimento'>) {
+  const { dia, comida, nombre, codigo } = route.params;
+  return (
+    <CrearAlimentoScreen
+      dia={dia}
+      comida={comida}
+      nombreInicial={nombre}
+      codigoInicial={codigo}
+      onVolver={() => navigation.goBack()}
+      // Agregado al diario: vuelve a la pestaña Comida.
+      onListo={() => navigation.popTo('Tabs')}
     />
   );
 }
@@ -112,6 +130,7 @@ export function Raiz() {
         // Sin encabezado nativo: la pantalla dibuja el suyo respetando el margen de arriba.
         options={{ headerShown: false, presentation: 'fullScreenModal' }}
       />
+      <Stack.Screen name="CrearAlimento" component={CrearAlimentoRuta} options={{ headerShown: false }} />
       <Stack.Screen
         name="SesionEnCurso"
         component={SesionEnCursoRuta}

@@ -17,10 +17,10 @@ export interface Porcion {
   estimada: boolean; // true: estimación nuestra; false: la declara el fabricante
 }
 
-export type OrigenAlimento = 'casera' | 'envasado';
+export type OrigenAlimento = 'casera' | 'envasado' | 'propio'; // propio: lo creó el usuario
 
 export interface Alimento extends Nutrientes {
-  id: string; // "casera:milanesa-carne-horno" o "off:7790040613607"
+  id: string; // "casera:milanesa-carne-horno", "off:7790040613607" o "propio:…"
   nombre: string;
   origen: OrigenAlimento;
   marca: string | null;
@@ -91,7 +91,7 @@ export function buscarCaseras(
 
 // "Casera · 245 kcal / 100 g" o "Arcor · 443 kcal / 100 g".
 export function subtituloAlimento(a: Alimento): string {
-  const origen = a.origen === 'casera' ? 'Casera' : (a.marca ?? 'Envasado');
+  const origen = a.origen === 'casera' ? 'Casera' : a.origen === 'propio' ? 'Creado por vos' : (a.marca ?? 'Envasado');
   return `${origen} · ${Math.round(a.kcal)} kcal / 100 g`;
 }
 
@@ -112,7 +112,7 @@ export function leerAlimento(x: unknown): Alimento | null {
   if (typeof x !== 'object' || x === null) return null;
   const a = x as Record<string, unknown>;
   if (!esTexto(a.id) || !esTexto(a.nombre) || !a.nombre.trim()) return null;
-  if (a.origen !== 'casera' && a.origen !== 'envasado') return null;
+  if (a.origen !== 'casera' && a.origen !== 'envasado' && a.origen !== 'propio') return null;
   if (!esNumero(a.kcal, 1000) || !esNumero(a.proteinas, 100) || !esNumero(a.carbos, 100) || !esNumero(a.grasas, 100)) {
     return null;
   }
