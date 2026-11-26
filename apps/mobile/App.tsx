@@ -3,6 +3,7 @@ import { StatusBar } from 'expo-status-bar';
 import { View } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
+import { ProveedorComidas } from './src/estado/Comidas';
 import { ProveedorDatosDelDia } from './src/estado/DatosDelDia';
 import { ProveedorEntreno } from './src/estado/Entreno';
 import { ProveedorPerfil, usePerfil } from './src/estado/Perfil';
@@ -30,9 +31,11 @@ function Puerta() {
   return (
     <ProveedorDatosDelDia>
       <ProveedorEntreno>
-        <NavigationContainer theme={tema}>
-          <Raiz />
-        </NavigationContainer>
+        <ProveedorComidas>
+          <NavigationContainer theme={tema}>
+            <Raiz />
+          </NavigationContainer>
+        </ProveedorComidas>
       </ProveedorEntreno>
     </ProveedorDatosDelDia>
   );

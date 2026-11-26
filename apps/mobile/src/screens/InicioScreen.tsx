@@ -10,8 +10,10 @@ import { TarjetaCoach } from '../components/inicio/TarjetaCoach';
 import { AnilloProgreso } from '../components/progreso/AnilloProgreso';
 import { BarraProgreso, BarraSegmentada } from '../components/progreso/Barras';
 import { formatearFechaCorta, formatearNumero, inicial } from '../lib/formato';
+import { useComidas } from '../estado/Comidas';
 import { useDatosDelDia } from '../estado/DatosDelDia';
 import { useEntreno } from '../estado/Entreno';
+import { diaComidas } from '../lib/comida/diario';
 import { kcalEntrenoDelDia } from '../lib/entreno/resumen';
 import { entrenoDeHoy as elegirEntrenoDeHoy, rutinaDelDia } from '../lib/entreno/rutinas';
 import { claveDia } from '../lib/pasosManuales';
@@ -61,13 +63,14 @@ export function InicioScreen({ onEmpezarEntreno, onArmarSesion, onAbrirCoach, on
   useFocusEffect(refrescarPasos);
 
   const { ejerciciosArmados, enCurso, historial, rutinas } = useEntreno();
+  const { registros } = useComidas();
   const entrenoDeHoy = useMemo(
     () => elegirEntrenoDeHoy(enCurso, rutinaDelDia(rutinas, new Date()), ejerciciosArmados),
     [enCurso, rutinas, ejerciciosArmados],
   );
 
   // Pasos y minutos del sensor + cargados a mano; las kcal de actividad salen de
-  // esos pasos y de los entrenamientos terminados hoy.
+  // esos pasos y de los entrenamientos terminados hoy; lo comido, del diario de comidas.
   const resumen = useMemo(
     () =>
       armarResumenDia({
@@ -79,8 +82,9 @@ export function InicioScreen({ onEmpezarEntreno, onArmarSesion, onAbrirCoach, on
         kcalEntreno: kcalEntrenoDelDia(historial, claveDia(new Date())),
         entreno: entrenoDeHoy,
         metas: metasNutricion(perfil),
+        comido: diaComidas(registros, claveDia(new Date())).totales,
       }),
-    [config.metaPasos, pasosSensorHoy, totalesDeHoy, minutos, perfil, historial, entrenoDeHoy],
+    [config.metaPasos, pasosSensorHoy, totalesDeHoy, minutos, perfil, historial, entrenoDeHoy, registros],
   );
   const { kcal, macros, pasos, minutosActivos, entreno } = resumen;
   const totalPasos = pasosTotales(pasos);
