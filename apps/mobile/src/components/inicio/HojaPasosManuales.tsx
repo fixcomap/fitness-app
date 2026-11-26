@@ -14,7 +14,6 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { META_PASOS_MAXIMA, META_PASOS_MINIMA } from '../../lib/configuracion';
 import { formatearNumero } from '../../lib/formato';
 import {
   convertir,
@@ -44,7 +43,7 @@ interface HojaPasosManualesProps {
   conPodometro: boolean; // si se descuenta lo que el celu ya contó
   onBorrar: (id: string) => void;
   metaPasos: number;
-  onCambiarMeta: (valor: number) => number | null;
+  onAbrirPerfil: () => void; // la meta se cambia en el perfil
 }
 
 const UNIDAD: Record<TipoCarga, string> = { km: 'km', minutos: 'min' };
@@ -61,12 +60,11 @@ export function HojaPasosManuales({
   conPodometro,
   onBorrar,
   metaPasos,
-  onCambiarMeta,
+  onAbrirPerfil,
 }: HojaPasosManualesProps) {
   const insets = useSafeAreaInsets();
   const [tipo, setTipo] = useState<TipoCarga>('km');
   const [texto, setTexto] = useState('');
-  const [textoMeta, setTextoMeta] = useState<string | null>(null); // null = no se está editando
   const [franja, setFranja] = useState<Franja>(() => franjaPorDefecto(new Date()));
   const [agregando, setAgregando] = useState(false);
   const [resultado, setResultado] = useState<string | null>(null);
@@ -134,13 +132,6 @@ export function HojaPasosManuales({
       setAgregando(false);
     }
   };
-
-  const guardarMeta = () => {
-    if (textoMeta === null) return;
-    const guardada = onCambiarMeta(Number(textoMeta.replace(/\./g, '')));
-    if (guardada !== null) setTextoMeta(null);
-  };
-  const metaInvalida = textoMeta !== null && textoMeta.trim() !== '' && !/^\d[\d.]*$/.test(textoMeta.trim());
 
   return (
     <Modal visible={visible} transparent animationType="slide" onRequestClose={onCerrar} onShow={alAbrir}>
@@ -290,39 +281,18 @@ export function HojaPasosManuales({
               </View>
             )}
 
-            {/* Meta diaria (configurable) */}
-            <View style={styles.meta}>
-              <Text style={styles.subtitulo}>Meta diaria de pasos</Text>
-              {textoMeta === null ? (
-                <Pressable onPress={() => setTextoMeta(String(metaPasos))} accessibilityRole="button" style={styles.filaMeta}>
-                  <Text style={styles.valorMeta}>{formatearNumero(metaPasos)}</Text>
-                  <Text style={styles.cambiar}>Cambiar</Text>
-                </Pressable>
-              ) : (
-                <View style={styles.filaEntrada}>
-                  <View style={[styles.entrada, metaInvalida && styles.entradaError]}>
-                    <TextInput
-                      value={textoMeta}
-                      onChangeText={setTextoMeta}
-                      keyboardType="number-pad"
-                      style={styles.input}
-                      autoFocus
-                      accessibilityLabel="Meta diaria de pasos"
-                      onSubmitEditing={guardarMeta}
-                    />
-                    <Text style={styles.unidad}>pasos</Text>
-                  </View>
-                  <Pressable onPress={guardarMeta} style={styles.botonAgregar} accessibilityRole="button">
-                    <Text style={styles.textoAgregar}>Guardar</Text>
-                  </Pressable>
-                </View>
-              )}
-              {textoMeta !== null && (
-                <Text style={styles.ayuda}>
-                  Entre {formatearNumero(META_PASOS_MINIMA)} y {formatearNumero(META_PASOS_MAXIMA)}.
-                </Text>
-              )}
-            </View>
+            {/* Meta diaria: se cambia en el perfil */}
+            <Pressable
+              onPress={() => {
+                onCerrar();
+                onAbrirPerfil();
+              }}
+              style={styles.filaMeta}
+              accessibilityRole="link"
+            >
+              <Text style={styles.ayuda}>Meta diaria: {formatearNumero(metaPasos)} pasos</Text>
+              <Text style={styles.cambiar}>Cambiar en tu perfil</Text>
+            </Pressable>
           </ScrollView>
         </View>
       </KeyboardAvoidingView>
@@ -452,8 +422,6 @@ const styles = StyleSheet.create({
   },
   textoCarga: { color: colores.texto, fontSize: 15, fontWeight: '700' },
   detalleCarga: { color: colores.textoSecundario, fontWeight: '400' },
-  meta: { gap: 8, marginTop: 4 },
-  filaMeta: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  valorMeta: { color: colores.texto, fontSize: 18, fontWeight: '800' },
+  filaMeta: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 4, paddingVertical: 6 },
   cambiar: { color: colores.acento, fontWeight: '700' },
 });

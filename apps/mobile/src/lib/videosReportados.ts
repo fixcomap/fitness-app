@@ -38,3 +38,18 @@ export function leerReportesGuardados(datos: unknown): VideoReportado[] {
       !Number.isNaN(Date.parse(r.fecha)),
   );
 }
+
+// Saca la marca de ese video; si no estaba, devuelve la misma lista.
+export function quitarReporte(
+  reportes: readonly VideoReportado[],
+  ejercicioId: string,
+  youtubeId: string,
+): readonly VideoReportado[] {
+  if (!estaReportado(reportes, ejercicioId, youtubeId)) return reportes;
+  return reportes.filter((r) => !(r.ejercicioId === ejercicioId && r.youtubeId === youtubeId));
+}
+
+// Los más nuevos primero (para la lista del perfil).
+export function reportesRecientes(reportes: readonly VideoReportado[]): VideoReportado[] {
+  return [...reportes].sort((a, b) => Date.parse(b.fecha) - Date.parse(a.fecha));
+}

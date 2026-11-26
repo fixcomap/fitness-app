@@ -15,6 +15,7 @@ import { useEntreno } from '../estado/Entreno';
 import { kcalEntrenoDelDia } from '../lib/entreno/resumen';
 import { entrenoDeHoy as elegirEntrenoDeHoy, rutinaDelDia } from '../lib/entreno/rutinas';
 import { claveDia } from '../lib/pasosManuales';
+import { metasNutricion } from '../lib/perfil';
 import {
   armarResumenDia,
   kcalRestantes,
@@ -36,14 +37,14 @@ interface InicioScreenProps {
   onEmpezarEntreno: (entreno: EntrenoDeHoy) => void; // la rutina del día, la sesión armada o la que está en curso
   onArmarSesion: () => void; // lleva a Entreno para elegir ejercicios
   onAbrirCoach: () => void;
+  onAbrirPerfil: () => void;
 }
 
-export function InicioScreen({ onEmpezarEntreno, onArmarSesion, onAbrirCoach }: InicioScreenProps) {
+export function InicioScreen({ onEmpezarEntreno, onArmarSesion, onAbrirCoach, onAbrirPerfil }: InicioScreenProps) {
   const hoy = new Date();
   const {
     perfil,
     config,
-    cambiarMetaPasos,
     cargasDeHoy,
     totalesDeHoy,
     agregarCarga,
@@ -77,6 +78,7 @@ export function InicioScreen({ onEmpezarEntreno, onArmarSesion, onAbrirCoach }: 
         perfil,
         kcalEntreno: kcalEntrenoDelDia(historial, claveDia(new Date())),
         entreno: entrenoDeHoy,
+        metas: metasNutricion(perfil),
       }),
     [config.metaPasos, pasosSensorHoy, totalesDeHoy, minutos, perfil, historial, entrenoDeHoy],
   );
@@ -92,9 +94,15 @@ export function InicioScreen({ onEmpezarEntreno, onArmarSesion, onAbrirCoach }: 
             <Text style={styles.fecha}>{formatearFechaCorta(hoy)}</Text>
             <Text style={styles.hola}>Hola, {perfil.nombre}</Text>
           </View>
-          <View style={styles.avatar} accessibilityLabel={`Perfil de ${perfil.nombre}`}>
+          <Pressable
+            onPress={onAbrirPerfil}
+            hitSlop={8}
+            style={({ pressed }) => [styles.avatar, pressed && styles.presionado]}
+            accessibilityRole="button"
+            accessibilityLabel={`Perfil de ${perfil.nombre}`}
+          >
             <Text style={styles.inicial}>{inicial(perfil.nombre)}</Text>
-          </View>
+          </Pressable>
         </View>
 
         {/* Calorías y macros */}
@@ -188,7 +196,7 @@ export function InicioScreen({ onEmpezarEntreno, onArmarSesion, onAbrirCoach }: 
         conPodometro={estadoFuente === 'activa'}
         onBorrar={borrar}
         metaPasos={config.metaPasos}
-        onCambiarMeta={cambiarMetaPasos}
+        onAbrirPerfil={onAbrirPerfil}
       />
     </SafeAreaView>
   );

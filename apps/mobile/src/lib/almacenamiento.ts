@@ -4,6 +4,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import { leerHistorialGuardado, type RegistroDia } from './actividad/historial';
 import { leerConfiguracion, type Configuracion } from './configuracion';
+import { leerPerfilGuardado, type PerfilUsuario } from './perfil';
 import { leerArmadaGuardada, leerEnCursoGuardada, leerSesionesGuardadas } from './entreno/historial';
 import { leerRutinasGuardadas, type Rutina } from './entreno/rutinas';
 import type { SesionArmada, SesionEnCurso, SesionGuardada } from './entreno/tipos';
@@ -18,6 +19,7 @@ const CLAVE_SESION_ARMADA = 'sesionArmada:v1';
 const CLAVE_SESION_EN_CURSO = 'sesionEnCurso:v1';
 const CLAVE_HISTORIAL_ENTRENO = 'historialEntreno:v1';
 const CLAVE_RUTINAS = 'rutinas:v1';
+const CLAVE_PERFIL = 'perfil:v1';
 
 async function leerJson(clave: string): Promise<unknown> {
   try {
@@ -84,6 +86,15 @@ export async function leerHistorialEntreno(): Promise<SesionGuardada[]> {
 
 export async function guardarHistorialEntreno(historial: readonly SesionGuardada[]): Promise<void> {
   await AsyncStorage.setItem(CLAVE_HISTORIAL_ENTRENO, JSON.stringify(historial));
+}
+
+// null si todavía no hay perfil (primera vez) o el guardado no es válido.
+export async function leerPerfil(): Promise<PerfilUsuario | null> {
+  return leerPerfilGuardado(await leerJson(CLAVE_PERFIL));
+}
+
+export async function guardarPerfil(perfil: PerfilUsuario): Promise<void> {
+  await AsyncStorage.setItem(CLAVE_PERFIL, JSON.stringify(perfil));
 }
 
 export async function leerRutinas(): Promise<Rutina[]> {

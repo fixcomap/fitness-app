@@ -5,7 +5,7 @@ import { StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useEntreno } from '../estado/Entreno';
-import { PERFIL_EJEMPLO } from '../lib/perfil';
+import { usePerfilActual } from '../estado/Perfil';
 import { ActividadScreen } from '../screens/ActividadScreen';
 import { InicioScreen } from '../screens/InicioScreen';
 import { PantallaTitulo } from '../screens/PantallaTitulo';
@@ -46,8 +46,14 @@ function InicioRuta({ navigation }: BottomTabScreenProps<TabsParamList, 'Inicio'
       }}
       onArmarSesion={() => navigation.navigate('Entreno')}
       onAbrirCoach={() => navigation.navigate('Coach')}
+      onAbrirPerfil={() => raiz.navigate('Perfil')}
     />
   );
+}
+
+function ActividadRuta() {
+  const raiz = useNavegacionRaiz();
+  return <ActividadScreen onAbrirPerfil={() => raiz.navigate('Perfil')} />;
 }
 
 const Comida = () => <PantallaTitulo titulo="Comida" />;
@@ -68,6 +74,7 @@ function IconoTab({ nombre, color, bloqueado }: { nombre: NombreIcono; color: st
 
 export function Tabs() {
   const insets = useSafeAreaInsets();
+  const perfil = usePerfilActual();
   return (
     <Tab.Navigator
       initialRouteName="Inicio"
@@ -81,14 +88,14 @@ export function Tabs() {
         tabBarItemStyle: styles.item,
         tabBarLabelStyle: styles.etiqueta,
         tabBarIcon: ({ color }) => (
-          <IconoTab nombre={ICONOS[route.name]} color={color} bloqueado={route.name === 'Coach' && !PERFIL_EJEMPLO.esPremium} />
+          <IconoTab nombre={ICONOS[route.name]} color={color} bloqueado={route.name === 'Coach' && !perfil.esPremium} />
         ),
       })}
     >
       <Tab.Screen name="Inicio" component={InicioRuta} />
       <Tab.Screen name="Entreno" component={EntrenoStack} />
       <Tab.Screen name="Comida" component={Comida} />
-      <Tab.Screen name="Actividad" component={ActividadScreen} />
+      <Tab.Screen name="Actividad" component={ActividadRuta} />
       <Tab.Screen name="Coach" component={Coach} />
     </Tab.Navigator>
   );

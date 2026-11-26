@@ -115,6 +115,16 @@ describe('armarResumenDia', () => {
     expect(armarResumenDia({ ...datos, entreno }).entreno).toEqual(entreno);
   });
 
+  test('las metas de kcal y macros salen del perfil; lo comido sigue de ejemplo', () => {
+    const metas = { kcal: 2633, proteinas: 135, grasas: 73, carbos: 359 };
+    const r = armarResumenDia({ metaPasos: 10000, pasosAutomaticos: 0, pasosManuales: 0, minutos: { hoy: 0, semana: 0 }, perfil, metas });
+    expect(r.kcal.objetivo).toBe(2633);
+    expect(r.macros.proteinas).toEqual({ actual: 96, meta: 135 });
+    expect(r.macros.carbos.meta).toBe(359);
+    expect(r.macros.grasas.meta).toBe(73);
+    expect(r.kcal.comidas).toBe(1480);
+  });
+
   test('usa los minutos activos reales y la meta de la OMS', () => {
     const r = armarResumenDia({ metaPasos: 10000, pasosAutomaticos: 0, pasosManuales: 0, minutos: { hoy: 12, semana: 47 }, perfil });
     expect(r.minutosActivos).toEqual({ hoy: 12, semana: 47, metaSemana: META_MINUTOS_SEMANA_OMS });

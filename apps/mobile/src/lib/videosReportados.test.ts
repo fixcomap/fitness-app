@@ -1,4 +1,11 @@
-import { estaReportado, leerReportesGuardados, reportarVideo, type VideoReportado } from './videosReportados';
+import {
+  estaReportado,
+  leerReportesGuardados,
+  quitarReporte,
+  reportarVideo,
+  reportesRecientes,
+  type VideoReportado,
+} from './videosReportados';
 
 const AHORA = new Date('2026-11-25T15:00:00.000Z');
 
@@ -45,5 +52,24 @@ describe('leerReportesGuardados', () => {
         null,
       ]),
     ).toEqual([bueno]);
+  });
+});
+
+describe('quitarReporte', () => {
+  const reportes: VideoReportado[] = [
+    { ejercicioId: 'a', youtubeId: 'v1', fecha: '2026-11-20T10:00:00Z' },
+    { ejercicioId: 'b', youtubeId: 'v2', fecha: '2026-11-24T10:00:00Z' },
+  ];
+
+  test('saca sólo esa marca', () => {
+    expect(quitarReporte(reportes, 'a', 'v1')).toEqual([reportes[1]]);
+  });
+
+  test('si no estaba, devuelve la misma lista', () => {
+    expect(quitarReporte(reportes, 'a', 'otro')).toBe(reportes);
+  });
+
+  test('reportesRecientes: los más nuevos primero', () => {
+    expect(reportesRecientes(reportes).map((r) => r.ejercicioId)).toEqual(['b', 'a']);
   });
 });
