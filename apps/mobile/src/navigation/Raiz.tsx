@@ -6,6 +6,9 @@ import { useEffect, useRef } from 'react';
 import { useEntreno } from '../estado/Entreno';
 import { EditarRutinaScreen } from '../screens/EditarRutinaScreen';
 import { PerfilScreen } from '../screens/PerfilScreen';
+import { BuscarAlimentoScreen } from '../screens/BuscarAlimentoScreen';
+import { CrearAlimentoScreen } from '../screens/CrearAlimentoScreen';
+import { EscanearCodigoScreen } from '../screens/EscanearCodigoScreen';
 import { ResumenSesionScreen } from '../screens/ResumenSesionScreen';
 import { SesionArmadaScreen } from '../screens/SesionArmadaScreen';
 import { SesionEnCursoScreen } from '../screens/SesionEnCursoScreen';
@@ -69,6 +72,48 @@ function PerfilRuta({ navigation }: NativeStackScreenProps<RaizParamList, 'Perfi
   return <PerfilScreen onVolver={() => navigation.goBack()} />;
 }
 
+function BuscarAlimentoRuta({ navigation, route }: NativeStackScreenProps<RaizParamList, 'BuscarAlimento'>) {
+  const { dia, comida } = route.params;
+  return (
+    <BuscarAlimentoScreen
+      dia={dia}
+      comida={comida}
+      onVolver={() => navigation.goBack()}
+      onEscanear={() => navigation.replace('EscanearCodigo', { dia, comida })}
+      onCrear={(datos) => navigation.navigate('CrearAlimento', { dia, comida, ...datos })}
+    />
+  );
+}
+
+function EscanearCodigoRuta({ navigation, route }: NativeStackScreenProps<RaizParamList, 'EscanearCodigo'>) {
+  const { dia, comida } = route.params;
+  return (
+    <EscanearCodigoScreen
+      dia={dia}
+      comida={comida}
+      onCerrar={() => navigation.goBack()}
+      onBuscarPorNombre={() => navigation.replace('BuscarAlimento', { dia, comida })}
+      onCrear={(datos) => navigation.replace('CrearAlimento', { dia, comida, ...datos })}
+    />
+  );
+}
+
+function CrearAlimentoRuta({ navigation, route }: NativeStackScreenProps<RaizParamList, 'CrearAlimento'>) {
+  const { dia, comida, nombre, marca, codigo } = route.params;
+  return (
+    <CrearAlimentoScreen
+      dia={dia}
+      comida={comida}
+      nombreInicial={nombre}
+      marcaInicial={marca}
+      codigoInicial={codigo}
+      onVolver={() => navigation.goBack()}
+      // Agregado al diario: vuelve a la pestaña Comida.
+      onListo={() => navigation.popTo('Tabs')}
+    />
+  );
+}
+
 export function Raiz() {
   return (
     <Stack.Navigator
@@ -86,6 +131,7 @@ export function Raiz() {
         // Sin encabezado nativo: la pantalla dibuja el suyo respetando el margen de arriba.
         options={{ headerShown: false, presentation: 'fullScreenModal' }}
       />
+      <Stack.Screen name="CrearAlimento" component={CrearAlimentoRuta} options={{ headerShown: false }} />
       <Stack.Screen
         name="SesionEnCurso"
         component={SesionEnCursoRuta}
@@ -102,6 +148,12 @@ export function Raiz() {
         options={{ headerShown: false, presentation: 'fullScreenModal', gestureEnabled: false }}
       />
       <Stack.Screen name="Perfil" component={PerfilRuta} options={{ headerShown: false }} />
+      <Stack.Screen name="BuscarAlimento" component={BuscarAlimentoRuta} options={{ headerShown: false }} />
+      <Stack.Screen
+        name="EscanearCodigo"
+        component={EscanearCodigoRuta}
+        options={{ headerShown: false, presentation: 'fullScreenModal' }}
+      />
     </Stack.Navigator>
   );
 }

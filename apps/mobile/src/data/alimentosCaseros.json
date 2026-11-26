@@ -1,0 +1,3114 @@
+[
+  {
+    "id": "milanesa-carne-frita",
+    "nombre": "Milanesa de carne frita",
+    "kcal": 238,
+    "proteinas": 27.3,
+    "carbos": 9.9,
+    "grasas": 9.2,
+    "porciones": [
+      {
+        "nombre": "milanesa",
+        "plural": "milanesas",
+        "gramos": 150,
+        "estimada": true
+      }
+    ],
+    "fuente": {
+      "base": "USDA FoodData Central",
+      "equivalente": true,
+      "alimentos": [
+        {
+          "fdcId": 173819,
+          "descripcion": "Veal, leg (top round), separable lean and fat, cooked, pan-fried, breaded",
+          "dataset": "SR Legacy (2018)"
+        }
+      ]
+    }
+  },
+  {
+    "id": "milanesa-carne-horno",
+    "nombre": "Milanesa de carne al horno",
+    "kcal": 216,
+    "proteinas": 28.4,
+    "carbos": 9.8,
+    "grasas": 6.3,
+    "porciones": [
+      {
+        "nombre": "milanesa",
+        "plural": "milanesas",
+        "gramos": 150,
+        "estimada": true
+      }
+    ],
+    "fuente": {
+      "base": "USDA FoodData Central",
+      "equivalente": true,
+      "alimentos": [
+        {
+          "fdcId": 175271,
+          "descripcion": "Veal, leg (top round), separable lean only, cooked, pan-fried, breaded",
+          "dataset": "SR Legacy (2018)"
+        }
+      ]
+    }
+  },
+  {
+    "id": "milanesa-pollo-frita",
+    "nombre": "Milanesa de pollo frita",
+    "kcal": 219,
+    "proteinas": 24.6,
+    "carbos": 6,
+    "grasas": 10,
+    "porciones": [
+      {
+        "nombre": "milanesa",
+        "plural": "milanesas",
+        "gramos": 150,
+        "estimada": true
+      }
+    ],
+    "fuente": {
+      "base": "USDA FoodData Central",
+      "equivalente": true,
+      "alimentos": [
+        {
+          "fdcId": 2705975,
+          "descripcion": "Chicken breast, fried, coated, prepared skinless, coating eaten, from raw",
+          "dataset": "FNDDS 2021-2023 (2024)"
+        }
+      ]
+    }
+  },
+  {
+    "id": "milanesa-pollo-horno",
+    "nombre": "Milanesa de pollo al horno",
+    "kcal": 207,
+    "proteinas": 23.8,
+    "carbos": 4,
+    "grasas": 9.9,
+    "porciones": [
+      {
+        "nombre": "milanesa",
+        "plural": "milanesas",
+        "gramos": 150,
+        "estimada": true
+      }
+    ],
+    "fuente": {
+      "base": "USDA FoodData Central",
+      "equivalente": true,
+      "alimentos": [
+        {
+          "fdcId": 2705980,
+          "descripcion": "Chicken breast, baked, coated, skin / coating eaten",
+          "dataset": "FNDDS 2021-2023 (2024)"
+        }
+      ]
+    }
+  },
+  {
+    "id": "milanesa-cerdo",
+    "nombre": "Milanesa de cerdo",
+    "kcal": 208,
+    "proteinas": 26,
+    "carbos": 7.2,
+    "grasas": 7.7,
+    "porciones": [
+      {
+        "nombre": "milanesa",
+        "plural": "milanesas",
+        "gramos": 150,
+        "estimada": true
+      }
+    ],
+    "fuente": {
+      "base": "USDA FoodData Central",
+      "equivalente": true,
+      "alimentos": [
+        {
+          "fdcId": 2705871,
+          "descripcion": "Pork, chop, coated, lean only eaten",
+          "dataset": "FNDDS 2021-2023 (2024)"
+        }
+      ]
+    }
+  },
+  {
+    "id": "milanesa-soja",
+    "nombre": "Medallón de soja",
+    "kcal": 177,
+    "proteinas": 15.7,
+    "carbos": 14.3,
+    "grasas": 6.3,
+    "porciones": [
+      {
+        "nombre": "medallón",
+        "plural": "medallones",
+        "gramos": 80,
+        "estimada": true
+      }
+    ],
+    "fuente": {
+      "base": "USDA FoodData Central",
+      "equivalente": true,
+      "alimentos": [
+        {
+          "fdcId": 2707473,
+          "descripcion": "Veggie burger patty, no bun",
+          "dataset": "FNDDS 2021-2023 (2024)"
+        }
+      ]
+    }
+  },
+  {
+    "id": "vacio",
+    "nombre": "Vacío a la parrilla",
+    "kcal": 202,
+    "proteinas": 27.6,
+    "carbos": 0,
+    "grasas": 9.3,
+    "porciones": [
+      {
+        "nombre": "porción",
+        "plural": "porciones",
+        "gramos": 250,
+        "estimada": true
+      }
+    ],
+    "fuente": {
+      "base": "USDA FoodData Central",
+      "equivalente": true,
+      "alimentos": [
+        {
+          "fdcId": 169435,
+          "descripcion": "Beef, flank, steak, separable lean and fat, trimmed to 0\" fat, choice, cooked, broiled",
+          "dataset": "SR Legacy (2018)"
+        }
+      ]
+    }
+  },
+  {
+    "id": "asado-tira",
+    "nombre": "Asado de tira",
+    "kcal": 287,
+    "proteinas": 25.8,
+    "carbos": 0,
+    "grasas": 20.4,
+    "porciones": [
+      {
+        "nombre": "porción",
+        "plural": "porciones",
+        "gramos": 250,
+        "estimada": true
+      }
+    ],
+    "fuente": {
+      "base": "USDA FoodData Central",
+      "equivalente": true,
+      "alimentos": [
+        {
+          "fdcId": 170825,
+          "descripcion": "Beef, chuck, short ribs, boneless, separable lean and fat, trimmed to 0\" fat, select, cooked, braised",
+          "dataset": "SR Legacy (2018)"
+        }
+      ]
+    }
+  },
+  {
+    "id": "bife",
+    "nombre": "Bife a la plancha",
+    "kcal": 229,
+    "proteinas": 27,
+    "carbos": 0,
+    "grasas": 12.9,
+    "porciones": [
+      {
+        "nombre": "bife",
+        "plural": "bifes",
+        "gramos": 200,
+        "estimada": true
+      }
+    ],
+    "fuente": {
+      "base": "USDA FoodData Central",
+      "equivalente": true,
+      "alimentos": [
+        {
+          "fdcId": 2705824,
+          "descripcion": "Beef, steak, NFS",
+          "dataset": "FNDDS 2021-2023 (2024)"
+        }
+      ]
+    }
+  },
+  {
+    "id": "bife-chorizo",
+    "nombre": "Bife de chorizo / ojo de bife",
+    "kcal": 260,
+    "proteinas": 25,
+    "carbos": 0,
+    "grasas": 17.7,
+    "porciones": [
+      {
+        "nombre": "bife",
+        "plural": "bifes",
+        "gramos": 300,
+        "estimada": true
+      }
+    ],
+    "fuente": {
+      "base": "USDA FoodData Central",
+      "equivalente": true,
+      "alimentos": [
+        {
+          "fdcId": 2705828,
+          "descripcion": "Beef, steak, ribeye, NS as to fat eaten",
+          "dataset": "FNDDS 2021-2023 (2024)"
+        }
+      ]
+    }
+  },
+  {
+    "id": "chorizo",
+    "nombre": "Chorizo parrillero",
+    "kcal": 341,
+    "proteinas": 19.3,
+    "carbos": 2.6,
+    "grasas": 28.1,
+    "porciones": [
+      {
+        "nombre": "chorizo",
+        "plural": "chorizos",
+        "gramos": 100,
+        "estimada": true
+      }
+    ],
+    "fuente": {
+      "base": "USDA FoodData Central",
+      "equivalente": false,
+      "alimentos": [
+        {
+          "fdcId": 2706179,
+          "descripcion": "Chorizo",
+          "dataset": "FNDDS 2021-2023 (2024)"
+        }
+      ]
+    }
+  },
+  {
+    "id": "morcilla",
+    "nombre": "Morcilla",
+    "kcal": 379,
+    "proteinas": 14.6,
+    "carbos": 1.3,
+    "grasas": 34.5,
+    "porciones": [
+      {
+        "nombre": "morcilla",
+        "plural": "morcillas",
+        "gramos": 100,
+        "estimada": true
+      }
+    ],
+    "fuente": {
+      "base": "USDA FoodData Central",
+      "equivalente": false,
+      "alimentos": [
+        {
+          "fdcId": 171618,
+          "descripcion": "Blood sausage",
+          "dataset": "SR Legacy (2018)"
+        }
+      ]
+    }
+  },
+  {
+    "id": "choripan",
+    "nombre": "Choripán",
+    "kcal": 300,
+    "proteinas": 14.5,
+    "carbos": 23.5,
+    "grasas": 16.3,
+    "porciones": [
+      {
+        "nombre": "choripán",
+        "plural": "choripanes",
+        "gramos": 200,
+        "estimada": true
+      }
+    ],
+    "fuente": {
+      "base": "USDA FoodData Central",
+      "equivalente": true,
+      "alimentos": [
+        {
+          "fdcId": 2707053,
+          "descripcion": "Italian sausage sandwich on white",
+          "dataset": "FNDDS 2021-2023 (2024)"
+        }
+      ]
+    }
+  },
+  {
+    "id": "hamburguesa-carne",
+    "nombre": "Hamburguesa de carne (sólo la medalla)",
+    "kcal": 246,
+    "proteinas": 24,
+    "carbos": 0,
+    "grasas": 15.9,
+    "porciones": [
+      {
+        "nombre": "medalla",
+        "plural": "medallas",
+        "gramos": 110,
+        "estimada": true
+      }
+    ],
+    "fuente": {
+      "base": "USDA FoodData Central",
+      "equivalente": false,
+      "alimentos": [
+        {
+          "fdcId": 171798,
+          "descripcion": "Beef, ground, 80% lean meat / 20% fat, patty, cooked, pan-broiled",
+          "dataset": "SR Legacy (2018)"
+        }
+      ]
+    }
+  },
+  {
+    "id": "hamburguesa-pan",
+    "nombre": "Hamburguesa con pan",
+    "kcal": 261,
+    "proteinas": 14.9,
+    "carbos": 26.8,
+    "grasas": 10.6,
+    "porciones": [
+      {
+        "nombre": "hamburguesa",
+        "plural": "hamburguesas",
+        "gramos": 120,
+        "estimada": true
+      }
+    ],
+    "fuente": {
+      "base": "USDA FoodData Central",
+      "equivalente": true,
+      "alimentos": [
+        {
+          "fdcId": 170328,
+          "descripcion": "BURGER KING, Hamburger",
+          "dataset": "SR Legacy (2018)"
+        }
+      ]
+    }
+  },
+  {
+    "id": "pancho",
+    "nombre": "Pancho (salchicha)",
+    "kcal": 277,
+    "proteinas": 9.7,
+    "carbos": 5,
+    "grasas": 24.2,
+    "porciones": [
+      {
+        "nombre": "salchicha",
+        "plural": "salchichas",
+        "gramos": 45,
+        "estimada": true
+      }
+    ],
+    "fuente": {
+      "base": "USDA FoodData Central",
+      "equivalente": true,
+      "alimentos": [
+        {
+          "fdcId": 2706168,
+          "descripcion": "Hot dog, meat and poultry",
+          "dataset": "FNDDS 2021-2023 (2024)"
+        }
+      ]
+    }
+  },
+  {
+    "id": "pollo-horno",
+    "nombre": "Pollo al horno, con piel",
+    "kcal": 203,
+    "proteinas": 24.7,
+    "carbos": 0,
+    "grasas": 10.8,
+    "porciones": [
+      {
+        "nombre": "presa",
+        "plural": "presas",
+        "gramos": 200,
+        "estimada": true
+      }
+    ],
+    "fuente": {
+      "base": "USDA FoodData Central",
+      "equivalente": false,
+      "alimentos": [
+        {
+          "fdcId": 2705933,
+          "descripcion": "Chicken, NS as to part, baked, broiled, or roasted, skin eaten",
+          "dataset": "FNDDS 2021-2023 (2024)"
+        }
+      ]
+    }
+  },
+  {
+    "id": "pollo-horno-sin-piel",
+    "nombre": "Pollo al horno, sin piel",
+    "kcal": 165,
+    "proteinas": 27.3,
+    "carbos": 0,
+    "grasas": 5.3,
+    "porciones": [
+      {
+        "nombre": "presa",
+        "plural": "presas",
+        "gramos": 180,
+        "estimada": true
+      }
+    ],
+    "fuente": {
+      "base": "USDA FoodData Central",
+      "equivalente": false,
+      "alimentos": [
+        {
+          "fdcId": 2705934,
+          "descripcion": "Chicken, NS as to part, baked, broiled, or roasted, skin not eaten",
+          "dataset": "FNDDS 2021-2023 (2024)"
+        }
+      ]
+    }
+  },
+  {
+    "id": "pechuga-plancha",
+    "nombre": "Pechuga a la plancha",
+    "kcal": 165,
+    "proteinas": 31,
+    "carbos": 0,
+    "grasas": 3.6,
+    "porciones": [
+      {
+        "nombre": "pechuga",
+        "plural": "pechugas",
+        "gramos": 170,
+        "estimada": true
+      }
+    ],
+    "fuente": {
+      "base": "USDA FoodData Central",
+      "equivalente": false,
+      "alimentos": [
+        {
+          "fdcId": 171477,
+          "descripcion": "Chicken, broilers or fryers, breast, meat only, cooked, roasted",
+          "dataset": "SR Legacy (2018)"
+        }
+      ]
+    }
+  },
+  {
+    "id": "carne-picada",
+    "nombre": "Carne picada cocida",
+    "kcal": 246,
+    "proteinas": 24,
+    "carbos": 0,
+    "grasas": 15.9,
+    "porciones": [
+      {
+        "nombre": "porción",
+        "plural": "porciones",
+        "gramos": 100,
+        "estimada": true
+      }
+    ],
+    "fuente": {
+      "base": "USDA FoodData Central",
+      "equivalente": false,
+      "alimentos": [
+        {
+          "fdcId": 171798,
+          "descripcion": "Beef, ground, 80% lean meat / 20% fat, patty, cooked, pan-broiled",
+          "dataset": "SR Legacy (2018)"
+        }
+      ]
+    }
+  },
+  {
+    "id": "guiso",
+    "nombre": "Guiso de carne",
+    "kcal": 107,
+    "proteinas": 8.8,
+    "carbos": 6.3,
+    "grasas": 5.1,
+    "porciones": [
+      {
+        "nombre": "plato",
+        "plural": "platos",
+        "gramos": 350,
+        "estimada": true
+      }
+    ],
+    "fuente": {
+      "base": "USDA FoodData Central",
+      "equivalente": true,
+      "alimentos": [
+        {
+          "fdcId": 2706592,
+          "descripcion": "Stew, beef",
+          "dataset": "FNDDS 2021-2023 (2024)"
+        }
+      ]
+    }
+  },
+  {
+    "id": "guiso-lentejas",
+    "nombre": "Guiso de lentejas",
+    "kcal": 166,
+    "proteinas": 8.4,
+    "carbos": 18.7,
+    "grasas": 6.9,
+    "porciones": [
+      {
+        "nombre": "plato",
+        "plural": "platos",
+        "gramos": 300,
+        "estimada": true
+      }
+    ],
+    "fuente": {
+      "base": "USDA FoodData Central",
+      "equivalente": true,
+      "alimentos": [
+        {
+          "fdcId": 2707424,
+          "descripcion": "Lentils, from dried, fat added",
+          "dataset": "FNDDS 2021-2023 (2024)"
+        }
+      ]
+    }
+  },
+  {
+    "id": "estofado-pastas",
+    "nombre": "Guiso de fideos",
+    "kcal": 132,
+    "proteinas": 9.8,
+    "carbos": 10.8,
+    "grasas": 5.2,
+    "porciones": [
+      {
+        "nombre": "plato",
+        "plural": "platos",
+        "gramos": 350,
+        "estimada": true
+      }
+    ],
+    "fuente": {
+      "base": "USDA FoodData Central",
+      "equivalente": true,
+      "alimentos": [
+        {
+          "fdcId": 2706593,
+          "descripcion": "Stew, beef, with pasta",
+          "dataset": "FNDDS 2021-2023 (2024)"
+        }
+      ]
+    }
+  },
+  {
+    "id": "merluza-horno",
+    "nombre": "Merluza al horno",
+    "kcal": 105,
+    "proteinas": 22.8,
+    "carbos": 0,
+    "grasas": 0.9,
+    "porciones": [
+      {
+        "nombre": "filet",
+        "plural": "filets",
+        "gramos": 150,
+        "estimada": true
+      }
+    ],
+    "fuente": {
+      "base": "USDA FoodData Central",
+      "equivalente": true,
+      "alimentos": [
+        {
+          "fdcId": 171956,
+          "descripcion": "Fish, cod, Atlantic, cooked, dry heat",
+          "dataset": "SR Legacy (2018)"
+        }
+      ]
+    }
+  },
+  {
+    "id": "filet-rebozado",
+    "nombre": "Filet de merluza rebozado",
+    "kcal": 223,
+    "proteinas": 20.7,
+    "carbos": 7.8,
+    "grasas": 11.7,
+    "porciones": [
+      {
+        "nombre": "filet",
+        "plural": "filets",
+        "gramos": 150,
+        "estimada": true
+      }
+    ],
+    "fuente": {
+      "base": "USDA FoodData Central",
+      "equivalente": true,
+      "alimentos": [
+        {
+          "fdcId": 2706226,
+          "descripcion": "Fish, NS as to type, baked or broiled, coated",
+          "dataset": "FNDDS 2021-2023 (2024)"
+        }
+      ]
+    }
+  },
+  {
+    "id": "atun-agua",
+    "nombre": "Atún al natural",
+    "kcal": 116,
+    "proteinas": 25.5,
+    "carbos": 0,
+    "grasas": 0.8,
+    "porciones": [
+      {
+        "nombre": "lata",
+        "plural": "latas",
+        "gramos": 120,
+        "estimada": true
+      }
+    ],
+    "fuente": {
+      "base": "USDA FoodData Central",
+      "equivalente": false,
+      "alimentos": [
+        {
+          "fdcId": 171986,
+          "descripcion": "Fish, tuna, light, canned in water, without salt, drained solids",
+          "dataset": "SR Legacy (2018)"
+        }
+      ]
+    }
+  },
+  {
+    "id": "atun-aceite",
+    "nombre": "Atún en aceite",
+    "kcal": 186,
+    "proteinas": 26.5,
+    "carbos": 0,
+    "grasas": 8.1,
+    "porciones": [
+      {
+        "nombre": "lata",
+        "plural": "latas",
+        "gramos": 120,
+        "estimada": true
+      }
+    ],
+    "fuente": {
+      "base": "USDA FoodData Central",
+      "equivalente": false,
+      "alimentos": [
+        {
+          "fdcId": 171987,
+          "descripcion": "Fish, tuna, white, canned in oil, without salt, drained solids",
+          "dataset": "SR Legacy (2018)"
+        }
+      ]
+    }
+  },
+  {
+    "id": "huevo-duro",
+    "nombre": "Huevo duro",
+    "kcal": 143,
+    "proteinas": 12.4,
+    "carbos": 1,
+    "grasas": 10,
+    "porciones": [
+      {
+        "nombre": "huevo",
+        "plural": "huevos",
+        "gramos": 50,
+        "estimada": true
+      }
+    ],
+    "fuente": {
+      "base": "USDA FoodData Central",
+      "equivalente": false,
+      "alimentos": [
+        {
+          "fdcId": 2707154,
+          "descripcion": "Egg, whole, boiled or poached",
+          "dataset": "FNDDS 2021-2023 (2024)"
+        }
+      ]
+    }
+  },
+  {
+    "id": "huevo-frito",
+    "nombre": "Huevo frito",
+    "kcal": 192,
+    "proteinas": 11.6,
+    "carbos": 0.9,
+    "grasas": 15.8,
+    "porciones": [
+      {
+        "nombre": "huevo",
+        "plural": "huevos",
+        "gramos": 46,
+        "estimada": true
+      }
+    ],
+    "fuente": {
+      "base": "USDA FoodData Central",
+      "equivalente": false,
+      "alimentos": [
+        {
+          "fdcId": 2707158,
+          "descripcion": "Egg, whole, fried with oil",
+          "dataset": "FNDDS 2021-2023 (2024)"
+        }
+      ]
+    }
+  },
+  {
+    "id": "revuelto",
+    "nombre": "Huevos revueltos / omelette",
+    "kcal": 192,
+    "proteinas": 11.6,
+    "carbos": 0.9,
+    "grasas": 15.8,
+    "porciones": [
+      {
+        "nombre": "porción (2 huevos)",
+        "plural": "porciones",
+        "gramos": 120,
+        "estimada": true
+      }
+    ],
+    "fuente": {
+      "base": "USDA FoodData Central",
+      "equivalente": false,
+      "alimentos": [
+        {
+          "fdcId": 2707200,
+          "descripcion": "Egg omelet or scrambled egg, made with oil",
+          "dataset": "FNDDS 2021-2023 (2024)"
+        }
+      ]
+    }
+  },
+  {
+    "id": "empanada-carne",
+    "nombre": "Empanada de carne",
+    "kcal": 333,
+    "proteinas": 12.1,
+    "carbos": 27.5,
+    "grasas": 19.2,
+    "porciones": [
+      {
+        "nombre": "empanada",
+        "plural": "empanadas",
+        "gramos": 90,
+        "estimada": true
+      }
+    ],
+    "fuente": {
+      "base": "USDA FoodData Central",
+      "equivalente": false,
+      "alimentos": [
+        {
+          "fdcId": 2708711,
+          "descripcion": "Empanada, beef",
+          "dataset": "FNDDS 2021-2023 (2024)"
+        }
+      ]
+    }
+  },
+  {
+    "id": "empanada-pollo",
+    "nombre": "Empanada de pollo",
+    "kcal": 309,
+    "proteinas": 12.6,
+    "carbos": 27.5,
+    "grasas": 16.5,
+    "porciones": [
+      {
+        "nombre": "empanada",
+        "plural": "empanadas",
+        "gramos": 90,
+        "estimada": true
+      }
+    ],
+    "fuente": {
+      "base": "USDA FoodData Central",
+      "equivalente": false,
+      "alimentos": [
+        {
+          "fdcId": 2708713,
+          "descripcion": "Empanada, chicken",
+          "dataset": "FNDDS 2021-2023 (2024)"
+        }
+      ]
+    }
+  },
+  {
+    "id": "empanada-jyq",
+    "nombre": "Empanada de jamón y queso",
+    "kcal": 265,
+    "proteinas": 5.8,
+    "carbos": 31.5,
+    "grasas": 13.2,
+    "porciones": [
+      {
+        "nombre": "empanada",
+        "plural": "empanadas",
+        "gramos": 80,
+        "estimada": true
+      }
+    ],
+    "fuente": {
+      "base": "USDA FoodData Central",
+      "equivalente": true,
+      "alimentos": [
+        {
+          "fdcId": 2708710,
+          "descripcion": "Empanada, no meat",
+          "dataset": "FNDDS 2021-2023 (2024)"
+        }
+      ]
+    }
+  },
+  {
+    "id": "empanada-humita",
+    "nombre": "Empanada de humita",
+    "kcal": 265,
+    "proteinas": 5.8,
+    "carbos": 31.5,
+    "grasas": 13.2,
+    "porciones": [
+      {
+        "nombre": "empanada",
+        "plural": "empanadas",
+        "gramos": 80,
+        "estimada": true
+      }
+    ],
+    "fuente": {
+      "base": "USDA FoodData Central",
+      "equivalente": true,
+      "alimentos": [
+        {
+          "fdcId": 2708710,
+          "descripcion": "Empanada, no meat",
+          "dataset": "FNDDS 2021-2023 (2024)"
+        }
+      ]
+    }
+  },
+  {
+    "id": "pizza-muzzarella",
+    "nombre": "Pizza de muzzarella",
+    "kcal": 266,
+    "proteinas": 11.4,
+    "carbos": 33.3,
+    "grasas": 9.7,
+    "porciones": [
+      {
+        "nombre": "porción",
+        "plural": "porciones",
+        "gramos": 120,
+        "estimada": true
+      }
+    ],
+    "fuente": {
+      "base": "USDA FoodData Central",
+      "equivalente": true,
+      "alimentos": [
+        {
+          "fdcId": 2708614,
+          "descripcion": "Pizza, cheese, from restaurant or fast food, NS as to type of crust",
+          "dataset": "FNDDS 2021-2023 (2024)"
+        }
+      ]
+    }
+  },
+  {
+    "id": "pizza-fugazzeta",
+    "nombre": "Fugazzeta",
+    "kcal": 271,
+    "proteinas": 10.8,
+    "carbos": 33.2,
+    "grasas": 10.5,
+    "porciones": [
+      {
+        "nombre": "porción",
+        "plural": "porciones",
+        "gramos": 140,
+        "estimada": true
+      }
+    ],
+    "fuente": {
+      "base": "USDA FoodData Central",
+      "equivalente": true,
+      "alimentos": [
+        {
+          "fdcId": 2708617,
+          "descripcion": "Pizza, cheese, from restaurant or fast food, thick crust",
+          "dataset": "FNDDS 2021-2023 (2024)"
+        }
+      ]
+    }
+  },
+  {
+    "id": "tarta-verdura",
+    "nombre": "Tarta de verdura",
+    "kcal": 299,
+    "proteinas": 10.3,
+    "carbos": 11.7,
+    "grasas": 23.5,
+    "porciones": [
+      {
+        "nombre": "porción",
+        "plural": "porciones",
+        "gramos": 150,
+        "estimada": true
+      }
+    ],
+    "fuente": {
+      "base": "USDA FoodData Central",
+      "equivalente": true,
+      "alimentos": [
+        {
+          "fdcId": 2708732,
+          "descripcion": "Spinach quiche, meatless",
+          "dataset": "FNDDS 2021-2023 (2024)"
+        }
+      ]
+    }
+  },
+  {
+    "id": "tarta-jyq",
+    "nombre": "Tarta de jamón y queso",
+    "kcal": 387,
+    "proteinas": 15.5,
+    "carbos": 12.1,
+    "grasas": 30.6,
+    "porciones": [
+      {
+        "nombre": "porción",
+        "plural": "porciones",
+        "gramos": 150,
+        "estimada": true
+      }
+    ],
+    "fuente": {
+      "base": "USDA FoodData Central",
+      "equivalente": true,
+      "alimentos": [
+        {
+          "fdcId": 2708731,
+          "descripcion": "Quiche with meat, poultry or fish",
+          "dataset": "FNDDS 2021-2023 (2024)"
+        }
+      ]
+    }
+  },
+  {
+    "id": "tarta-queso",
+    "nombre": "Tarta de queso",
+    "kcal": 365,
+    "proteinas": 11.9,
+    "carbos": 13.7,
+    "grasas": 29.2,
+    "porciones": [
+      {
+        "nombre": "porción",
+        "plural": "porciones",
+        "gramos": 150,
+        "estimada": true
+      }
+    ],
+    "fuente": {
+      "base": "USDA FoodData Central",
+      "equivalente": true,
+      "alimentos": [
+        {
+          "fdcId": 2708733,
+          "descripcion": "Cheese quiche, meatless",
+          "dataset": "FNDDS 2021-2023 (2024)"
+        }
+      ]
+    }
+  },
+  {
+    "id": "noquis",
+    "nombre": "Ñoquis de papa",
+    "kcal": 135,
+    "proteinas": 2.4,
+    "carbos": 17.2,
+    "grasas": 6.3,
+    "porciones": [
+      {
+        "nombre": "plato",
+        "plural": "platos",
+        "gramos": 250,
+        "estimada": true
+      }
+    ],
+    "fuente": {
+      "base": "USDA FoodData Central",
+      "equivalente": true,
+      "alimentos": [
+        {
+          "fdcId": 2708722,
+          "descripcion": "Gnocchi, potato",
+          "dataset": "FNDDS 2021-2023 (2024)"
+        }
+      ]
+    }
+  },
+  {
+    "id": "ravioles",
+    "nombre": "Ravioles (sin salsa)",
+    "kcal": 185,
+    "proteinas": 10.3,
+    "carbos": 19.9,
+    "grasas": 7,
+    "porciones": [
+      {
+        "nombre": "plato",
+        "plural": "platos",
+        "gramos": 250,
+        "estimada": true
+      }
+    ],
+    "fuente": {
+      "base": "USDA FoodData Central",
+      "equivalente": false,
+      "alimentos": [
+        {
+          "fdcId": 2708760,
+          "descripcion": "Ravioli, NS as to filling, no sauce",
+          "dataset": "FNDDS 2021-2023 (2024)"
+        }
+      ]
+    }
+  },
+  {
+    "id": "canelones",
+    "nombre": "Canelones de verdura",
+    "kcal": 157,
+    "proteinas": 6.3,
+    "carbos": 18.4,
+    "grasas": 6.5,
+    "porciones": [
+      {
+        "nombre": "canelón",
+        "plural": "canelones",
+        "gramos": 120,
+        "estimada": true
+      }
+    ],
+    "fuente": {
+      "base": "USDA FoodData Central",
+      "equivalente": true,
+      "alimentos": [
+        {
+          "fdcId": 2708795,
+          "descripcion": "Cannelloni, cheese- and spinach-filled, no sauce",
+          "dataset": "FNDDS 2021-2023 (2024)"
+        }
+      ]
+    }
+  },
+  {
+    "id": "lasana",
+    "nombre": "Lasaña de carne",
+    "kcal": 185,
+    "proteinas": 10.8,
+    "carbos": 11.4,
+    "grasas": 10.7,
+    "porciones": [
+      {
+        "nombre": "porción",
+        "plural": "porciones",
+        "gramos": 300,
+        "estimada": true
+      }
+    ],
+    "fuente": {
+      "base": "USDA FoodData Central",
+      "equivalente": false,
+      "alimentos": [
+        {
+          "fdcId": 169850,
+          "descripcion": "Restaurant, Italian, lasagna with meat",
+          "dataset": "SR Legacy (2018)"
+        }
+      ]
+    }
+  },
+  {
+    "id": "fideos",
+    "nombre": "Fideos hervidos",
+    "kcal": 158,
+    "proteinas": 5.8,
+    "carbos": 30.9,
+    "grasas": 0.9,
+    "porciones": [
+      {
+        "nombre": "plato",
+        "plural": "platos",
+        "gramos": 200,
+        "estimada": true
+      }
+    ],
+    "fuente": {
+      "base": "USDA FoodData Central",
+      "equivalente": false,
+      "alimentos": [
+        {
+          "fdcId": 168928,
+          "descripcion": "Pasta, cooked, unenriched, without added salt",
+          "dataset": "SR Legacy (2018)"
+        }
+      ]
+    }
+  },
+  {
+    "id": "fideos-tuco",
+    "nombre": "Fideos con tuco",
+    "kcal": 106,
+    "proteinas": 3.7,
+    "carbos": 19.9,
+    "grasas": 1.2,
+    "porciones": [
+      {
+        "nombre": "plato",
+        "plural": "platos",
+        "gramos": 300,
+        "estimada": true
+      }
+    ],
+    "fuente": {
+      "base": "USDA FoodData Central",
+      "equivalente": true,
+      "alimentos": [
+        {
+          "fdcId": 2708831,
+          "descripcion": "Pasta with tomato-based sauce, home recipe",
+          "dataset": "FNDDS 2021-2023 (2024)"
+        }
+      ]
+    }
+  },
+  {
+    "id": "fideos-tuco-carne",
+    "nombre": "Fideos con tuco y carne",
+    "kcal": 147,
+    "proteinas": 7.6,
+    "carbos": 13.3,
+    "grasas": 7.1,
+    "porciones": [
+      {
+        "nombre": "plato",
+        "plural": "platos",
+        "gramos": 300,
+        "estimada": true
+      }
+    ],
+    "fuente": {
+      "base": "USDA FoodData Central",
+      "equivalente": true,
+      "alimentos": [
+        {
+          "fdcId": 2708825,
+          "descripcion": "Pasta with tomato-based sauce, cheese and meat",
+          "dataset": "FNDDS 2021-2023 (2024)"
+        }
+      ]
+    }
+  },
+  {
+    "id": "arroz",
+    "nombre": "Arroz blanco",
+    "kcal": 130,
+    "proteinas": 2.7,
+    "carbos": 28.2,
+    "grasas": 0.3,
+    "porciones": [
+      {
+        "nombre": "plato",
+        "plural": "platos",
+        "gramos": 200,
+        "estimada": true
+      }
+    ],
+    "fuente": {
+      "base": "USDA FoodData Central",
+      "equivalente": false,
+      "alimentos": [
+        {
+          "fdcId": 168878,
+          "descripcion": "Rice, white, long-grain, regular, enriched, cooked",
+          "dataset": "SR Legacy (2018)"
+        }
+      ]
+    }
+  },
+  {
+    "id": "pure",
+    "nombre": "Puré de papas",
+    "kcal": 113,
+    "proteinas": 1.9,
+    "carbos": 16.8,
+    "grasas": 4.2,
+    "porciones": [
+      {
+        "nombre": "plato",
+        "plural": "platos",
+        "gramos": 200,
+        "estimada": true
+      }
+    ],
+    "fuente": {
+      "base": "USDA FoodData Central",
+      "equivalente": false,
+      "alimentos": [
+        {
+          "fdcId": 168555,
+          "descripcion": "Potatoes, mashed, home-prepared, whole milk and butter added",
+          "dataset": "SR Legacy (2018)"
+        }
+      ]
+    }
+  },
+  {
+    "id": "papas-fritas",
+    "nombre": "Papas fritas",
+    "kcal": 312,
+    "proteinas": 3.4,
+    "carbos": 41.4,
+    "grasas": 14.7,
+    "porciones": [
+      {
+        "nombre": "porción",
+        "plural": "porciones",
+        "gramos": 120,
+        "estimada": true
+      }
+    ],
+    "fuente": {
+      "base": "USDA FoodData Central",
+      "equivalente": false,
+      "alimentos": [
+        {
+          "fdcId": 170698,
+          "descripcion": "Fast foods, potato, french fried in vegetable oil",
+          "dataset": "SR Legacy (2018)"
+        }
+      ]
+    }
+  },
+  {
+    "id": "papa-hervida",
+    "nombre": "Papa hervida",
+    "kcal": 86,
+    "proteinas": 1.7,
+    "carbos": 20,
+    "grasas": 0.1,
+    "porciones": [
+      {
+        "nombre": "papa",
+        "plural": "papas",
+        "gramos": 150,
+        "estimada": true
+      }
+    ],
+    "fuente": {
+      "base": "USDA FoodData Central",
+      "equivalente": false,
+      "alimentos": [
+        {
+          "fdcId": 170440,
+          "descripcion": "Potatoes, boiled, cooked without skin, flesh, without salt",
+          "dataset": "SR Legacy (2018)"
+        }
+      ]
+    }
+  },
+  {
+    "id": "papa-horno",
+    "nombre": "Papa al horno",
+    "kcal": 93,
+    "proteinas": 2,
+    "carbos": 21.5,
+    "grasas": 0.1,
+    "porciones": [
+      {
+        "nombre": "papa",
+        "plural": "papas",
+        "gramos": 150,
+        "estimada": true
+      }
+    ],
+    "fuente": {
+      "base": "USDA FoodData Central",
+      "equivalente": false,
+      "alimentos": [
+        {
+          "fdcId": 2709383,
+          "descripcion": "Potato, baked, NFS",
+          "dataset": "FNDDS 2021-2023 (2024)"
+        }
+      ]
+    }
+  },
+  {
+    "id": "batata",
+    "nombre": "Batata al horno",
+    "kcal": 90,
+    "proteinas": 2,
+    "carbos": 20.7,
+    "grasas": 0.2,
+    "porciones": [
+      {
+        "nombre": "batata",
+        "plural": "batatas",
+        "gramos": 150,
+        "estimada": true
+      }
+    ],
+    "fuente": {
+      "base": "USDA FoodData Central",
+      "equivalente": false,
+      "alimentos": [
+        {
+          "fdcId": 168483,
+          "descripcion": "Sweet potato, cooked, baked in skin, flesh, without salt",
+          "dataset": "SR Legacy (2018)"
+        }
+      ]
+    }
+  },
+  {
+    "id": "calabaza",
+    "nombre": "Calabaza hervida",
+    "kcal": 20,
+    "proteinas": 0.7,
+    "carbos": 4.9,
+    "grasas": 0.1,
+    "porciones": [
+      {
+        "nombre": "porción",
+        "plural": "porciones",
+        "gramos": 150,
+        "estimada": true
+      }
+    ],
+    "fuente": {
+      "base": "USDA FoodData Central",
+      "equivalente": false,
+      "alimentos": [
+        {
+          "fdcId": 168449,
+          "descripcion": "Pumpkin, cooked, boiled, drained, without salt",
+          "dataset": "SR Legacy (2018)"
+        }
+      ]
+    }
+  },
+  {
+    "id": "polenta",
+    "nombre": "Polenta",
+    "kcal": 71,
+    "proteinas": 1.1,
+    "carbos": 12.3,
+    "grasas": 1.8,
+    "porciones": [
+      {
+        "nombre": "plato",
+        "plural": "platos",
+        "gramos": 250,
+        "estimada": true
+      }
+    ],
+    "fuente": {
+      "base": "USDA FoodData Central",
+      "equivalente": true,
+      "alimentos": [
+        {
+          "fdcId": 2708375,
+          "descripcion": "Cornmeal mush, fat added",
+          "dataset": "FNDDS 2021-2023 (2024)"
+        }
+      ]
+    }
+  },
+  {
+    "id": "lentejas",
+    "nombre": "Lentejas hervidas",
+    "kcal": 115,
+    "proteinas": 9,
+    "carbos": 20,
+    "grasas": 0.4,
+    "porciones": [
+      {
+        "nombre": "plato",
+        "plural": "platos",
+        "gramos": 200,
+        "estimada": true
+      }
+    ],
+    "fuente": {
+      "base": "USDA FoodData Central",
+      "equivalente": false,
+      "alimentos": [
+        {
+          "fdcId": 2707425,
+          "descripcion": "Lentils, from dried, no added fat",
+          "dataset": "FNDDS 2021-2023 (2024)"
+        }
+      ]
+    }
+  },
+  {
+    "id": "garbanzos",
+    "nombre": "Garbanzos hervidos",
+    "kcal": 164,
+    "proteinas": 8.9,
+    "carbos": 27.4,
+    "grasas": 2.6,
+    "porciones": [
+      {
+        "nombre": "plato",
+        "plural": "platos",
+        "gramos": 150,
+        "estimada": true
+      }
+    ],
+    "fuente": {
+      "base": "USDA FoodData Central",
+      "equivalente": false,
+      "alimentos": [
+        {
+          "fdcId": 173757,
+          "descripcion": "Chickpeas (garbanzo beans, bengal gram), mature seeds, cooked, boiled, without salt",
+          "dataset": "SR Legacy (2018)"
+        }
+      ]
+    }
+  },
+  {
+    "id": "lechuga",
+    "nombre": "Lechuga",
+    "kcal": 15,
+    "proteinas": 1.4,
+    "carbos": 2.9,
+    "grasas": 0.2,
+    "porciones": [
+      {
+        "nombre": "plato",
+        "plural": "platos",
+        "gramos": 50,
+        "estimada": true
+      }
+    ],
+    "fuente": {
+      "base": "USDA FoodData Central",
+      "equivalente": false,
+      "alimentos": [
+        {
+          "fdcId": 169249,
+          "descripcion": "Lettuce, green leaf, raw",
+          "dataset": "SR Legacy (2018)"
+        }
+      ]
+    }
+  },
+  {
+    "id": "tomate",
+    "nombre": "Tomate",
+    "kcal": 18,
+    "proteinas": 0.9,
+    "carbos": 3.9,
+    "grasas": 0.2,
+    "porciones": [
+      {
+        "nombre": "tomate",
+        "plural": "tomates",
+        "gramos": 120,
+        "estimada": true
+      }
+    ],
+    "fuente": {
+      "base": "USDA FoodData Central",
+      "equivalente": false,
+      "alimentos": [
+        {
+          "fdcId": 170457,
+          "descripcion": "Tomatoes, red, ripe, raw, year round average",
+          "dataset": "SR Legacy (2018)"
+        }
+      ]
+    }
+  },
+  {
+    "id": "zanahoria",
+    "nombre": "Zanahoria rallada",
+    "kcal": 41,
+    "proteinas": 0.9,
+    "carbos": 9.6,
+    "grasas": 0.2,
+    "porciones": [
+      {
+        "nombre": "zanahoria",
+        "plural": "zanahorias",
+        "gramos": 70,
+        "estimada": true
+      }
+    ],
+    "fuente": {
+      "base": "USDA FoodData Central",
+      "equivalente": false,
+      "alimentos": [
+        {
+          "fdcId": 170393,
+          "descripcion": "Carrots, raw",
+          "dataset": "SR Legacy (2018)"
+        }
+      ]
+    }
+  },
+  {
+    "id": "cebolla",
+    "nombre": "Cebolla",
+    "kcal": 40,
+    "proteinas": 1.1,
+    "carbos": 9.3,
+    "grasas": 0.1,
+    "porciones": [
+      {
+        "nombre": "cebolla",
+        "plural": "cebollas",
+        "gramos": 110,
+        "estimada": true
+      }
+    ],
+    "fuente": {
+      "base": "USDA FoodData Central",
+      "equivalente": false,
+      "alimentos": [
+        {
+          "fdcId": 170000,
+          "descripcion": "Onions, raw",
+          "dataset": "SR Legacy (2018)"
+        }
+      ]
+    }
+  },
+  {
+    "id": "palta",
+    "nombre": "Palta",
+    "kcal": 160,
+    "proteinas": 2,
+    "carbos": 8.5,
+    "grasas": 14.7,
+    "porciones": [
+      {
+        "nombre": "palta",
+        "plural": "paltas",
+        "gramos": 150,
+        "estimada": true
+      }
+    ],
+    "fuente": {
+      "base": "USDA FoodData Central",
+      "equivalente": false,
+      "alimentos": [
+        {
+          "fdcId": 171705,
+          "descripcion": "Avocados, raw, all commercial varieties",
+          "dataset": "SR Legacy (2018)"
+        }
+      ]
+    }
+  },
+  {
+    "id": "zapallito",
+    "nombre": "Zapallito / zucchini",
+    "kcal": 15,
+    "proteinas": 1.1,
+    "carbos": 2.7,
+    "grasas": 0.4,
+    "porciones": [
+      {
+        "nombre": "zapallito",
+        "plural": "zapallitos",
+        "gramos": 200,
+        "estimada": true
+      }
+    ],
+    "fuente": {
+      "base": "USDA FoodData Central",
+      "equivalente": false,
+      "alimentos": [
+        {
+          "fdcId": 169292,
+          "descripcion": "Squash, summer, zucchini, includes skin, cooked, boiled, drained, without salt",
+          "dataset": "SR Legacy (2018)"
+        }
+      ]
+    }
+  },
+  {
+    "id": "brocoli",
+    "nombre": "Brócoli hervido",
+    "kcal": 35,
+    "proteinas": 2.4,
+    "carbos": 7.2,
+    "grasas": 0.4,
+    "porciones": [
+      {
+        "nombre": "plato",
+        "plural": "platos",
+        "gramos": 150,
+        "estimada": true
+      }
+    ],
+    "fuente": {
+      "base": "USDA FoodData Central",
+      "equivalente": false,
+      "alimentos": [
+        {
+          "fdcId": 169967,
+          "descripcion": "Broccoli, cooked, boiled, drained, without salt",
+          "dataset": "SR Legacy (2018)"
+        }
+      ]
+    }
+  },
+  {
+    "id": "espinaca",
+    "nombre": "Espinaca hervida",
+    "kcal": 23,
+    "proteinas": 3,
+    "carbos": 3.8,
+    "grasas": 0.3,
+    "porciones": [
+      {
+        "nombre": "plato",
+        "plural": "platos",
+        "gramos": 150,
+        "estimada": true
+      }
+    ],
+    "fuente": {
+      "base": "USDA FoodData Central",
+      "equivalente": false,
+      "alimentos": [
+        {
+          "fdcId": 168463,
+          "descripcion": "Spinach, cooked, boiled, drained, without salt",
+          "dataset": "SR Legacy (2018)"
+        }
+      ]
+    }
+  },
+  {
+    "id": "pan-frances",
+    "nombre": "Pan francés",
+    "kcal": 272,
+    "proteinas": 10.8,
+    "carbos": 51.9,
+    "grasas": 2.4,
+    "porciones": [
+      {
+        "nombre": "mignon",
+        "plural": "mignones",
+        "gramos": 50,
+        "estimada": true
+      }
+    ],
+    "fuente": {
+      "base": "USDA FoodData Central",
+      "equivalente": false,
+      "alimentos": [
+        {
+          "fdcId": 172675,
+          "descripcion": "Bread, french or vienna (includes sourdough)",
+          "dataset": "SR Legacy (2018)"
+        }
+      ]
+    }
+  },
+  {
+    "id": "tostadas",
+    "nombre": "Tostadas de pan blanco",
+    "kcal": 293,
+    "proteinas": 10.4,
+    "carbos": 54.1,
+    "grasas": 3.9,
+    "porciones": [
+      {
+        "nombre": "tostada",
+        "plural": "tostadas",
+        "gramos": 25,
+        "estimada": true
+      }
+    ],
+    "fuente": {
+      "base": "USDA FoodData Central",
+      "equivalente": false,
+      "alimentos": [
+        {
+          "fdcId": 2707599,
+          "descripcion": "Bread, white, toasted",
+          "dataset": "FNDDS 2021-2023 (2024)"
+        }
+      ]
+    }
+  },
+  {
+    "id": "tostadas-integral",
+    "nombre": "Tostadas de pan integral",
+    "kcal": 279,
+    "proteinas": 13.5,
+    "carbos": 47.4,
+    "grasas": 3.9,
+    "porciones": [
+      {
+        "nombre": "tostada",
+        "plural": "tostadas",
+        "gramos": 25,
+        "estimada": true
+      }
+    ],
+    "fuente": {
+      "base": "USDA FoodData Central",
+      "equivalente": false,
+      "alimentos": [
+        {
+          "fdcId": 2707710,
+          "descripcion": "Bread, whole wheat, toasted",
+          "dataset": "FNDDS 2021-2023 (2024)"
+        }
+      ]
+    }
+  },
+  {
+    "id": "pan-lactal",
+    "nombre": "Pan lactal",
+    "kcal": 293,
+    "proteinas": 10.4,
+    "carbos": 54.1,
+    "grasas": 3.9,
+    "porciones": [
+      {
+        "nombre": "rebanada",
+        "plural": "rebanadas",
+        "gramos": 25,
+        "estimada": true
+      }
+    ],
+    "fuente": {
+      "base": "USDA FoodData Central",
+      "equivalente": true,
+      "alimentos": [
+        {
+          "fdcId": 2707599,
+          "descripcion": "Bread, white, toasted",
+          "dataset": "FNDDS 2021-2023 (2024)"
+        }
+      ]
+    }
+  },
+  {
+    "id": "galletitas-agua",
+    "nombre": "Galletitas de agua",
+    "kcal": 418,
+    "proteinas": 9.5,
+    "carbos": 74.1,
+    "grasas": 8.6,
+    "porciones": [
+      {
+        "nombre": "galletita",
+        "plural": "galletitas",
+        "gramos": 6,
+        "estimada": true
+      }
+    ],
+    "fuente": {
+      "base": "USDA FoodData Central",
+      "equivalente": true,
+      "alimentos": [
+        {
+          "fdcId": 172746,
+          "descripcion": "Crackers, saltines (includes oyster, soda, soup)",
+          "dataset": "SR Legacy (2018)"
+        }
+      ]
+    }
+  },
+  {
+    "id": "sandwich-jyq",
+    "nombre": "Sándwich / tostado de jamón y queso",
+    "kcal": 213,
+    "proteinas": 14.1,
+    "carbos": 22.4,
+    "grasas": 7.5,
+    "porciones": [
+      {
+        "nombre": "sándwich",
+        "plural": "sándwiches",
+        "gramos": 150,
+        "estimada": true
+      }
+    ],
+    "fuente": {
+      "base": "USDA FoodData Central",
+      "equivalente": false,
+      "alimentos": [
+        {
+          "fdcId": 2706965,
+          "descripcion": "Ham sandwich on white, with cheese",
+          "dataset": "FNDDS 2021-2023 (2024)"
+        }
+      ]
+    }
+  },
+  {
+    "id": "medialuna-manteca",
+    "nombre": "Medialuna de manteca",
+    "kcal": 406,
+    "proteinas": 8.2,
+    "carbos": 45.8,
+    "grasas": 21,
+    "porciones": [
+      {
+        "nombre": "medialuna",
+        "plural": "medialunas",
+        "gramos": 45,
+        "estimada": true
+      }
+    ],
+    "fuente": {
+      "base": "USDA FoodData Central",
+      "equivalente": true,
+      "alimentos": [
+        {
+          "fdcId": 174987,
+          "descripcion": "Croissants, butter",
+          "dataset": "SR Legacy (2018)"
+        }
+      ]
+    }
+  },
+  {
+    "id": "factura",
+    "nombre": "Factura (vigilante, cañoncito…)",
+    "kcal": 371,
+    "proteinas": 5.4,
+    "carbos": 47.8,
+    "grasas": 18.5,
+    "porciones": [
+      {
+        "nombre": "factura",
+        "plural": "facturas",
+        "gramos": 60,
+        "estimada": true
+      }
+    ],
+    "fuente": {
+      "base": "USDA FoodData Central",
+      "equivalente": true,
+      "alimentos": [
+        {
+          "fdcId": 172755,
+          "descripcion": "Danish pastry, fruit, enriched (includes apple, cinnamon, raisin, lemon, raspberry, strawberry)",
+          "dataset": "SR Legacy (2018)"
+        }
+      ]
+    }
+  },
+  {
+    "id": "bola-fraile",
+    "nombre": "Bola de fraile / dona",
+    "kcal": 421,
+    "proteinas": 6.1,
+    "carbos": 47.9,
+    "grasas": 22.7,
+    "porciones": [
+      {
+        "nombre": "unidad",
+        "plural": "unidades",
+        "gramos": 60,
+        "estimada": true
+      }
+    ],
+    "fuente": {
+      "base": "USDA FoodData Central",
+      "equivalente": true,
+      "alimentos": [
+        {
+          "fdcId": 172758,
+          "descripcion": "Doughnuts, yeast-leavened, glazed, enriched (includes honey buns)",
+          "dataset": "SR Legacy (2018)"
+        }
+      ]
+    }
+  },
+  {
+    "id": "budin",
+    "nombre": "Budín",
+    "kcal": 353,
+    "proteinas": 5,
+    "carbos": 53.6,
+    "grasas": 14,
+    "porciones": [
+      {
+        "nombre": "porción",
+        "plural": "porciones",
+        "gramos": 60,
+        "estimada": true
+      }
+    ],
+    "fuente": {
+      "base": "USDA FoodData Central",
+      "equivalente": true,
+      "alimentos": [
+        {
+          "fdcId": 2707882,
+          "descripcion": "Cake, pound",
+          "dataset": "FNDDS 2021-2023 (2024)"
+        }
+      ]
+    }
+  },
+  {
+    "id": "alfajor-chocolate",
+    "nombre": "Alfajor de chocolate",
+    "kcal": 464,
+    "proteinas": 5.2,
+    "carbos": 71,
+    "grasas": 19.1,
+    "porciones": [
+      {
+        "nombre": "alfajor",
+        "plural": "alfajores",
+        "gramos": 50,
+        "estimada": true
+      }
+    ],
+    "fuente": {
+      "base": "USDA FoodData Central",
+      "equivalente": true,
+      "alimentos": [
+        {
+          "fdcId": 172718,
+          "descripcion": "Cookies, chocolate sandwich, with creme filling, regular",
+          "dataset": "SR Legacy (2018)"
+        }
+      ]
+    }
+  },
+  {
+    "id": "alfajor-maicena",
+    "nombre": "Alfajor de maicena",
+    "kcal": 483,
+    "proteinas": 4.5,
+    "carbos": 72.1,
+    "grasas": 20,
+    "porciones": [
+      {
+        "nombre": "alfajor",
+        "plural": "alfajores",
+        "gramos": 40,
+        "estimada": true
+      }
+    ],
+    "fuente": {
+      "base": "USDA FoodData Central",
+      "equivalente": true,
+      "alimentos": [
+        {
+          "fdcId": 2707963,
+          "descripcion": "Cookie, sandwich-type, not chocolate or vanilla",
+          "dataset": "FNDDS 2021-2023 (2024)"
+        }
+      ]
+    }
+  },
+  {
+    "id": "dulce-leche",
+    "nombre": "Dulce de leche",
+    "kcal": 315,
+    "proteinas": 6.8,
+    "carbos": 55.4,
+    "grasas": 7.4,
+    "porciones": [
+      {
+        "nombre": "cucharada",
+        "plural": "cucharadas",
+        "gramos": 20,
+        "estimada": true
+      }
+    ],
+    "fuente": {
+      "base": "USDA FoodData Central",
+      "equivalente": false,
+      "alimentos": [
+        {
+          "fdcId": 173461,
+          "descripcion": "Dulce de Leche",
+          "dataset": "SR Legacy (2018)"
+        }
+      ]
+    }
+  },
+  {
+    "id": "mermelada",
+    "nombre": "Mermelada",
+    "kcal": 278,
+    "proteinas": 0.4,
+    "carbos": 68.9,
+    "grasas": 0.1,
+    "porciones": [
+      {
+        "nombre": "cucharada",
+        "plural": "cucharadas",
+        "gramos": 20,
+        "estimada": true
+      }
+    ],
+    "fuente": {
+      "base": "USDA FoodData Central",
+      "equivalente": false,
+      "alimentos": [
+        {
+          "fdcId": 169641,
+          "descripcion": "Jams and preserves",
+          "dataset": "SR Legacy (2018)"
+        }
+      ]
+    }
+  },
+  {
+    "id": "miel",
+    "nombre": "Miel",
+    "kcal": 304,
+    "proteinas": 0.3,
+    "carbos": 82.4,
+    "grasas": 0,
+    "porciones": [
+      {
+        "nombre": "cucharada",
+        "plural": "cucharadas",
+        "gramos": 21,
+        "estimada": true
+      }
+    ],
+    "fuente": {
+      "base": "USDA FoodData Central",
+      "equivalente": false,
+      "alimentos": [
+        {
+          "fdcId": 169640,
+          "descripcion": "Honey",
+          "dataset": "SR Legacy (2018)"
+        }
+      ]
+    }
+  },
+  {
+    "id": "azucar",
+    "nombre": "Azúcar",
+    "kcal": 387,
+    "proteinas": 0,
+    "carbos": 100,
+    "grasas": 0,
+    "porciones": [
+      {
+        "nombre": "cucharadita",
+        "plural": "cucharaditas",
+        "gramos": 4,
+        "estimada": true
+      }
+    ],
+    "fuente": {
+      "base": "USDA FoodData Central",
+      "equivalente": false,
+      "alimentos": [
+        {
+          "fdcId": 169655,
+          "descripcion": "Sugars, granulated",
+          "dataset": "SR Legacy (2018)"
+        }
+      ]
+    }
+  },
+  {
+    "id": "manteca",
+    "nombre": "Manteca",
+    "kcal": 717,
+    "proteinas": 0.9,
+    "carbos": 0.1,
+    "grasas": 81.1,
+    "porciones": [
+      {
+        "nombre": "cucharadita",
+        "plural": "cucharaditas",
+        "gramos": 5,
+        "estimada": true
+      }
+    ],
+    "fuente": {
+      "base": "USDA FoodData Central",
+      "equivalente": false,
+      "alimentos": [
+        {
+          "fdcId": 173410,
+          "descripcion": "Butter, salted",
+          "dataset": "SR Legacy (2018)"
+        }
+      ]
+    }
+  },
+  {
+    "id": "queso-crema",
+    "nombre": "Queso crema",
+    "kcal": 343,
+    "proteinas": 5.8,
+    "carbos": 4.6,
+    "grasas": 33.5,
+    "porciones": [
+      {
+        "nombre": "cucharada",
+        "plural": "cucharadas",
+        "gramos": 15,
+        "estimada": true
+      }
+    ],
+    "fuente": {
+      "base": "USDA FoodData Central",
+      "equivalente": false,
+      "alimentos": [
+        {
+          "fdcId": 2705760,
+          "descripcion": "Cream cheese, regular, plain",
+          "dataset": "FNDDS 2021-2023 (2024)"
+        }
+      ]
+    }
+  },
+  {
+    "id": "chocolate",
+    "nombre": "Chocolate con leche",
+    "kcal": 535,
+    "proteinas": 7.7,
+    "carbos": 59.4,
+    "grasas": 29.7,
+    "porciones": [
+      {
+        "nombre": "barra chica",
+        "plural": "barras chicas",
+        "gramos": 25,
+        "estimada": true
+      }
+    ],
+    "fuente": {
+      "base": "USDA FoodData Central",
+      "equivalente": false,
+      "alimentos": [
+        {
+          "fdcId": 167587,
+          "descripcion": "Candies, milk chocolate",
+          "dataset": "SR Legacy (2018)"
+        }
+      ]
+    }
+  },
+  {
+    "id": "flan",
+    "nombre": "Flan",
+    "kcal": 145,
+    "proteinas": 4.5,
+    "carbos": 22.8,
+    "grasas": 4,
+    "porciones": [
+      {
+        "nombre": "porción",
+        "plural": "porciones",
+        "gramos": 120,
+        "estimada": true
+      }
+    ],
+    "fuente": {
+      "base": "USDA FoodData Central",
+      "equivalente": false,
+      "alimentos": [
+        {
+          "fdcId": 167574,
+          "descripcion": "Desserts, flan, caramel custard, prepared-from-recipe",
+          "dataset": "SR Legacy (2018)"
+        }
+      ]
+    }
+  },
+  {
+    "id": "helado",
+    "nombre": "Helado de crema",
+    "kcal": 207,
+    "proteinas": 3.5,
+    "carbos": 23.6,
+    "grasas": 11,
+    "porciones": [
+      {
+        "nombre": "bocha",
+        "plural": "bochas",
+        "gramos": 70,
+        "estimada": true
+      }
+    ],
+    "fuente": {
+      "base": "USDA FoodData Central",
+      "equivalente": true,
+      "alimentos": [
+        {
+          "fdcId": 167575,
+          "descripcion": "Ice creams, vanilla",
+          "dataset": "SR Legacy (2018)"
+        }
+      ]
+    }
+  },
+  {
+    "id": "panqueque",
+    "nombre": "Panqueque",
+    "kcal": 224,
+    "proteinas": 8.9,
+    "carbos": 22,
+    "grasas": 11.3,
+    "porciones": [
+      {
+        "nombre": "panqueque",
+        "plural": "panqueques",
+        "gramos": 50,
+        "estimada": true
+      }
+    ],
+    "fuente": {
+      "base": "USDA FoodData Central",
+      "equivalente": true,
+      "alimentos": [
+        {
+          "fdcId": 2708342,
+          "descripcion": "Crepe, plain",
+          "dataset": "FNDDS 2021-2023 (2024)"
+        }
+      ]
+    }
+  },
+  {
+    "id": "leche-entera",
+    "nombre": "Leche entera",
+    "kcal": 61,
+    "proteinas": 3.2,
+    "carbos": 4.8,
+    "grasas": 3.3,
+    "porciones": [
+      {
+        "nombre": "taza",
+        "plural": "tazas",
+        "gramos": 250,
+        "estimada": true
+      }
+    ],
+    "fuente": {
+      "base": "USDA FoodData Central",
+      "equivalente": false,
+      "alimentos": [
+        {
+          "fdcId": 171265,
+          "descripcion": "Milk, whole, 3.25% milkfat, with added vitamin D",
+          "dataset": "SR Legacy (2018)"
+        }
+      ]
+    }
+  },
+  {
+    "id": "leche-descremada",
+    "nombre": "Leche descremada",
+    "kcal": 34,
+    "proteinas": 3.4,
+    "carbos": 5,
+    "grasas": 0.1,
+    "porciones": [
+      {
+        "nombre": "taza",
+        "plural": "tazas",
+        "gramos": 250,
+        "estimada": true
+      }
+    ],
+    "fuente": {
+      "base": "USDA FoodData Central",
+      "equivalente": false,
+      "alimentos": [
+        {
+          "fdcId": 171269,
+          "descripcion": "Milk, nonfat, fluid, with added vitamin A and vitamin D (fat free or skim)",
+          "dataset": "SR Legacy (2018)"
+        }
+      ]
+    }
+  },
+  {
+    "id": "cafe-con-leche",
+    "nombre": "Café con leche",
+    "kcal": 43,
+    "proteinas": 2.8,
+    "carbos": 4.4,
+    "grasas": 1.6,
+    "porciones": [
+      {
+        "nombre": "taza",
+        "plural": "tazas",
+        "gramos": 250,
+        "estimada": true
+      }
+    ],
+    "fuente": {
+      "base": "USDA FoodData Central",
+      "equivalente": true,
+      "alimentos": [
+        {
+          "fdcId": 2710386,
+          "descripcion": "Coffee, Latte",
+          "dataset": "FNDDS 2021-2023 (2024)"
+        }
+      ]
+    }
+  },
+  {
+    "id": "mate-cocido-leche",
+    "nombre": "Mate cocido con leche",
+    "kcal": 31,
+    "proteinas": 1.6,
+    "carbos": 2.5,
+    "grasas": 1.6,
+    "porciones": [
+      {
+        "nombre": "taza",
+        "plural": "tazas",
+        "gramos": 250,
+        "estimada": true
+      }
+    ],
+    "fuente": {
+      "base": "USDA FoodData Central",
+      "equivalente": true,
+      "alimentos": [
+        {
+          "fdcId": 2710502,
+          "descripcion": "Tea, hot, herbal",
+          "dataset": "FNDDS 2021-2023 (2024)",
+          "proporcion": 0.5
+        },
+        {
+          "fdcId": 171265,
+          "descripcion": "Milk, whole, 3.25% milkfat, with added vitamin D",
+          "dataset": "SR Legacy (2018)",
+          "proporcion": 0.5
+        }
+      ]
+    }
+  },
+  {
+    "id": "mate-cocido",
+    "nombre": "Mate cocido / té",
+    "kcal": 1,
+    "proteinas": 0,
+    "carbos": 0.2,
+    "grasas": 0,
+    "porciones": [
+      {
+        "nombre": "taza",
+        "plural": "tazas",
+        "gramos": 250,
+        "estimada": true
+      }
+    ],
+    "fuente": {
+      "base": "USDA FoodData Central",
+      "equivalente": true,
+      "alimentos": [
+        {
+          "fdcId": 2710502,
+          "descripcion": "Tea, hot, herbal",
+          "dataset": "FNDDS 2021-2023 (2024)"
+        }
+      ]
+    }
+  },
+  {
+    "id": "yogur-entero",
+    "nombre": "Yogur natural entero",
+    "kcal": 61,
+    "proteinas": 3.5,
+    "carbos": 4.7,
+    "grasas": 3.3,
+    "porciones": [
+      {
+        "nombre": "pote",
+        "plural": "potes",
+        "gramos": 190,
+        "estimada": true
+      }
+    ],
+    "fuente": {
+      "base": "USDA FoodData Central",
+      "equivalente": false,
+      "alimentos": [
+        {
+          "fdcId": 171284,
+          "descripcion": "Yogurt, plain, whole milk",
+          "dataset": "SR Legacy (2018)"
+        }
+      ]
+    }
+  },
+  {
+    "id": "yogur-descremado",
+    "nombre": "Yogur natural descremado",
+    "kcal": 63,
+    "proteinas": 5.3,
+    "carbos": 7,
+    "grasas": 1.6,
+    "porciones": [
+      {
+        "nombre": "pote",
+        "plural": "potes",
+        "gramos": 190,
+        "estimada": true
+      }
+    ],
+    "fuente": {
+      "base": "USDA FoodData Central",
+      "equivalente": false,
+      "alimentos": [
+        {
+          "fdcId": 170886,
+          "descripcion": "Yogurt, plain, low fat",
+          "dataset": "SR Legacy (2018)"
+        }
+      ]
+    }
+  },
+  {
+    "id": "yogur-frutado",
+    "nombre": "Yogur con frutas",
+    "kcal": 99,
+    "proteinas": 4,
+    "carbos": 18.6,
+    "grasas": 1.2,
+    "porciones": [
+      {
+        "nombre": "pote",
+        "plural": "potes",
+        "gramos": 190,
+        "estimada": true
+      }
+    ],
+    "fuente": {
+      "base": "USDA FoodData Central",
+      "equivalente": false,
+      "alimentos": [
+        {
+          "fdcId": 170889,
+          "descripcion": "Yogurt, fruit, low fat,9 g protein/8 oz",
+          "dataset": "SR Legacy (2018)"
+        }
+      ]
+    }
+  },
+  {
+    "id": "yogur-griego",
+    "nombre": "Yogur griego natural",
+    "kcal": 97,
+    "proteinas": 9,
+    "carbos": 4,
+    "grasas": 5,
+    "porciones": [
+      {
+        "nombre": "pote",
+        "plural": "potes",
+        "gramos": 170,
+        "estimada": true
+      }
+    ],
+    "fuente": {
+      "base": "USDA FoodData Central",
+      "equivalente": false,
+      "alimentos": [
+        {
+          "fdcId": 171304,
+          "descripcion": "Yogurt, Greek, plain, whole milk",
+          "dataset": "SR Legacy (2018)"
+        }
+      ]
+    }
+  },
+  {
+    "id": "queso-cremoso",
+    "nombre": "Queso cremoso / port salut",
+    "kcal": 352,
+    "proteinas": 23.8,
+    "carbos": 0.6,
+    "grasas": 28.2,
+    "porciones": [
+      {
+        "nombre": "feta",
+        "plural": "fetas",
+        "gramos": 30,
+        "estimada": true
+      }
+    ],
+    "fuente": {
+      "base": "USDA FoodData Central",
+      "equivalente": true,
+      "alimentos": [
+        {
+          "fdcId": 170849,
+          "descripcion": "Cheese, port de salut",
+          "dataset": "SR Legacy (2018)"
+        }
+      ]
+    }
+  },
+  {
+    "id": "muzzarella",
+    "nombre": "Muzzarella",
+    "kcal": 299,
+    "proteinas": 22.2,
+    "carbos": 2.4,
+    "grasas": 22.1,
+    "porciones": [
+      {
+        "nombre": "feta",
+        "plural": "fetas",
+        "gramos": 30,
+        "estimada": true
+      }
+    ],
+    "fuente": {
+      "base": "USDA FoodData Central",
+      "equivalente": false,
+      "alimentos": [
+        {
+          "fdcId": 170845,
+          "descripcion": "Cheese, mozzarella, whole milk",
+          "dataset": "SR Legacy (2018)"
+        }
+      ]
+    }
+  },
+  {
+    "id": "queso-rallado",
+    "nombre": "Queso rallado",
+    "kcal": 420,
+    "proteinas": 28.4,
+    "carbos": 13.9,
+    "grasas": 27.8,
+    "porciones": [
+      {
+        "nombre": "cucharada",
+        "plural": "cucharadas",
+        "gramos": 5,
+        "estimada": true
+      }
+    ],
+    "fuente": {
+      "base": "USDA FoodData Central",
+      "equivalente": false,
+      "alimentos": [
+        {
+          "fdcId": 171247,
+          "descripcion": "Cheese, parmesan, grated",
+          "dataset": "SR Legacy (2018)"
+        }
+      ]
+    }
+  },
+  {
+    "id": "ricota",
+    "nombre": "Ricota",
+    "kcal": 150,
+    "proteinas": 7.5,
+    "carbos": 7.3,
+    "grasas": 10.2,
+    "porciones": [
+      {
+        "nombre": "cucharada",
+        "plural": "cucharadas",
+        "gramos": 30,
+        "estimada": true
+      }
+    ],
+    "fuente": {
+      "base": "USDA FoodData Central",
+      "equivalente": false,
+      "alimentos": [
+        {
+          "fdcId": 170851,
+          "descripcion": "Cheese, ricotta, whole milk",
+          "dataset": "SR Legacy (2018)"
+        }
+      ]
+    }
+  },
+  {
+    "id": "jamon-cocido",
+    "nombre": "Jamón cocido",
+    "kcal": 164,
+    "proteinas": 16.6,
+    "carbos": 3.6,
+    "grasas": 8.8,
+    "porciones": [
+      {
+        "nombre": "feta",
+        "plural": "fetas",
+        "gramos": 20,
+        "estimada": true
+      }
+    ],
+    "fuente": {
+      "base": "USDA FoodData Central",
+      "equivalente": false,
+      "alimentos": [
+        {
+          "fdcId": 173864,
+          "descripcion": "Ham, sliced, regular (approximately 11% fat)",
+          "dataset": "SR Legacy (2018)"
+        }
+      ]
+    }
+  },
+  {
+    "id": "banana",
+    "nombre": "Banana",
+    "kcal": 89,
+    "proteinas": 1.1,
+    "carbos": 22.8,
+    "grasas": 0.3,
+    "porciones": [
+      {
+        "nombre": "banana",
+        "plural": "bananas",
+        "gramos": 120,
+        "estimada": true
+      }
+    ],
+    "fuente": {
+      "base": "USDA FoodData Central",
+      "equivalente": false,
+      "alimentos": [
+        {
+          "fdcId": 173944,
+          "descripcion": "Bananas, raw",
+          "dataset": "SR Legacy (2018)"
+        }
+      ]
+    }
+  },
+  {
+    "id": "manzana",
+    "nombre": "Manzana",
+    "kcal": 52,
+    "proteinas": 0.3,
+    "carbos": 13.8,
+    "grasas": 0.2,
+    "porciones": [
+      {
+        "nombre": "manzana",
+        "plural": "manzanas",
+        "gramos": 180,
+        "estimada": true
+      }
+    ],
+    "fuente": {
+      "base": "USDA FoodData Central",
+      "equivalente": false,
+      "alimentos": [
+        {
+          "fdcId": 171688,
+          "descripcion": "Apples, raw, with skin (Includes foods for USDA's Food Distribution Program)",
+          "dataset": "SR Legacy (2018)"
+        }
+      ]
+    }
+  },
+  {
+    "id": "naranja",
+    "nombre": "Naranja",
+    "kcal": 47,
+    "proteinas": 0.9,
+    "carbos": 11.8,
+    "grasas": 0.1,
+    "porciones": [
+      {
+        "nombre": "naranja",
+        "plural": "naranjas",
+        "gramos": 150,
+        "estimada": true
+      }
+    ],
+    "fuente": {
+      "base": "USDA FoodData Central",
+      "equivalente": false,
+      "alimentos": [
+        {
+          "fdcId": 169097,
+          "descripcion": "Oranges, raw, all commercial varieties",
+          "dataset": "SR Legacy (2018)"
+        }
+      ]
+    }
+  },
+  {
+    "id": "mandarina",
+    "nombre": "Mandarina",
+    "kcal": 53,
+    "proteinas": 0.8,
+    "carbos": 13.3,
+    "grasas": 0.3,
+    "porciones": [
+      {
+        "nombre": "mandarina",
+        "plural": "mandarinas",
+        "gramos": 90,
+        "estimada": true
+      }
+    ],
+    "fuente": {
+      "base": "USDA FoodData Central",
+      "equivalente": false,
+      "alimentos": [
+        {
+          "fdcId": 169105,
+          "descripcion": "Tangerines, (mandarin oranges), raw",
+          "dataset": "SR Legacy (2018)"
+        }
+      ]
+    }
+  },
+  {
+    "id": "pera",
+    "nombre": "Pera",
+    "kcal": 57,
+    "proteinas": 0.4,
+    "carbos": 15.2,
+    "grasas": 0.1,
+    "porciones": [
+      {
+        "nombre": "pera",
+        "plural": "peras",
+        "gramos": 180,
+        "estimada": true
+      }
+    ],
+    "fuente": {
+      "base": "USDA FoodData Central",
+      "equivalente": false,
+      "alimentos": [
+        {
+          "fdcId": 169118,
+          "descripcion": "Pears, raw",
+          "dataset": "SR Legacy (2018)"
+        }
+      ]
+    }
+  },
+  {
+    "id": "durazno",
+    "nombre": "Durazno",
+    "kcal": 39,
+    "proteinas": 0.9,
+    "carbos": 9.5,
+    "grasas": 0.3,
+    "porciones": [
+      {
+        "nombre": "durazno",
+        "plural": "duraznos",
+        "gramos": 150,
+        "estimada": true
+      }
+    ],
+    "fuente": {
+      "base": "USDA FoodData Central",
+      "equivalente": false,
+      "alimentos": [
+        {
+          "fdcId": 169928,
+          "descripcion": "Peaches, yellow, raw",
+          "dataset": "SR Legacy (2018)"
+        }
+      ]
+    }
+  },
+  {
+    "id": "uvas",
+    "nombre": "Uvas",
+    "kcal": 69,
+    "proteinas": 0.7,
+    "carbos": 18.1,
+    "grasas": 0.2,
+    "porciones": [
+      {
+        "nombre": "racimo chico",
+        "plural": "racimos chicos",
+        "gramos": 100,
+        "estimada": true
+      }
+    ],
+    "fuente": {
+      "base": "USDA FoodData Central",
+      "equivalente": false,
+      "alimentos": [
+        {
+          "fdcId": 174683,
+          "descripcion": "Grapes, red or green (European type, such as Thompson seedless), raw",
+          "dataset": "SR Legacy (2018)"
+        }
+      ]
+    }
+  },
+  {
+    "id": "frutillas",
+    "nombre": "Frutillas",
+    "kcal": 32,
+    "proteinas": 0.7,
+    "carbos": 7.7,
+    "grasas": 0.3,
+    "porciones": [
+      {
+        "nombre": "taza",
+        "plural": "tazas",
+        "gramos": 150,
+        "estimada": true
+      }
+    ],
+    "fuente": {
+      "base": "USDA FoodData Central",
+      "equivalente": false,
+      "alimentos": [
+        {
+          "fdcId": 167762,
+          "descripcion": "Strawberries, raw",
+          "dataset": "SR Legacy (2018)"
+        }
+      ]
+    }
+  },
+  {
+    "id": "kiwi",
+    "nombre": "Kiwi",
+    "kcal": 61,
+    "proteinas": 1.1,
+    "carbos": 14.7,
+    "grasas": 0.5,
+    "porciones": [
+      {
+        "nombre": "kiwi",
+        "plural": "kiwis",
+        "gramos": 75,
+        "estimada": true
+      }
+    ],
+    "fuente": {
+      "base": "USDA FoodData Central",
+      "equivalente": false,
+      "alimentos": [
+        {
+          "fdcId": 168153,
+          "descripcion": "Kiwifruit, green, raw",
+          "dataset": "SR Legacy (2018)"
+        }
+      ]
+    }
+  },
+  {
+    "id": "avena",
+    "nombre": "Avena (cruda)",
+    "kcal": 379,
+    "proteinas": 13.2,
+    "carbos": 67.7,
+    "grasas": 6.5,
+    "porciones": [
+      {
+        "nombre": "cucharada",
+        "plural": "cucharadas",
+        "gramos": 10,
+        "estimada": true
+      }
+    ],
+    "fuente": {
+      "base": "USDA FoodData Central",
+      "equivalente": false,
+      "alimentos": [
+        {
+          "fdcId": 173904,
+          "descripcion": "Cereals, oats, regular and quick, not fortified, dry",
+          "dataset": "SR Legacy (2018)"
+        }
+      ]
+    }
+  },
+  {
+    "id": "almendras",
+    "nombre": "Almendras tostadas",
+    "kcal": 598,
+    "proteinas": 21,
+    "carbos": 21,
+    "grasas": 52.5,
+    "porciones": [
+      {
+        "nombre": "puñado",
+        "plural": "puñados",
+        "gramos": 30,
+        "estimada": true
+      }
+    ],
+    "fuente": {
+      "base": "USDA FoodData Central",
+      "equivalente": false,
+      "alimentos": [
+        {
+          "fdcId": 168596,
+          "descripcion": "Nuts, almonds, dry roasted, with salt added",
+          "dataset": "SR Legacy (2018)"
+        }
+      ]
+    }
+  },
+  {
+    "id": "mani-pasta",
+    "nombre": "Pasta de maní",
+    "kcal": 588,
+    "proteinas": 21.9,
+    "carbos": 24,
+    "grasas": 49.5,
+    "porciones": [
+      {
+        "nombre": "cucharada",
+        "plural": "cucharadas",
+        "gramos": 16,
+        "estimada": true
+      }
+    ],
+    "fuente": {
+      "base": "USDA FoodData Central",
+      "equivalente": false,
+      "alimentos": [
+        {
+          "fdcId": 174294,
+          "descripcion": "Peanut Butter, smooth (Includes foods for USDA's Food Distribution Program)",
+          "dataset": "SR Legacy (2018)"
+        }
+      ]
+    }
+  },
+  {
+    "id": "jugo-naranja",
+    "nombre": "Jugo de naranja exprimido",
+    "kcal": 47,
+    "proteinas": 0.8,
+    "carbos": 10,
+    "grasas": 0.4,
+    "porciones": [
+      {
+        "nombre": "vaso",
+        "plural": "vasos",
+        "gramos": 250,
+        "estimada": true
+      }
+    ],
+    "fuente": {
+      "base": "USDA FoodData Central",
+      "equivalente": false,
+      "alimentos": [
+        {
+          "fdcId": 2709187,
+          "descripcion": "Orange juice, 100%,  freshly squeezed",
+          "dataset": "FNDDS 2021-2023 (2024)"
+        }
+      ]
+    }
+  },
+  {
+    "id": "gaseosa-cola",
+    "nombre": "Gaseosa cola",
+    "kcal": 42,
+    "proteinas": 0,
+    "carbos": 10.4,
+    "grasas": 0.3,
+    "porciones": [
+      {
+        "nombre": "vaso",
+        "plural": "vasos",
+        "gramos": 250,
+        "estimada": true
+      }
+    ],
+    "fuente": {
+      "base": "USDA FoodData Central",
+      "equivalente": false,
+      "alimentos": [
+        {
+          "fdcId": 2710541,
+          "descripcion": "Soft drink, cola",
+          "dataset": "FNDDS 2021-2023 (2024)"
+        }
+      ]
+    }
+  },
+  {
+    "id": "gaseosa-cola-light",
+    "nombre": "Gaseosa cola light",
+    "kcal": 2,
+    "proteinas": 0.1,
+    "carbos": 0.3,
+    "grasas": 0,
+    "porciones": [
+      {
+        "nombre": "vaso",
+        "plural": "vasos",
+        "gramos": 250,
+        "estimada": true
+      }
+    ],
+    "fuente": {
+      "base": "USDA FoodData Central",
+      "equivalente": false,
+      "alimentos": [
+        {
+          "fdcId": 2710542,
+          "descripcion": "Soft drink, cola, diet",
+          "dataset": "FNDDS 2021-2023 (2024)"
+        }
+      ]
+    }
+  }
+]

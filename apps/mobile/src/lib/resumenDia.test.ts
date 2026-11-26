@@ -77,6 +77,32 @@ describe('resumenDeEjemplo', () => {
 describe('armarResumenDia', () => {
   const perfil = { alturaCm: 175, pesoKg: 75 };
 
+  test('lo comido sale del diario: kcal y macros', () => {
+    const r = armarResumenDia({
+      metaPasos: 10000,
+      pasosAutomaticos: 0,
+      pasosManuales: 0,
+      minutos: { hoy: 0, semana: 0 },
+      perfil,
+      metas: { kcal: 2000, proteinas: 135, carbos: 250, grasas: 56 },
+      comido: { kcal: 1480.4, proteinas: 96.5, carbos: 160, grasas: 48 },
+    });
+    expect(r.kcal).toEqual({ objetivo: 2000, actividad: 0, comidas: 1480 });
+    expect(r.macros).toEqual({
+      proteinas: { actual: 96.5, meta: 135 },
+      carbos: { actual: 160, meta: 250 },
+      grasas: { actual: 48, meta: 56 },
+    });
+    expect(kcalRestantes(r.kcal)).toBe(520);
+  });
+
+  test('un día sin comidas cargadas: 0 comido', () => {
+    const nada = { kcal: 0, proteinas: 0, carbos: 0, grasas: 0 };
+    const r = armarResumenDia({ metaPasos: 10000, pasosAutomaticos: 0, pasosManuales: 0, minutos: { hoy: 0, semana: 0 }, perfil, comido: nada });
+    expect(r.kcal.comidas).toBe(0);
+    expect(r.macros.proteinas.actual).toBe(0);
+  });
+
   test('usa los pasos del sensor y suma los manuales', () => {
     const r = armarResumenDia({ metaPasos: 10000, pasosAutomaticos: 6000, pasosManuales: 2700, minutos: { hoy: 34, semana: 110 }, perfil });
     expect(r.pasos).toEqual({ automaticos: 6000, manuales: 2700, meta: 10000 });

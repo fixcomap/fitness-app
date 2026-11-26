@@ -28,7 +28,15 @@
           "motionPermission": "Usamos el sensor de movimiento para contar tus pasos y tus minutos activos. Los datos no salen de tu celu."
         }
       ],
-      "@react-native-community/datetimepicker"
+      "@react-native-community/datetimepicker",
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Usamos la cámara para leer el código de barras de los alimentos. Las imágenes no se guardan.",
+          "microphonePermission": false,
+          "recordAudioAndroid": false
+        }
+      ]
     ]
   }
 }

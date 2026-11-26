@@ -1,9 +1,10 @@
 // Resumen del día: lo que muestra la pantalla Inicio.
 // Es el punto de encuentro de todas las secciones (Comida, Actividad, Entreno).
 // Ya son reales: los pasos y los minutos activos (sensor + manuales), las kcal de
-// actividad (caminata + entrenamientos), el entreno de hoy y las metas de kcal y
-// macros (del perfil). Sigue de ejemplo lo comido.
+// actividad (caminata + entrenamientos), el entreno de hoy, las metas de kcal y
+// macros (del perfil) y lo comido (del diario de comidas).
 import { kcalCaminata } from './actividad/calculos';
+import type { Nutrientes } from './comida/alimentos';
 import type { MetasNutricion } from './perfil';
 
 // Recomendación de la OMS para adultos: 150 minutos de actividad moderada por semana.
@@ -55,6 +56,7 @@ export interface DatosDelDia {
   kcalEntreno?: number; // de los entrenamientos terminados hoy (estimadas)
   entreno?: EntrenoDeHoy | null;
   metas?: MetasNutricion; // del perfil; sin metas, las de ejemplo
+  comido?: Nutrientes; // del diario de comidas; sin diario, lo de ejemplo
 }
 
 // Arma el resumen con los datos reales que ya hay y completa el resto con ejemplos.
@@ -67,20 +69,23 @@ export function armarResumenDia({
   kcalEntreno = 0,
   entreno = null,
   metas,
+  comido,
 }: DatosDelDia): ResumenDia {
   const pasosDelDia = pasosAutomaticos + pasosManuales;
   const base = resumenDeEjemplo(metaPasos);
   const actividad = kcalCaminata(pasosDelDia, perfil.alturaCm, perfil.pesoKg) + Math.max(0, Math.round(kcalEntreno));
-  const macros = metas
-    ? {
-        proteinas: { ...base.macros.proteinas, meta: metas.proteinas },
-        carbos: { ...base.macros.carbos, meta: metas.carbos },
-        grasas: { ...base.macros.grasas, meta: metas.grasas },
-      }
-    : base.macros;
+  const macro = (clave: 'proteinas' | 'carbos' | 'grasas'): Meta => ({
+    actual: comido ? comido[clave] : base.macros[clave].actual,
+    meta: metas ? metas[clave] : base.macros[clave].meta,
+  });
+  const macros = { proteinas: macro('proteinas'), carbos: macro('carbos'), grasas: macro('grasas') };
   return {
     ...base,
-    kcal: { ...base.kcal, objetivo: metas?.kcal ?? base.kcal.objetivo, actividad },
+    kcal: {
+      objetivo: metas?.kcal ?? base.kcal.objetivo,
+      actividad,
+      comidas: comido ? Math.round(comido.kcal) : base.kcal.comidas,
+    },
     macros,
     pasos: { automaticos: pasosAutomaticos, manuales: pasosManuales, meta: metaPasos },
     minutosActivos: { ...base.minutosActivos, hoy: minutos.hoy, semana: minutos.semana },
