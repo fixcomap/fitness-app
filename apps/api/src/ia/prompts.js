@@ -40,11 +40,13 @@ Cómo usar el contexto:
 - Basate en esos datos y no inventes los que no están. Si falta algo para responder bien, preguntalo.
 
 Rutinas:
-- Solo armá una rutina si el usuario la pide. Si no, "rutina" va en null.
+- Solo armá rutinas si el usuario las pide. Si no, "rutinas" va vacía.
+- Una rutina por cada día de entrenamiento, con sus propios ejercicios y su día en "dias" (un solo día por rutina, sin repetir días entre rutinas). Por ejemplo, 3 días de empuje/tirón/piernas son 3 rutinas: "Empuje" el lunes, "Tirón" el miércoles y "Piernas" el viernes. No juntes los ejercicios de varios días en una sola rutina.
+- Nombres cortos, de una o dos palabras: "Empuje", "Tirón", "Piernas", "Torso", "Full body". Sin el objetivo ni la cantidad de días en el nombre.
 - Usá únicamente ejercicios del catálogo, con su id exacto. No inventes ids.
 - dias: 0 = lunes … 6 = domingo. series: de 1 a 10. rango de repeticiones: min y max de 1 a 30, con min ≤ max.
 - Tené en cuenta cuántos días por semana entrena y su objetivo (hipertrofia o fuerza).
-- En "texto" explicá la rutina en pocas líneas; la app la muestra aparte.`;
+- En "texto" explicá la idea del plan en pocas líneas. No repitas los días, los ejercicios ni las series: la app muestra las rutinas aparte.`;
 
 // El contexto del usuario como segundo bloque de instrucciones (cambia en cada pedido).
 function contextoCoach(contexto) {

@@ -7,6 +7,7 @@ const { ErrorIa } = require('./proveedor');
 const SERIES = { min: 1, max: 10 };
 const REPS = { min: 1, max: 30 };
 const MAXIMO_EJERCICIOS_RUTINA = 15;
+const MAXIMO_RUTINAS = 7; // una por día de la semana
 const MAXIMO_NOMBRE_RUTINA = 40;
 const NOMBRE_RUTINA_POR_DEFECTO = 'Rutina del coach';
 const MAXIMO_TEXTO = 4000;
@@ -86,50 +87,81 @@ function erroresPedido(error) {
   return error.issues.slice(0, 5).map((i) => `${i.path.join('.') || 'cuerpo'}: ${i.message}`);
 }
 
-// La rutina de la IA en el formato de Mis rutinas, solo con ejercicios del catálogo y en rango.
+// Recorta el nombre en una palabra completa (sin dejar separadores colgando al final).
+// "Hipertrofia 3 días - Empuje, Tirón, Piernas" con 40 → "Hipertrofia 3 días - Empuje, Tirón".
+function recortarNombre(nombre, maximo = MAXIMO_NOMBRE_RUTINA) {
+  const limpio = nombre.trim().replace(/\s+/g, ' ');
+  if (limpio.length <= maximo) return limpio;
+  const corte = limpio.slice(0, maximo + 1).lastIndexOf(' ');
+  const recortado = corte > 0 ? limpio.slice(0, corte) : limpio.slice(0, maximo);
+  return recortado.replace(/[\s,;:/\-–—·|+&(]+$/u, '');
+}
+
+// Una rutina de la IA en el formato de Mis rutinas, solo con ejercicios del catálogo y en rango.
+// diasOcupados: días que ya tiene otra rutina de la lista (en la app, un día tiene una sola rutina).
 // { rutina, descartados } — rutina es null si no queda ningún ejercicio válido.
-function limpiarRutina(rutina, idsCatalogo, crearId = randomUUID) {
+function limpiarRutina(rutina, idsCatalogo, { crearId = randomUUID, diasOcupados = new Set() } = {}) {
   if (!rutina || typeof rutina !== 'object') return { rutina: null, descartados: [] };
+  const nombre = recortarNombre(typeof rutina.nombre === 'string' ? rutina.nombre : '') || NOMBRE_RUTINA_POR_DEFECTO;
   const descartados = [];
+  const descartar = (ejercicioId, motivo) => descartados.push({ rutina: nombre, ejercicioId, motivo });
   const usados = new Set();
   const ejercicios = [];
   for (const crudo of Array.isArray(rutina.ejercicios) ? rutina.ejercicios : []) {
     const r = ejercicioRutina.safeParse(crudo);
     const id = r.success ? r.data.ejercicioId : String(crudo?.ejercicioId ?? '?');
-    const valido = r.success && idsCatalogo.has(id) && r.data.rango.min <= r.data.rango.max && !usados.has(id);
-    if (!valido || ejercicios.length >= MAXIMO_EJERCICIOS_RUTINA) {
-      descartados.push(id);
-      continue;
+    if (!idsCatalogo.has(id)) descartar(id, 'no-existe');
+    else if (!r.success || r.data.rango.min > r.data.rango.max) descartar(id, 'fuera-de-rango');
+    else if (usados.has(id)) descartar(id, 'repetido');
+    else if (ejercicios.length >= MAXIMO_EJERCICIOS_RUTINA) descartar(id, 'de-mas');
+    else {
+      usados.add(id);
+      ejercicios.push({
+        ejercicioId: id,
+        series: r.data.series,
+        rango: { min: r.data.rango.min, max: r.data.rango.max },
+      });
     }
-    usados.add(id);
-    ejercicios.push({
-      ejercicioId: id,
-      series: r.data.series,
-      rango: { min: r.data.rango.min, max: r.data.rango.max },
-    });
   }
   if (ejercicios.length === 0) return { rutina: null, descartados };
 
-  const dias = [...new Set((Array.isArray(rutina.dias) ? rutina.dias : []).filter((d) => dia.safeParse(d).success))];
-  const nombre = typeof rutina.nombre === 'string' ? rutina.nombre.trim().slice(0, MAXIMO_NOMBRE_RUTINA) : '';
-  return {
-    rutina: {
-      id: crearId(),
-      nombre: nombre || NOMBRE_RUTINA_POR_DEFECTO,
-      dias: dias.sort((a, b) => a - b),
-      ejercicios,
-    },
-    descartados,
-  };
+  const dias = [...new Set((Array.isArray(rutina.dias) ? rutina.dias : []).filter((d) => dia.safeParse(d).success))]
+    .filter((d) => !diasOcupados.has(d))
+    .sort((a, b) => a - b);
+  return { rutina: { id: crearId(), nombre, dias, ejercicios }, descartados };
 }
 
-// { texto, rutina, descartados }. Tira ErrorIa si no vino el texto.
-function leerRespuestaCoach(datos, catalogo, crearId) {
+// Las rutinas de la IA (una por día de entrenamiento). Un día queda en la primera rutina que lo pide.
+// { rutinas, descartados }
+function limpiarRutinas(lista, idsCatalogo, { crearId = randomUUID } = {}) {
+  const rutinas = [];
+  const descartados = [];
+  const diasOcupados = new Set();
+  for (const cruda of (Array.isArray(lista) ? lista : []).slice(0, MAXIMO_RUTINAS)) {
+    const r = limpiarRutina(cruda, idsCatalogo, { crearId, diasOcupados });
+    descartados.push(...r.descartados);
+    if (!r.rutina) continue;
+    for (const d of r.rutina.dias) diasOcupados.add(d);
+    rutinas.push(r.rutina);
+  }
+  return { rutinas, descartados };
+}
+
+// { texto, rutinas, descartados }. Tira ErrorIa si no vino el texto.
+function leerRespuestaCoach(datos, catalogo, opciones) {
   const textoIa = typeof datos?.texto === 'string' ? datos.texto.trim() : '';
   if (!textoIa) throw new ErrorIa('formato', 'La IA no devolvió el texto');
   const ids = new Set(catalogo.map((e) => e.id));
-  const { rutina, descartados } = limpiarRutina(datos.rutina, ids, crearId);
-  return { texto: textoIa.slice(0, MAXIMO_TEXTO), rutina, descartados };
+  const { rutinas, descartados } = limpiarRutinas(datos.rutinas, ids, opciones);
+  return { texto: textoIa.slice(0, MAXIMO_TEXTO), rutinas, descartados };
 }
 
-module.exports = { esquemaPedidoCoach, erroresPedido, limpiarRutina, leerRespuestaCoach };
+module.exports = {
+  MAXIMO_NOMBRE_RUTINA,
+  esquemaPedidoCoach,
+  erroresPedido,
+  recortarNombre,
+  limpiarRutina,
+  limpiarRutinas,
+  leerRespuestaCoach,
+};

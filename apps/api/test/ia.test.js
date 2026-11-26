@@ -150,10 +150,10 @@ test('Gemini: manda la foto con el prompt y lee JSON y tokens (con los de razona
 });
 
 test('Gemini: el coach manda el historial con roles user/model y el contexto en las instrucciones', async () => {
-  const cliente = clienteGemini(respuestaGemini('{"texto":"Dale","rutina":null}'));
+  const cliente = clienteGemini(respuestaGemini('{"texto":"Dale","rutinas":[]}'));
   const ia = crearProveedorGemini({ cliente, modeloFoto: 'm-foto', modeloCoach: 'm-coach' });
   const r = await ia.responderCoach(mensajes, contexto);
-  assert.deepStrictEqual(r.datos, { texto: 'Dale', rutina: null });
+  assert.deepStrictEqual(r.datos, { texto: 'Dale', rutinas: [] });
 
   const [pedido] = cliente.pedidos;
   assert.strictEqual(pedido.model, 'm-coach');
@@ -217,7 +217,7 @@ test('Claude: manda la foto en base64 con salida estructurada y lee tokens', asy
 });
 
 test('Claude: el coach manda el historial con roles user/assistant y el contexto aparte', async () => {
-  const { pedidos, clientePara } = clientesClaude(respuestaClaude({ texto: 'Dale', rutina: null }));
+  const { pedidos, clientePara } = clientesClaude(respuestaClaude({ texto: 'Dale', rutinas: [] }));
   const ia = crearProveedorClaude({ clientePara, modeloFoto: 'm-foto', modeloCoach: 'm-coach' });
   await ia.responderCoach(mensajes, contexto);
   const [pedido] = pedidos;

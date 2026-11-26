@@ -64,4 +64,30 @@ function resumir(resultados) {
   };
 }
 
-module.exports = { USO, leerArgumentos, estaDentro, costoEstimado, formatoCosto, resumir };
+const DIAS = ['lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado', 'domingo'];
+const MOTIVOS = {
+  'no-existe': 'no existen en el catálogo',
+  'fuera-de-rango': 'series o repeticiones fuera de rango',
+  repetido: 'repetidos en la misma rutina',
+  'de-mas': 'sobraban (máximo por rutina)',
+};
+
+// Lo que muestra el script de una respuesta del coach: texto, rutinas (con los nombres del catálogo)
+// y los ejercicios descartados, agrupados por motivo.
+function lineasCoach(salida, catalogo) {
+  const nombres = new Map(catalogo.map((e) => [e.id, e.nombre]));
+  const lineas = salida.texto.split('\n').map((l) => `│ ${l}`);
+  for (const r of salida.rutinas) {
+    lineas.push(`Rutina "${r.nombre}" (${r.dias.map((d) => DIAS[d]).join(', ') || 'sin día'}):`);
+    for (const e of r.ejercicios) {
+      lineas.push(`  ${nombres.get(e.ejercicioId)} [${e.ejercicioId}]: ${e.series} × ${e.rango.min}-${e.rango.max}`);
+    }
+  }
+  for (const [motivo, texto] of Object.entries(MOTIVOS)) {
+    const ids = salida.descartados.filter((d) => d.motivo === motivo).map((d) => `${d.ejercicioId} (${d.rutina})`);
+    if (ids.length) lineas.push(`Descartados, ${texto}: ${ids.join(', ')}`);
+  }
+  return lineas;
+}
+
+module.exports = { USO, leerArgumentos, estaDentro, costoEstimado, formatoCosto, resumir, lineasCoach };

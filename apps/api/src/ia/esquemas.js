@@ -18,8 +18,8 @@ const esquemaSalidaFoto = z.object({
 });
 
 const esquemaRutina = z.object({
-  nombre: z.string(),
-  dias: z.array(z.number().int()).describe('Días de la semana: 0 = lunes … 6 = domingo'),
+  nombre: z.string().describe('Nombre corto, de una o dos palabras: "Empuje", "Tirón", "Piernas"'),
+  dias: z.array(z.number().int()).describe('El día de esta rutina: 0 = lunes … 6 = domingo'),
   ejercicios: z.array(
     z.object({
       ejercicioId: z.string().describe('id exacto del catálogo'),
@@ -31,7 +31,9 @@ const esquemaRutina = z.object({
 
 const esquemaSalidaCoach = z.object({
   texto: z.string().describe('La respuesta para el usuario'),
-  rutina: z.union([z.null(), esquemaRutina]).describe('Solo si el usuario pidió una rutina; si no, null'),
+  rutinas: z
+    .array(esquemaRutina)
+    .describe('Una rutina por día de entrenamiento, solo si el usuario pidió una rutina; si no, lista vacía'),
 });
 
 // JSON Schema para los proveedores que lo piden así (Gemini).

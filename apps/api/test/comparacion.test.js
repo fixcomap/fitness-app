@@ -2,7 +2,14 @@ const test = require('node:test');
 const assert = require('node:assert');
 const path = require('path');
 const precios = require('../scripts/precios-ia.json');
-const { leerArgumentos, estaDentro, costoEstimado, formatoCosto, resumir } = require('../scripts/comparacion');
+const {
+  leerArgumentos,
+  estaDentro,
+  costoEstimado,
+  formatoCosto,
+  resumir,
+  lineasCoach,
+} = require('../scripts/comparacion');
 
 test('lee la carpeta, los candidatos y --solo', () => {
   assert.deepStrictEqual(
@@ -76,4 +83,43 @@ test('precios-ia.json: cada modelo tiene precio de entrada y de salida', () => {
   }
   assert.ok(precios.modelos['claude-opus-5-5']);
   assert.ok(precios.modelos['gemini-3.8-flash']);
+});
+
+test('el script muestra las rutinas con los nombres del catálogo y los descartados por motivo', () => {
+  const catalogo = [
+    { id: 'press-banca', nombre: 'Press de banca' },
+    { id: 'remo-barra', nombre: 'Remo con barra' },
+  ];
+  const salida = {
+    texto: 'Arrancamos.\nTres días.',
+    rutinas: [
+      {
+        id: 'a',
+        nombre: 'Empuje',
+        dias: [0],
+        ejercicios: [{ ejercicioId: 'press-banca', series: 4, rango: { min: 8, max: 10 } }],
+      },
+      {
+        id: 'b',
+        nombre: 'Tirón',
+        dias: [],
+        ejercicios: [{ ejercicioId: 'remo-barra', series: 3, rango: { min: 10, max: 12 } }],
+      },
+    ],
+    descartados: [
+      { rutina: 'Tirón', ejercicioId: 'jalon-inventado', motivo: 'no-existe' },
+      { rutina: 'Empuje', ejercicioId: 'press-banca', motivo: 'repetido' },
+      { rutina: 'Empuje', ejercicioId: 'fondos-inventado', motivo: 'no-existe' },
+    ],
+  };
+  assert.deepStrictEqual(lineasCoach(salida, catalogo), [
+    '│ Arrancamos.',
+    '│ Tres días.',
+    'Rutina "Empuje" (lunes):',
+    '  Press de banca [press-banca]: 4 × 8-10',
+    'Rutina "Tirón" (sin día):',
+    '  Remo con barra [remo-barra]: 3 × 10-12',
+    'Descartados, no existen en el catálogo: jalon-inventado (Tirón), fondos-inventado (Empuje)',
+    'Descartados, repetidos en la misma rutina: press-banca (Empuje)',
+  ]);
 });

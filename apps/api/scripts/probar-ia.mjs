@@ -22,14 +22,16 @@ const { crearProveedor } = require('../src/ia');
 const { leerResultadoFoto } = require('../src/ia/foto');
 const { EXTENSIONES, esFoto, fotoAJpeg } = require('./fotos');
 const { leerRespuestaCoach } = require('../src/ia/coach');
-const { USO, leerArgumentos, estaDentro, costoEstimado, formatoCosto, resumir } = require('./comparacion');
+const { USO, leerArgumentos, estaDentro, costoEstimado, formatoCosto, resumir, lineasCoach } = require('./comparacion');
 
 const MAXIMO_FOTO = 2 * 1024 * 1024;
 const precios = JSON.parse(fs.readFileSync(path.join(aqui, 'precios-ia.json'), 'utf8')).modelos;
 const ejemplo = JSON.parse(fs.readFileSync(path.join(aqui, 'preguntas-coach.json'), 'utf8'));
+// El catálogo real de la app (ids + nombres), como lo va a mandar la app.
 const catalogo = JSON.parse(fs.readFileSync(path.join(raizRepo, 'apps/mobile/src/data/ejercicios.json'), 'utf8')).map(
   ({ id, nombre }) => ({ id, nombre }),
 );
+console.log(`Catálogo: ${catalogo.length} ejercicios de apps/mobile/src/data/ejercicios.json`);
 const contexto = { ...ejemplo.contexto, catalogo };
 
 function salir(mensaje) {
@@ -88,17 +90,7 @@ function detalleFoto({ salida }) {
   ];
 }
 
-function detalleCoach({ salida }) {
-  const lineas = salida.texto.split('\n').map((l) => `│ ${l}`);
-  if (salida.rutina) {
-    const r = salida.rutina;
-    lineas.push(`Rutina "${r.nombre}" (días ${r.dias.join(', ') || '-'}):`);
-    for (const e of r.ejercicios) lineas.push(`  ${e.ejercicioId}: ${e.series} × ${e.rango.min}-${e.rango.max}`);
-  }
-  if (salida.descartados.length)
-    lineas.push(`Descartados (no están en el catálogo o fuera de rango): ${salida.descartados.join(', ')}`);
-  return lineas;
-}
+const detalleCoach = ({ salida }) => lineasCoach(salida, catalogo);
 
 async function probar({ proveedor, modelo }, fotos, solo) {
   const env = { ...process.env, IA_PROVEEDOR: proveedor, IA_MODELO_FOTO: modelo, IA_MODELO_COACH: modelo };
