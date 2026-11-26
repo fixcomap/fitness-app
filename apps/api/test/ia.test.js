@@ -148,6 +148,14 @@ test('el prompt del coach: sin cifras fuera del manual o del contexto; alimentos
   assert.match(SISTEMA_COACH, /si el peso es crudo o cocido/);
 });
 
+test('el prompt del coach: el aviso de salud solo cuando la pregunta lo amerita', () => {
+  assert.match(
+    SISTEMA_COACH,
+    /El aviso de consultar a un profesional va solo si la pregunta toca suplementos, una dieta restrictiva .*, dolor o una lesión, o medicación/,
+  );
+  assert.match(SISTEMA_COACH, /no agregues avisos genéricos/);
+});
+
 test('el prompt del coach: suplementos sin dosis personalizadas, menores derivados y el manual primero', () => {
   assert.match(SISTEMA_COACH, /No des dosis personalizadas/);
   assert.match(SISTEMA_COACH, /menor de 18 años/);
