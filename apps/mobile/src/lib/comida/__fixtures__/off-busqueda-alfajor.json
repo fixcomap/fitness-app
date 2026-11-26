@@ -1,0 +1,78 @@
+{
+  "count": 94,
+  "page": 1,
+  "page_size": 6,
+  "hits": [
+    {
+      "code": "7622300835620",
+      "brands": ["xx:milka", "xx:oreo"],
+      "serving_quantity": 61,
+      "serving_size": "1 cookie (61 g)",
+      "product_name": "Alfajor",
+      "product_name_es": "Alfajor Milka Oreo",
+      "image_front_small_url": "https://images.openfoodfacts.org/images/products/762/230/083/5620/front_en.48.200.jpg",
+      "nutriments": {}
+    },
+    {
+      "code": "77965134",
+      "serving_quantity": 35,
+      "serving_size": "35.0g",
+      "nutriments": {
+        "energy-kcal_100g": 141,
+        "fat_100g": 6,
+        "carbohydrates_100g": 19,
+        "proteins_100g": 3
+      },
+      "product_name": "Alfajor"
+    },
+    {
+      "code": "77958341",
+      "brands": ["vimar"],
+      "serving_quantity": 60,
+      "serving_size": "60.0g",
+      "nutriments": {
+        "energy-kcal_100g": 355,
+        "fat_100g": 10.333333333333334,
+        "carbohydrates_100g": 60,
+        "proteins_100g": 5.833333333333334
+      },
+      "product_name": "Alfajor"
+    },
+    {
+      "code": "7790040613607",
+      "brands": ["xx:bon-o-bon", "xx:Arcor"],
+      "serving_quantity": 40,
+      "serving_size": "1 alfajor (40 g)",
+      "product_name": "Alfajor Blanco",
+      "product_name_es": "Alfajor Blanco",
+      "image_front_small_url": "https://images.openfoodfacts.org/images/products/779/004/061/3607/front_es.65.200.jpg",
+      "nutriments": {}
+    },
+    {
+      "code": "7798196060047",
+      "brands": ["orense"],
+      "serving_quantity": 60,
+      "serving_size": "60.0g",
+      "nutriments": {
+        "energy-kcal_100g": 249,
+        "fat_100g": 9.3,
+        "carbohydrates_100g": 38,
+        "proteins_100g": 3.2
+      },
+      "product_name": "Alfajor"
+    },
+    {
+      "code": "77957023",
+      "brands": ["havana"],
+      "serving_quantity": 55,
+      "serving_size": "55.0g",
+      "nutriments": {
+        "energy-kcal_100g": 207,
+        "fat_100g": 3.4000000953674316,
+        "carbohydrates_100g": 33,
+        "proteins_100g": 3.4000000953674316
+      },
+      "product_name": "Alfajor"
+    }
+  ]
+}

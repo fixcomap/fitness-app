@@ -3,7 +3,9 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import { leerHistorialGuardado, type RegistroDia } from './actividad/historial';
+import type { Alimento } from './comida/alimentos';
 import { leerDiarioGuardado, type RegistroComida } from './comida/diario';
+import { leerProductosGuardados } from './comida/openFoodFacts';
 import { leerConfiguracion, type Configuracion } from './configuracion';
 import { leerPerfilGuardado, type PerfilUsuario } from './perfil';
 import { leerArmadaGuardada, leerEnCursoGuardada, leerSesionesGuardadas } from './entreno/historial';
@@ -22,6 +24,7 @@ const CLAVE_HISTORIAL_ENTRENO = 'historialEntreno:v1';
 const CLAVE_RUTINAS = 'rutinas:v1';
 const CLAVE_PERFIL = 'perfil:v1';
 const CLAVE_DIARIO_COMIDAS = 'diarioComidas:v1';
+const CLAVE_PRODUCTOS_OFF = 'productosOff:v1';
 
 async function leerJson(clave: string): Promise<unknown> {
   try {
@@ -113,4 +116,13 @@ export async function leerDiarioComidas(): Promise<RegistroComida[]> {
 
 export async function guardarDiarioComidas(registros: readonly RegistroComida[]): Promise<void> {
   await AsyncStorage.setItem(CLAVE_DIARIO_COMIDAS, JSON.stringify(registros));
+}
+
+// Productos envasados ya usados (para escanearlos o buscarlos sin internet).
+export async function leerProductosOff(): Promise<Alimento[]> {
+  return leerProductosGuardados(await leerJson(CLAVE_PRODUCTOS_OFF));
+}
+
+export async function guardarProductosOff(productos: readonly Alimento[]): Promise<void> {
+  await AsyncStorage.setItem(CLAVE_PRODUCTOS_OFF, JSON.stringify(productos));
 }
