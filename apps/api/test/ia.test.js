@@ -6,7 +6,15 @@ const { crearProveedor } = require('../src/ia');
 const { crearProveedorGemini } = require('../src/ia/gemini');
 const { crearClientesClaude, crearProveedorClaude } = require('../src/ia/claude');
 const { ErrorIa, historialDesdeUsuario } = require('../src/ia/proveedor');
-const { MINIMO_KCAL, SISTEMA_COACH, SISTEMA_FOTO, MANUAL_COACH, textoFoto } = require('../src/ia/prompts');
+const {
+  MINIMO_KCAL,
+  SISTEMA_COACH,
+  SISTEMA_FOTO,
+  MANUAL_COACH,
+  textoFoto,
+  contextoCoach,
+  diaDeSemana,
+} = require('../src/ia/prompts');
 
 const imagen = Buffer.from([0xff, 0xd8, 0xff, 0xe0, 1, 2, 3]);
 const contexto = { perfil: { sexo: 'mujer' }, catalogo: [{ id: 'sentadilla', nombre: 'Sentadilla' }] };
@@ -104,6 +112,35 @@ test('el prompt del coach tiene los mínimos de kcal y la derivación a un profe
   assert.match(SISTEMA_COACH, /déficits extremos/);
   assert.match(SISTEMA_COACH, /consultar a un profesional/);
   assert.match(SISTEMA_COACH, /rioplatense/);
+});
+
+test('diaDeSemana: el día de una fecha AAAA-MM-DD, o null si no existe', () => {
+  assert.strictEqual(diaDeSemana('2026-11-21'), 'sábado');
+  assert.strictEqual(diaDeSemana('2026-11-23'), 'lunes');
+  assert.strictEqual(diaDeSemana('2024-02-29'), 'jueves');
+  for (const mala of ['2026-02-30', '2026-13-01', '21/11/2026', '', undefined]) {
+    assert.strictEqual(diaDeSemana(mala), null);
+  }
+});
+
+test('el contexto del coach suma el día de la semana a cada día de ultimos7Dias', () => {
+  const datos = (texto) => JSON.parse(texto.slice(texto.indexOf('{')));
+  const r = datos(
+    contextoCoach({
+      perfil: { sexo: 'hombre' },
+      ultimos7Dias: [
+        { fecha: '2026-11-21', kcal: 2150 },
+        { fecha: '2026-11-22', kcal: 1980, pasos: 3900 },
+      ],
+    }),
+  );
+  assert.deepStrictEqual(r.ultimos7Dias, [
+    { fecha: '2026-11-21', dia: 'sábado', kcal: 2150 },
+    { fecha: '2026-11-22', dia: 'domingo', kcal: 1980, pasos: 3900 },
+  ]);
+  assert.deepStrictEqual(r.perfil, { sexo: 'hombre' });
+  // Sin ultimos7Dias el contexto va igual.
+  assert.deepStrictEqual(datos(contextoCoach({ perfil: {} })), { perfil: {} });
 });
 
 test('el prompt del coach: suplementos sin dosis personalizadas, menores derivados y el manual primero', () => {

@@ -64,9 +64,27 @@ Rutinas:
 // Es fijo: va después de las instrucciones y antes del contexto, para que se cachee.
 const MANUAL_COACH = fs.readFileSync(path.join(__dirname, 'guias', 'manual-coach.md'), 'utf8').trim();
 
-// El contexto del usuario como último bloque de instrucciones (cambia en cada pedido).
-function contextoCoach(contexto) {
-  return `Contexto del usuario (datos de la app, en JSON):\n${JSON.stringify(contexto)}`;
+const DIAS_SEMANA = ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado'];
+
+// "2026-11-21" -> "sábado"; null si la fecha no existe. Así la IA no tiene que calcularlo (y errarle).
+function diaDeSemana(fecha) {
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(fecha ?? '');
+  if (!m) return null;
+  const [anio, mes, dia] = m.slice(1).map(Number);
+  const d = new Date(Date.UTC(anio, mes - 1, dia));
+  if (d.getUTCFullYear() !== anio || d.getUTCMonth() !== mes - 1 || d.getUTCDate() !== dia) return null;
+  return DIAS_SEMANA[d.getUTCDay()];
 }
 
-module.exports = { MINIMO_KCAL, SISTEMA_FOTO, SISTEMA_COACH, MANUAL_COACH, textoFoto, contextoCoach };
+// El contexto del usuario como último bloque de instrucciones (cambia en cada pedido).
+// A cada día de ultimos7Dias le suma el día de la semana.
+function contextoCoach(contexto) {
+  const dias = contexto?.ultimos7Dias?.map((d) => {
+    const nombre = diaDeSemana(d.fecha);
+    return nombre ? { fecha: d.fecha, dia: nombre, ...d } : d;
+  });
+  const conDias = dias ? { ...contexto, ultimos7Dias: dias } : contexto;
+  return `Contexto del usuario (datos de la app, en JSON):\n${JSON.stringify(conDias)}`;
+}
+
+module.exports = { MINIMO_KCAL, SISTEMA_FOTO, SISTEMA_COACH, MANUAL_COACH, textoFoto, contextoCoach, diaDeSemana };
