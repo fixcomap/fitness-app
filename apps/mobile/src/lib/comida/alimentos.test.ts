@@ -98,6 +98,9 @@ test('subtítulo: origen y kcal cada 100 g', () => {
   expect(subtituloAlimento(milanesa)).toBe('Casera · 216 kcal / 100 g');
   expect(subtituloAlimento({ ...milanesa, origen: 'envasado', marca: 'Arcor' })).toBe('Arcor · 216 kcal / 100 g');
   expect(subtituloAlimento({ ...milanesa, origen: 'propio' })).toBe('Creado por vos · 216 kcal / 100 g');
+  expect(subtituloAlimento({ ...milanesa, origen: 'propio', marca: 'Lay’s' })).toBe(
+    'Lay’s · creado por vos · 216 kcal / 100 g',
+  );
 });
 
 describe('leerAlimento', () => {

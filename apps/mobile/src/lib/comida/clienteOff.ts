@@ -1,6 +1,7 @@
 // Pedidos a Open Food Facts. La lectura de las respuestas está en openFoodFacts.ts (con tests).
-import { normalizar, type Alimento } from './alimentos';
+import { normalizar } from './alimentos';
 import {
+  BUSQUEDA_VACIA,
   DURACION_CACHE_BUSQUEDA_MS,
   duracionCacheCodigo,
   errorLimite,
@@ -15,12 +16,13 @@ import {
   urlProducto,
   USER_AGENT_OFF,
   type CacheOff,
+  type ResultadoBusquedaOff,
   type ResultadoCodigo,
 } from './openFoodFacts';
 
 const ESPERA_MS = 10000;
 
-type ResultadoBusqueda = { argentina: Alimento[]; mundo: Alimento[] };
+type ResultadoBusqueda = { argentina: ResultadoBusquedaOff; mundo: ResultadoBusquedaOff };
 
 // En memoria, mientras la app está abierta.
 let pausaHasta = 0;
@@ -76,8 +78,8 @@ export async function pedirBusqueda(texto: string, senal?: AbortSignal): Promise
     throw esErrorLimite(mundo.reason) ? mundo.reason : ar.reason;
   }
   const resultado = {
-    argentina: ar.status === 'fulfilled' ? ar.value : [],
-    mundo: mundo.status === 'fulfilled' ? mundo.value : [],
+    argentina: ar.status === 'fulfilled' ? ar.value : BUSQUEDA_VACIA,
+    mundo: mundo.status === 'fulfilled' ? mundo.value : BUSQUEDA_VACIA,
   };
   // Sólo se guarda si salieron los dos.
   if (ar.status === 'fulfilled' && mundo.status === 'fulfilled') {

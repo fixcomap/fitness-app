@@ -10,7 +10,8 @@ import { useComidas } from '../estado/Comidas';
 import { subtituloAlimento, type Alimento } from '../lib/comida/alimentos';
 import { pedirProducto } from '../lib/comida/clienteOff';
 import { textoAgregarA, type Comida } from '../lib/comida/diario';
-import { buscarPorCodigo, codigoValido, esErrorLimite } from '../lib/comida/openFoodFacts';
+import { buscarPorCodigo, codigoValido, esErrorLimite, type ProductoSinDatos } from '../lib/comida/openFoodFacts';
+import type { DatosIniciales } from '../lib/comida/propios';
 import { cantidadInicial, nutrientesCantidad, type Cantidad } from '../lib/comida/porciones';
 import { formatearNumero } from '../lib/formato';
 import { colores, radios } from '../theme/tema';
@@ -18,7 +19,7 @@ import { colores, radios } from '../theme/tema';
 type Lectura =
   | { tipo: 'buscando'; codigo: string }
   | { tipo: 'encontrado'; codigo: string; alimento: Alimento; cantidad: Cantidad }
-  | { tipo: 'no-encontrado'; codigo: string; sinKcal: boolean }
+  | { tipo: 'no-encontrado'; codigo: string; producto: ProductoSinDatos | null } // producto: está, pero sin kcal
   | { tipo: 'error'; codigo: string; limite: boolean }; // sin conexión, o Open Food Facts cortó por muchos pedidos
 
 interface EscanearCodigoScreenProps {
@@ -26,7 +27,7 @@ interface EscanearCodigoScreenProps {
   comida: Comida;
   onCerrar: () => void;
   onBuscarPorNombre: () => void;
-  onCrear: (codigo: string) => void; // crear un alimento propio con ese código
+  onCrear: (datos: DatosIniciales) => void; // crear un alimento propio con ese código
 }
 
 // Escáner de código de barras: al detectar un código, la tarjeta del producto.
@@ -60,7 +61,7 @@ export function EscanearCodigoScreen({ dia, comida, onCerrar, onBuscarPorNombre,
           recordar(r.alimento);
           setLectura({ tipo: 'encontrado', codigo, alimento: r.alimento, cantidad: cantidadInicial(r.alimento) });
         } else {
-          setLectura({ tipo: 'no-encontrado', codigo, sinKcal: r.tipo === 'sin-kcal' });
+          setLectura({ tipo: 'no-encontrado', codigo, producto: r.tipo === 'sin-kcal' ? r.producto : null });
         }
       })
       .catch((error: unknown) => {
@@ -160,19 +161,36 @@ export function EscanearCodigoScreen({ dia, comida, onCerrar, onBuscarPorNombre,
 
           {lectura.tipo === 'no-encontrado' && (
             <>
-              <Text style={styles.tituloTarjeta}>No lo encontramos</Text>
-              <Text style={styles.texto}>
-                {lectura.sinKcal
-                  ? `El producto ${lectura.codigo} está en Open Food Facts pero sin las calorías cargadas.`
-                  : `El código ${lectura.codigo} no está en Open Food Facts.`}{' '}
-                Buscalo por nombre o crealo con los datos de la etiqueta.
-              </Text>
-              <Pressable onPress={onBuscarPorNombre} style={styles.boton} accessibilityRole="button">
-                <Text style={styles.textoBoton}>Buscar por nombre</Text>
-              </Pressable>
+              {lectura.producto ? (
+                <>
+                  <Text style={styles.tituloTarjeta}>Sin datos nutricionales</Text>
+                  <Text style={styles.texto}>
+                    {lectura.producto.nombre || `El producto ${lectura.codigo}`}
+                    {lectura.producto.marca ? ` (${lectura.producto.marca})` : ''} está en Open Food Facts, pero sin las
+                    calorías. Cargalo con los datos de la etiqueta y la próxima vez que lo escanees aparece con ellos.
+                  </Text>
+                </>
+              ) : (
+                <>
+                  <Text style={styles.tituloTarjeta}>No lo encontramos</Text>
+                  <Text style={styles.texto}>
+                    El código {lectura.codigo} no está en Open Food Facts. Buscalo por nombre o crealo con los datos de
+                    la etiqueta.
+                  </Text>
+                  <Pressable onPress={onBuscarPorNombre} style={styles.boton} accessibilityRole="button">
+                    <Text style={styles.textoBoton}>Buscar por nombre</Text>
+                  </Pressable>
+                </>
+              )}
               <Pressable
-                onPress={() => onCrear(lectura.codigo)}
-                style={[styles.boton, styles.botonCrear]}
+                onPress={() =>
+                  onCrear({
+                    codigo: lectura.codigo,
+                    nombre: lectura.producto?.nombre || undefined,
+                    marca: lectura.producto?.marca ?? undefined,
+                  })
+                }
+                style={[styles.boton, !lectura.producto && styles.botonCrear]}
                 accessibilityRole="button"
               >
                 <Text style={styles.textoBoton}>Crear alimento</Text>

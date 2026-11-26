@@ -119,6 +119,11 @@ describe('alimentoDesdeBorrador', () => {
     ]);
   });
 
+  test('con la marca del producto', () => {
+    expect(alimentoDesdeBorrador({ ...alfajor, marca: ' La Serenísima ' }, 'x6')?.marca).toBe('La Serenísima');
+    expect(erroresAlimento({ ...alfajor, marca: 'x'.repeat(41) }).marca).toBe('Hasta 40 letras.');
+  });
+
   test('con errores, null', () => {
     expect(alimentoDesdeBorrador({ ...alfajor, nombre: '' }, 'x4')).toBeNull();
   });
@@ -135,6 +140,11 @@ describe('guardados', () => {
 
   test('el último creado va primero', () => {
     expect(guardarPropio([a], b).map((x) => x.id)).toEqual(['propio:b', 'propio:a']);
+  });
+
+  test('con el mismo código, reemplaza al anterior', () => {
+    const otro = alimentoDesdeBorrador({ ...alfajor, kcal: '200' }, 'c')!;
+    expect(guardarPropio([a, b], otro).map((x) => x.id)).toEqual(['propio:c', 'propio:b']);
   });
 
   test('leer descarta lo inválido y lo que no es propio', () => {

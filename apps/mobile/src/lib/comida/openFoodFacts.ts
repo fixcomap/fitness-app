@@ -121,39 +121,106 @@ export function alimentoDesdeOff(producto: unknown): Alimento | null {
 
 const redondear = (x: number) => Math.round(x * 10) / 10;
 
+// Un producto que está en Open Food Facts pero sin kcal (o con valores imposibles). No se
+// esconde: se muestra para completarlo con los datos de la etiqueta.
+export interface ProductoSinDatos {
+  codigo: string;
+  nombre: string; // puede venir vacío
+  marca: string | null;
+  imagen: string | null;
+}
+
+export function productoSinDatosDesdeOff(producto: unknown): ProductoSinDatos | null {
+  if (typeof producto !== 'object' || producto === null) return null;
+  const p = producto as Record<string, unknown>;
+  const codigo = texto(p.code);
+  if (!codigoValido(codigo)) return null;
+  return {
+    codigo,
+    nombre: texto(p.product_name_es) || texto(p.product_name),
+    marca: leerMarca(p.brands),
+    imagen: texto(p.image_front_small_url) || null,
+  };
+}
+
 export type ResultadoCodigo =
-  { tipo: 'encontrado'; alimento: Alimento } | { tipo: 'no-encontrado' } | { tipo: 'sin-kcal' };
+  | { tipo: 'encontrado'; alimento: Alimento }
+  | { tipo: 'no-encontrado' }
+  | { tipo: 'sin-kcal'; producto: ProductoSinDatos };
 
 // La respuesta de /api/v2/product/<codigo>.json.
 export function leerRespuestaProducto(json: unknown): ResultadoCodigo {
   if (typeof json !== 'object' || json === null) return { tipo: 'no-encontrado' };
   const r = json as Record<string, unknown>;
   if (r.status !== 1 || typeof r.product !== 'object' || r.product === null) return { tipo: 'no-encontrado' };
-  const alimento = alimentoDesdeOff({ code: r.code, ...(r.product as object) });
-  return alimento ? { tipo: 'encontrado', alimento } : { tipo: 'sin-kcal' };
+  const producto = { code: r.code, ...(r.product as object) };
+  const alimento = alimentoDesdeOff(producto);
+  if (alimento) return { tipo: 'encontrado', alimento };
+  const sinDatos = productoSinDatosDesdeOff(producto);
+  return sinDatos ? { tipo: 'sin-kcal', producto: sinDatos } : { tipo: 'no-encontrado' };
 }
 
-// La respuesta de la búsqueda: sólo los productos válidos, sin repetir.
-export function leerRespuestaBusqueda(json: unknown): Alimento[] {
-  if (typeof json !== 'object' || json === null) return [];
+export interface ResultadoBusquedaOff {
+  alimentos: Alimento[]; // con kcal
+  sinDatos: ProductoSinDatos[]; // con nombre pero sin kcal
+}
+
+export const BUSQUEDA_VACIA: ResultadoBusquedaOff = { alimentos: [], sinDatos: [] };
+
+// La respuesta de la búsqueda: los productos con kcal y, aparte, los que tienen nombre pero no kcal.
+export function leerRespuestaBusqueda(json: unknown): ResultadoBusquedaOff {
+  if (typeof json !== 'object' || json === null) return BUSQUEDA_VACIA;
   const hits = (json as Record<string, unknown>).hits;
-  if (!Array.isArray(hits)) return [];
-  return sinRepetidos(hits.map(alimentoDesdeOff).filter((a): a is Alimento => a !== null));
+  if (!Array.isArray(hits)) return BUSQUEDA_VACIA;
+  const alimentos: Alimento[] = [];
+  const sinDatos: ProductoSinDatos[] = [];
+  for (const hit of hits) {
+    const alimento = alimentoDesdeOff(hit);
+    const producto = alimento ? null : productoSinDatosDesdeOff(hit);
+    if (alimento) alimentos.push(alimento);
+    else if (producto?.nombre) sinDatos.push(producto);
+  }
+  return { alimentos, sinDatos };
 }
 
-function sinRepetidos(alimentos: readonly Alimento[]): Alimento[] {
-  const vistos = new Set<string>();
-  return alimentos.filter((a) => !vistos.has(a.id) && vistos.add(a.id));
-}
+export type ItemResultado =
+  { tipo: 'alimento'; alimento: Alimento } | { tipo: 'sin-datos'; producto: ProductoSinDatos };
 
-// Resultados del buscador: primero las caseras, después los envasados de Argentina y
-// después los del resto del mundo.
-export function combinarResultados(
-  caseras: readonly Alimento[],
-  argentina: readonly Alimento[],
-  mundo: readonly Alimento[],
-): Alimento[] {
-  return sinRepetidos([...caseras, ...argentina, ...mundo]);
+export const claveItem = (item: ItemResultado) =>
+  item.tipo === 'alimento' ? item.alimento.id : `sin-datos:${item.producto.codigo}`;
+
+// Resultados del buscador: primero los locales (propios y caseras), después Argentina y después
+// el resto del mundo; en cada uno, primero los que tienen datos. Sin repetir productos (por id ni
+// por código). Un producto sin datos que ya está guardado (creado por el usuario o pedido por
+// código) aparece con sus datos.
+export function armarResultados(
+  locales: readonly Alimento[],
+  argentina: ResultadoBusquedaOff,
+  mundo: ResultadoBusquedaOff,
+  guardados: readonly Alimento[] = [],
+): ItemResultado[] {
+  const items: ItemResultado[] = [];
+  const ids = new Set<string>();
+  const codigos = new Set<string>();
+  const agregarAlimento = (alimento: Alimento) => {
+    if (ids.has(alimento.id) || (alimento.codigo && codigos.has(alimento.codigo))) return;
+    ids.add(alimento.id);
+    if (alimento.codigo) codigos.add(alimento.codigo);
+    items.push({ tipo: 'alimento', alimento });
+  };
+  const agregarSinDatos = (producto: ProductoSinDatos) => {
+    if (codigos.has(producto.codigo)) return;
+    const guardado = buscarPorCodigo(guardados, producto.codigo);
+    if (guardado) return agregarAlimento(guardado);
+    codigos.add(producto.codigo);
+    items.push({ tipo: 'sin-datos', producto });
+  };
+  locales.forEach(agregarAlimento);
+  for (const grupo of [argentina, mundo]) {
+    grupo.alimentos.forEach(agregarAlimento);
+    grupo.sinDatos.forEach(agregarSinDatos);
+  }
+  return items;
 }
 
 // ── Productos ya usados (para escanear sin internet) ──

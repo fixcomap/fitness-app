@@ -4,6 +4,7 @@ import { useNavigation, type NavigatorScreenParams } from '@react-navigation/nat
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
 import type { Comida } from '../lib/comida/diario';
+import type { DatosIniciales } from '../lib/comida/propios';
 import type { DiaSemana } from '../lib/entreno/rutinas';
 
 import type { TabsParamList } from './Tabs';
@@ -18,7 +19,7 @@ export type RaizParamList = {
   Perfil: undefined;
   BuscarAlimento: { dia: string; comida: Comida };
   EscanearCodigo: { dia: string; comida: Comida };
-  CrearAlimento: { dia: string; comida: Comida; nombre?: string; codigo?: string };
+  CrearAlimento: { dia: string; comida: Comida } & DatosIniciales;
 };
 
 export type NavegacionRaiz = NativeStackNavigationProp<RaizParamList>;

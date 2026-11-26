@@ -1,14 +1,24 @@
 import { Ionicons } from '@expo/vector-icons';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { ActivityIndicator, FlatList, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { HojaPorcion } from '../components/comida/HojaPorcion';
 import { useComidas } from '../estado/Comidas';
 import { buscarCaseras, normalizar, subtituloAlimento, type Alimento } from '../lib/comida/alimentos';
-import { pedirBusqueda } from '../lib/comida/clienteOff';
+import { pedirBusqueda, pedirProducto } from '../lib/comida/clienteOff';
 import { alimentosRecientes, NOMBRE_COMIDA, textoAgregarA, type Comida } from '../lib/comida/diario';
-import { buscarGuardados, combinarResultados, esErrorLimite } from '../lib/comida/openFoodFacts';
+import {
+  armarResultados,
+  BUSQUEDA_VACIA,
+  buscarGuardados,
+  claveItem,
+  esErrorLimite,
+  type ItemResultado,
+  type ProductoSinDatos,
+  type ResultadoBusquedaOff,
+} from '../lib/comida/openFoodFacts';
+import type { DatosIniciales } from '../lib/comida/propios';
 import { cantidadInicial, type Cantidad } from '../lib/comida/porciones';
 import { colores, radios } from '../theme/tema';
 
@@ -19,7 +29,7 @@ const MINIMO_LETRAS = 3;
 type EstadoEnvasados =
   | { tipo: 'nada' }
   | { tipo: 'buscando'; consulta: string }
-  | { tipo: 'listo'; consulta: string; argentina: Alimento[]; mundo: Alimento[] }
+  | { tipo: 'listo'; consulta: string; argentina: ResultadoBusquedaOff; mundo: ResultadoBusquedaOff }
   | { tipo: 'sin-conexion'; consulta: string }
   | { tipo: 'limite'; consulta: string }; // Open Food Facts cortó por muchos pedidos
 
@@ -28,19 +38,24 @@ interface BuscarAlimentoScreenProps {
   comida: Comida;
   onVolver: () => void;
   onEscanear: () => void;
-  onCrear: (nombre: string) => void; // crear un alimento propio
+  onCrear: (datos: DatosIniciales) => void; // crear un alimento propio
 }
 
 // Buscador: los alimentos propios y las comidas caseras (primero), y productos de Open Food
 // Facts; y los recientes. Si no está, se puede crear.
 export function BuscarAlimentoScreen({ dia, comida, onVolver, onEscanear, onCrear }: BuscarAlimentoScreenProps) {
   const insets = useSafeAreaInsets();
-  const { registros, productos, propios, agregar } = useComidas();
+  const { registros, productos, propios, agregar, recordar } = useComidas();
   const [texto, setTexto] = useState('');
   const [pestana, setPestana] = useState<'resultados' | 'recientes'>('resultados');
   const [elegido, setElegido] = useState<{ alimento: Alimento; cantidad: Cantidad } | null>(null);
   const [envasados, setEnvasados] = useState<EstadoEnvasados>({ tipo: 'nada' });
   const [intento, setIntento] = useState(0); // "Reintentar" vuelve a buscar
+  // Un producto sin datos que se está pidiendo por código, y el aviso si no se pudo.
+  const [pidiendo, setPidiendo] = useState<string | null>(null);
+  const [avisoProducto, setAvisoProducto] = useState<string | null>(null);
+  const pedido = useRef<AbortController | null>(null);
+  useEffect(() => () => pedido.current?.abort(), []);
 
   const consulta = normalizar(texto);
   // Los propios van primero: si alguien lo creó, es lo que busca.
@@ -48,7 +63,10 @@ export function BuscarAlimentoScreen({ dia, comida, onVolver, onEscanear, onCrea
     () => [...(consulta ? buscarGuardados(propios, consulta) : []), ...buscarCaseras(texto)],
     [consulta, propios, texto],
   );
-  const recientes = useMemo(() => alimentosRecientes(registros), [registros]);
+  const recientes = useMemo(
+    () => alimentosRecientes(registros).map((alimento): ItemResultado => ({ tipo: 'alimento', alimento })),
+    [registros],
+  );
 
   useEffect(() => {
     if (consulta.length < MINIMO_LETRAS) return;
@@ -71,14 +89,49 @@ export function BuscarAlimentoScreen({ dia, comida, onVolver, onEscanear, onCrea
   // Sólo vale lo que corresponde a lo que está escrito ahora.
   const actual = consulta.length >= MINIMO_LETRAS && 'consulta' in envasados && envasados.consulta === consulta;
   const resultados = useMemo(() => {
-    if (actual && envasados.tipo === 'listo') return combinarResultados(locales, envasados.argentina, envasados.mundo);
+    // Los sin datos que ya se crearon o se pidieron por código aparecen con sus datos.
+    const guardados = [...propios, ...productos];
+    if (actual && envasados.tipo === 'listo') {
+      return armarResultados(locales, envasados.argentina, envasados.mundo, guardados);
+    }
     // Sin conexión (o mientras busca), también los productos ya usados que coinciden.
-    return combinarResultados(locales, consulta ? buscarGuardados(productos, consulta) : [], []);
-  }, [actual, envasados, locales, consulta, productos]);
+    const usados = consulta ? buscarGuardados(productos, consulta) : [];
+    return armarResultados(locales, { alimentos: usados, sinDatos: [] }, BUSQUEDA_VACIA, guardados);
+  }, [actual, envasados, locales, consulta, productos, propios]);
 
   const buscando = consulta.length >= MINIMO_LETRAS && (!actual || envasados.tipo === 'buscando');
   const lista = pestana === 'resultados' ? resultados : recientes;
   const abrir = (alimento: Alimento) => setElegido({ alimento, cantidad: cantidadInicial(alimento) });
+
+  // Un producto sin datos: la búsqueda a veces no trae las kcal que el producto sí tiene, así que
+  // primero se pide por código. Si tampoco las tiene, "Crear alimento" con lo que se sabe.
+  const completar = (producto: ProductoSinDatos) => {
+    pedido.current?.abort();
+    const control = new AbortController();
+    pedido.current = control;
+    setPidiendo(producto.codigo);
+    setAvisoProducto(null);
+    const crear = () =>
+      onCrear({ nombre: producto.nombre, marca: producto.marca ?? undefined, codigo: producto.codigo });
+    pedirProducto(producto.codigo, control.signal)
+      .then((r) => {
+        if (control.signal.aborted) return;
+        if (r.tipo === 'encontrado') {
+          recordar(r.alimento);
+          abrir(r.alimento);
+        } else crear();
+      })
+      .catch((error: unknown) => {
+        if (control.signal.aborted) return;
+        // Sin conexión no se puede saber si tiene datos: se carga con la etiqueta.
+        if (esErrorLimite(error)) {
+          setAvisoProducto('Open Food Facts está recibiendo muchos pedidos. Probá de nuevo en un momento.');
+        } else crear();
+      })
+      .finally(() => {
+        if (!control.signal.aborted) setPidiendo(null);
+      });
+  };
 
   return (
     <View style={[styles.pantalla, { paddingTop: insets.top + 8 }]}>
@@ -142,12 +195,30 @@ export function BuscarAlimentoScreen({ dia, comida, onVolver, onEscanear, onCrea
         ))}
       </View>
 
+      {avisoProducto && (
+        <Text style={styles.aviso} accessibilityLiveRegion="polite">
+          {avisoProducto}
+        </Text>
+      )}
+
       <FlatList
         data={lista}
-        keyExtractor={(a) => a.id}
+        keyExtractor={claveItem}
         keyboardShouldPersistTaps="handled"
         contentContainerStyle={{ paddingBottom: insets.bottom + 24 }}
-        renderItem={({ item }) => <Fila alimento={item} onPress={() => abrir(item)} />}
+        renderItem={({ item }) =>
+          item.tipo === 'alimento' ? (
+            <Fila alimento={item.alimento} onPress={() => abrir(item.alimento)} />
+          ) : (
+            <FilaSinDatos
+              producto={item.producto}
+              pidiendo={pidiendo === item.producto.codigo}
+              onPress={() => {
+                if (pidiendo === null) completar(item.producto);
+              }}
+            />
+          )
+        }
         ListHeaderComponent={
           pestana !== 'resultados' || !actual ? undefined : envasados.tipo === 'sin-conexion' ? (
             <Text style={styles.aviso}>Sin conexión: mostramos las comidas caseras y los productos que ya usaste.</Text>
@@ -168,7 +239,7 @@ export function BuscarAlimentoScreen({ dia, comida, onVolver, onEscanear, onCrea
             </View>
           ) : (
             <Pressable
-              onPress={() => onCrear(texto.trim())}
+              onPress={() => onCrear({ nombre: texto.trim() })}
               style={({ pressed }) => [styles.crear, pressed && styles.presionado]}
               accessibilityRole="button"
             >
@@ -224,6 +295,43 @@ function Fila({ alimento, onPress }: { alimento: Alimento; onPress: () => void }
       </View>
       <View style={styles.mas}>
         <Ionicons name="add" size={20} color={colores.texto} />
+      </View>
+    </Pressable>
+  );
+}
+
+// Está en Open Food Facts pero sin kcal: al tocarlo, se completa.
+function FilaSinDatos({
+  producto,
+  pidiendo,
+  onPress,
+}: {
+  producto: ProductoSinDatos;
+  pidiendo: boolean;
+  onPress: () => void;
+}) {
+  return (
+    <Pressable
+      onPress={onPress}
+      style={({ pressed }) => [styles.fila, pressed && styles.presionado]}
+      accessibilityRole="button"
+      accessibilityHint="Completalo con los datos de la etiqueta"
+      accessibilityState={{ busy: pidiendo }}
+    >
+      <View style={styles.flex}>
+        <Text style={styles.nombre} numberOfLines={2}>
+          {producto.nombre}
+        </Text>
+        <Text style={styles.subtitulo} numberOfLines={1}>
+          {producto.marca ?? 'Envasado'} · <Text style={styles.sinDatos}>Sin datos nutricionales</Text>
+        </Text>
+      </View>
+      <View style={[styles.mas, styles.masSinDatos]}>
+        {pidiendo ? (
+          <ActivityIndicator size="small" color={colores.texto} />
+        ) : (
+          <Ionicons name="create-outline" size={18} color={colores.texto} />
+        )}
       </View>
     </Pressable>
   );
@@ -289,6 +397,8 @@ const styles = StyleSheet.create({
   crear: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 16 },
   textoCrear: { color: colores.acento, fontSize: 16, fontWeight: '800' },
   reintentar: { color: colores.texto, fontWeight: '800', textDecorationLine: 'underline' },
+  sinDatos: { color: colores.acentoSuave },
+  masSinDatos: { backgroundColor: colores.tarjeta },
   aviso: { color: colores.acentoSuave, fontSize: 13, paddingVertical: 10 },
   buscando: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, paddingVertical: 16 },
   textoVacio: { color: colores.textoSecundario, fontSize: 14, textAlign: 'center', paddingVertical: 24 },

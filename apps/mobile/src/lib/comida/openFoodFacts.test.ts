@@ -17,7 +17,9 @@ import {
   type CacheOff,
   buscarPorCodigo,
   codigoValido,
-  combinarResultados,
+  armarResultados,
+  BUSQUEDA_VACIA,
+  claveItem,
   consultaBusqueda,
   etiquetaMarca,
   leerMarca,
@@ -147,10 +149,13 @@ describe('producto por código', () => {
     expect(leerRespuestaProducto('<html>')).toEqual({ tipo: 'no-encontrado' });
   });
 
-  test('sin kcal no es válido', () => {
+  test('sin kcal: no es un alimento, pero trae nombre, marca y código para completarlo', () => {
     const sinKcal = structuredClone(productoOk);
     delete (sinKcal.product.nutriments as Record<string, unknown>)['energy-kcal_100g'];
-    expect(leerRespuestaProducto(sinKcal)).toEqual({ tipo: 'sin-kcal' });
+    expect(leerRespuestaProducto(sinKcal)).toEqual({
+      tipo: 'sin-kcal',
+      producto: { codigo: '77958341', nombre: 'Alfajor', marca: 'Vimar', imagen: null },
+    });
   });
 
   test('sin nombre o con valores imposibles no es válido', () => {
@@ -162,27 +167,65 @@ describe('producto por código', () => {
 });
 
 describe('búsqueda', () => {
-  test('sólo los productos con kcal', () => {
+  test('los productos con kcal y, aparte, los que no las tienen', () => {
     // De los 6 resultados, 2 vienen sin kcal (Milka Oreo y Bon o Bon).
     const r = leerRespuestaBusqueda(busquedaAlfajor);
-    expect(r.map((a) => a.codigo)).toEqual(['77965134', '77958341', '7798196060047', '77957023']);
-    expect(r[1]).toMatchObject({ nombre: 'Alfajor', marca: 'Vimar', kcal: 355 });
+    expect(r.alimentos.map((a) => a.codigo)).toEqual(['77965134', '77958341', '7798196060047', '77957023']);
+    expect(r.alimentos[1]).toMatchObject({ nombre: 'Alfajor', marca: 'Vimar', kcal: 355 });
+    expect(r.sinDatos).toEqual([
+      expect.objectContaining({ codigo: '7622300835620', nombre: 'Alfajor Milka Oreo', marca: 'Milka' }),
+      expect.objectContaining({ codigo: '7790040613607', nombre: 'Alfajor Blanco', marca: 'Bon o bon' }),
+    ]);
+  });
+
+  test('sin datos y sin nombre, o sin código válido, no se muestra', () => {
+    const hits = [
+      { code: '7790040613607', product_name: ' ' },
+      { code: '12', product_name: 'Alfajor' },
+    ];
+    expect(leerRespuestaBusqueda({ hits }).sinDatos).toEqual([]);
   });
 
   test('respuesta rota o con error', () => {
-    expect(leerRespuestaBusqueda(null)).toEqual([]);
-    expect(leerRespuestaBusqueda({ errors: [{ title: 'QueryCheckError' }] })).toEqual([]);
+    expect(leerRespuestaBusqueda(null)).toEqual(BUSQUEDA_VACIA);
+    expect(leerRespuestaBusqueda({ errors: [{ title: 'QueryCheckError' }] })).toEqual(BUSQUEDA_VACIA);
+  });
+});
+
+describe('resultados del buscador', () => {
+  const { alimentos, sinDatos } = leerRespuestaBusqueda(busquedaAlfajor);
+  const [a, b, c] = alimentos;
+  const [milka, bonobon] = sinDatos;
+  const claves = (items: ReturnType<typeof armarResultados>) => items.map(claveItem);
+
+  test('locales primero, después Argentina y el mundo (cada uno con los sin datos al final), sin repetir', () => {
+    const [casera] = ALIMENTOS_CASEROS;
+    const items = armarResultados(
+      [casera],
+      { alimentos: [a, b], sinDatos: [milka] },
+      { alimentos: [b, c], sinDatos: [milka, bonobon] },
+    );
+    expect(claves(items)).toEqual([casera.id, a.id, b.id, 'sin-datos:7622300835620', c.id, 'sin-datos:7790040613607']);
+    expect(items[3]).toEqual({ tipo: 'sin-datos', producto: milka });
   });
 
-  test('caseras primero, después Argentina y después el mundo, sin repetir', () => {
-    const [casera] = ALIMENTOS_CASEROS;
-    const [a, b, c] = leerRespuestaBusqueda(busquedaAlfajor);
-    expect(combinarResultados([casera], [a, b], [b, c]).map((x) => x.id)).toEqual([casera.id, a.id, b.id, c.id]);
+  test('un producto sin datos ya guardado (creado o pedido por código) aparece con sus datos', () => {
+    const creado: Alimento = { ...a, id: 'propio:x', origen: 'propio', codigo: milka.codigo };
+    const items = armarResultados([], { alimentos: [], sinDatos: [milka, bonobon] }, BUSQUEDA_VACIA, [creado]);
+    expect(claves(items)).toEqual(['propio:x', 'sin-datos:7790040613607']);
+  });
+
+  test('un propio con el mismo código que un producto de Open Food Facts va una sola vez', () => {
+    const creado: Alimento = { ...a, id: 'propio:y', origen: 'propio' };
+    expect(claves(armarResultados([creado], { alimentos: [a, b], sinDatos: [] }, BUSQUEDA_VACIA))).toEqual([
+      'propio:y',
+      b.id,
+    ]);
   });
 });
 
 describe('productos guardados', () => {
-  const [a, b] = leerRespuestaBusqueda(busquedaAlfajor);
+  const [a, b] = leerRespuestaBusqueda(busquedaAlfajor).alimentos;
 
   test('el último usado va primero, sin repetir', () => {
     expect(recordarProducto([a, b], b).map((x) => x.id)).toEqual([b.id, a.id]);

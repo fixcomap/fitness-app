@@ -8,6 +8,7 @@ export type BaseEtiqueta = '100g' | 'porcion';
 // Lo que se escribe en el formulario (texto, para validar mientras se escribe).
 export interface BorradorAlimento {
   nombre: string;
+  marca: string; // opcional
   base: BaseEtiqueta; // cómo viene la tabla de la etiqueta
   porcionGramos: string; // obligatoria si base es 'porcion'; opcional si es '100g'
   porcionNombre: string; // "alfajor", "galletita"… vacío: "porción"
@@ -18,11 +19,19 @@ export interface BorradorAlimento {
   codigo: string; // código de barras; vacío si no hay
 }
 
+// Lo que llega precargado: lo buscado, o el producto de Open Food Facts sin datos.
+export interface DatosIniciales {
+  nombre?: string;
+  marca?: string;
+  codigo?: string;
+}
+
 export type CampoAlimento = keyof BorradorAlimento;
 export type ErroresAlimento = Partial<Record<CampoAlimento, string>>;
 
 export const BORRADOR_ALIMENTO_VACIO: BorradorAlimento = {
   nombre: '',
+  marca: '',
   base: '100g',
   porcionGramos: '',
   porcionNombre: '',
@@ -35,6 +44,7 @@ export const BORRADOR_ALIMENTO_VACIO: BorradorAlimento = {
 
 export const LIMITES_ALIMENTO = {
   nombre: 60,
+  marca: 40,
   porcionGramos: { min: 1, max: 2000 },
   kcal100: 900, // ni el aceite puro llega a más de 900 kcal cada 100 g
 } as const;
@@ -54,6 +64,8 @@ export function erroresAlimento(b: BorradorAlimento): ErroresAlimento {
   const nombre = b.nombre.trim();
   if (!nombre) e.nombre = 'Escribí el nombre.';
   else if (nombre.length > LIMITES_ALIMENTO.nombre) e.nombre = `Hasta ${LIMITES_ALIMENTO.nombre} letras.`;
+
+  if (b.marca.trim().length > LIMITES_ALIMENTO.marca) e.marca = `Hasta ${LIMITES_ALIMENTO.marca} letras.`;
 
   const gramos = leerValor(b.porcionGramos);
   const { min, max } = LIMITES_ALIMENTO.porcionGramos;
@@ -98,7 +110,7 @@ export function alimentoDesdeBorrador(b: BorradorAlimento, id: string): Alimento
     id: `propio:${id}`,
     nombre: b.nombre.trim(),
     origen: 'propio',
-    marca: null,
+    marca: b.marca.trim() || null,
     codigo: b.codigo.trim() || null,
     imagen: null,
     kcal: Math.round(valor(b.kcal)),
@@ -127,8 +139,9 @@ export function plural(nombre: string): string {
 
 // ── Guardados ──
 
+// El último creado va primero. Con el mismo código de barras, reemplaza al anterior.
 export function guardarPropio(propios: readonly Alimento[], nuevo: Alimento): Alimento[] {
-  return [nuevo, ...propios.filter((a) => a.id !== nuevo.id)];
+  return [nuevo, ...propios.filter((a) => a.id !== nuevo.id && !(nuevo.codigo && a.codigo === nuevo.codigo))];
 }
 
 export function leerPropiosGuardados(datos: unknown): Alimento[] {

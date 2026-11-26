@@ -34,7 +34,8 @@ const nuevoId = () => `${Date.now().toString(36)}-${Math.random().toString(36).s
 interface CrearAlimentoScreenProps {
   dia: string;
   comida: Comida;
-  nombreInicial?: string; // lo que se había buscado
+  nombreInicial?: string; // lo que se había buscado, o el nombre del producto sin datos
+  marcaInicial?: string;
   codigoInicial?: string; // el código escaneado
   onVolver: () => void;
   onListo: () => void; // después de agregarlo al diario
@@ -45,6 +46,7 @@ export function CrearAlimentoScreen({
   dia,
   comida,
   nombreInicial = '',
+  marcaInicial = '',
   codigoInicial = '',
   onVolver,
   onListo,
@@ -54,6 +56,7 @@ export function CrearAlimentoScreen({
   const [borrador, setBorrador] = useState<BorradorAlimento>({
     ...BORRADOR_ALIMENTO_VACIO,
     nombre: nombreInicial,
+    marca: marcaInicial,
     codigo: codigoInicial,
   });
   const [intentado, setIntentado] = useState(false); // los errores se ven al tocar "Crear"
@@ -107,6 +110,18 @@ export function CrearAlimentoScreen({
             maxLength={LIMITES_ALIMENTO.nombre}
             style={[styles.entrada, errores.nombre && styles.entradaError]}
             accessibilityLabel="Nombre"
+          />
+        </Campo>
+
+        <Campo etiqueta="Marca (opcional)" error={errores.marca}>
+          <TextInput
+            value={borrador.marca}
+            onChangeText={(marca) => cambiar({ marca })}
+            placeholder="Ej.: La Serenísima"
+            placeholderTextColor={colores.textoSecundario}
+            maxLength={LIMITES_ALIMENTO.marca}
+            style={[styles.entrada, errores.marca && styles.entradaError]}
+            accessibilityLabel="Marca"
           />
         </Campo>
 
@@ -192,7 +207,7 @@ export function CrearAlimentoScreen({
         {codigoInicial ? (
           <View style={styles.codigo}>
             <Ionicons name="barcode-outline" size={18} color={colores.textoSecundario} />
-            <Text style={styles.ayuda}>Código escaneado: {codigoInicial}</Text>
+            <Text style={styles.ayuda}>Código de barras: {codigoInicial}</Text>
           </View>
         ) : (
           <CampoNumero
@@ -219,7 +234,9 @@ export function CrearAlimentoScreen({
         >
           <Text style={styles.textoBoton}>Crear alimento</Text>
         </Pressable>
-        <Text style={styles.ayuda}>Queda guardado en tu celu y aparece en las búsquedas.</Text>
+        <Text style={styles.ayuda}>
+          Queda guardado en tu celu y aparece en las búsquedas{codigoInicial ? ' y al escanearlo' : ''}.
+        </Text>
       </ScrollView>
 
       <HojaPorcion

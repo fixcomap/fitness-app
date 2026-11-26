@@ -80,7 +80,7 @@ function BuscarAlimentoRuta({ navigation, route }: NativeStackScreenProps<RaizPa
       comida={comida}
       onVolver={() => navigation.goBack()}
       onEscanear={() => navigation.replace('EscanearCodigo', { dia, comida })}
-      onCrear={(nombre) => navigation.navigate('CrearAlimento', { dia, comida, nombre })}
+      onCrear={(datos) => navigation.navigate('CrearAlimento', { dia, comida, ...datos })}
     />
   );
 }
@@ -93,18 +93,19 @@ function EscanearCodigoRuta({ navigation, route }: NativeStackScreenProps<RaizPa
       comida={comida}
       onCerrar={() => navigation.goBack()}
       onBuscarPorNombre={() => navigation.replace('BuscarAlimento', { dia, comida })}
-      onCrear={(codigo) => navigation.replace('CrearAlimento', { dia, comida, codigo })}
+      onCrear={(datos) => navigation.replace('CrearAlimento', { dia, comida, ...datos })}
     />
   );
 }
 
 function CrearAlimentoRuta({ navigation, route }: NativeStackScreenProps<RaizParamList, 'CrearAlimento'>) {
-  const { dia, comida, nombre, codigo } = route.params;
+  const { dia, comida, nombre, marca, codigo } = route.params;
   return (
     <CrearAlimentoScreen
       dia={dia}
       comida={comida}
       nombreInicial={nombre}
+      marcaInicial={marca}
       codigoInicial={codigo}
       onVolver={() => navigation.goBack()}
       // Agregado al diario: vuelve a la pestaña Comida.

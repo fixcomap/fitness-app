@@ -91,7 +91,14 @@ export function buscarCaseras(
 
 // "Casera · 245 kcal / 100 g" o "Arcor · 443 kcal / 100 g".
 export function subtituloAlimento(a: Alimento): string {
-  const origen = a.origen === 'casera' ? 'Casera' : a.origen === 'propio' ? 'Creado por vos' : (a.marca ?? 'Envasado');
+  const origen =
+    a.origen === 'casera'
+      ? 'Casera'
+      : a.origen === 'propio'
+        ? a.marca
+          ? `${a.marca} · creado por vos`
+          : 'Creado por vos'
+        : (a.marca ?? 'Envasado');
   return `${origen} · ${Math.round(a.kcal)} kcal / 100 g`;
 }
 
