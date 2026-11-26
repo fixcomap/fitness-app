@@ -72,14 +72,14 @@ export function OnboardingScreen({ onListo }: { onListo: (perfil: PerfilUsuario)
         {paso === 2 && perfil && (
           <View style={styles.resultado}>
             <Text style={styles.texto}>
-              {perfil.nombre}, con tus datos y {perfil.diasEntrenoPorSemana}{' '}
-              {perfil.diasEntrenoPorSemana === 1 ? 'día' : 'días'} de entreno por semana, esto es lo que te conviene
-              comer para {perfil.objetivoPeso === 'mantener' ? 'mantener tu peso' : `${perfil.objetivoPeso} de peso`}:
+              {perfil.nombre}, esto es lo que te conviene comer en un día sin entrenar para{' '}
+              {perfil.objetivoPeso === 'mantener' ? 'mantener tu peso' : `${perfil.objetivoPeso} de peso`}. Lo que
+              gastes caminando y entrenando se suma aparte cada día.
             </Text>
             <ResumenMetas metas={metasNutricion(perfil)} grande />
             <Text style={styles.nota}>
-              Proteína: 1,8 g por kg de peso. Grasas: 25 % de las calorías. Carbos: el resto. Lo podés cambiar cuando
-              quieras desde tu perfil.
+              Proteína: 1,8 g por kg de peso. Grasas: 25 % de las calorías. Carbos: el resto. Si preferís otro número de
+              kcal, lo podés personalizar desde tu perfil.
             </Text>
           </View>
         )}

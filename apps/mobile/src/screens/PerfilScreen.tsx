@@ -6,6 +6,7 @@ import { KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { CamposDatos, CamposObjetivos } from '../components/perfil/CamposPerfil';
+import { KcalObjetivo } from '../components/perfil/KcalObjetivo';
 import { MetaPasos } from '../components/perfil/MetaPasos';
 import { ResumenMetas } from '../components/perfil/ResumenMetas';
 import { buscarEjercicioPorId } from '../data/ejercicios';
@@ -16,6 +17,7 @@ import { formatearFechaCorta, formatearNumero, inicial } from '../lib/formato';
 import {
   borradorDe,
   erroresPerfil,
+  kcalRecomendadas,
   metasNutricion,
   perfilDesdeBorrador,
   type BorradorPerfil,
@@ -68,11 +70,19 @@ export function PerfilScreen({ onVolver }: { onVolver: () => void }) {
 
         <Seccion titulo="Datos personales">
           {/* key: si se guarda, el formulario arranca de nuevo con lo guardado */}
-          <FormularioPerfil key={JSON.stringify(perfil)} perfil={perfil} onGuardar={guardar} />
+          <FormularioPerfil key={JSON.stringify(borradorDe(perfil))} perfil={perfil} onGuardar={guardar} />
         </Seccion>
 
         <Seccion titulo="Metas">
           <ResumenMetas metas={metas} />
+          <View style={styles.tarjeta}>
+            <KcalObjetivo
+              recomendadas={kcalRecomendadas(perfil)}
+              personalizadas={perfil.kcalPersonalizadas}
+              sexo={perfil.sexo}
+              onCambiar={(kcalPersonalizadas) => guardar({ ...perfil, kcalPersonalizadas })}
+            />
+          </View>
           <View style={styles.tarjeta}>
             <MetaPasos meta={config.metaPasos} onCambiar={cambiarMetaPasos} />
           </View>
@@ -123,7 +133,10 @@ function FormularioPerfil({ perfil, onGuardar }: { perfil: PerfilUsuario; onGuar
   const [borrador, setBorrador] = useState<BorradorPerfil>(() => borradorDe(perfil));
   const [cambiado, setCambiado] = useState(false);
   const errores = erroresPerfil(borrador);
-  const nuevo = perfilDesdeBorrador(borrador, perfil.esPremium);
+  const nuevo = perfilDesdeBorrador(borrador, {
+    esPremium: perfil.esPremium,
+    kcalPersonalizadas: perfil.kcalPersonalizadas,
+  });
 
   const cambiar = (cambios: Partial<BorradorPerfil>) => {
     setBorrador((b) => ({ ...b, ...cambios }));
@@ -136,7 +149,10 @@ function FormularioPerfil({ perfil, onGuardar }: { perfil: PerfilUsuario; onGuar
       <CamposObjetivos borrador={borrador} errores={errores} onCambiar={cambiar} />
       {cambiado && nuevo && (
         <Text style={styles.ayuda}>
-          Con estos datos, tu objetivo pasa a {formatearNumero(metasNutricion(nuevo).kcal)} kcal por día.
+          Con estos datos, el objetivo recomendado pasa a {formatearNumero(kcalRecomendadas(nuevo))} kcal por día
+          {nuevo.kcalPersonalizadas !== null &&
+            ` (seguís usando tus ${formatearNumero(nuevo.kcalPersonalizadas)} kcal personalizadas)`}
+          .
         </Text>
       )}
       <Pressable

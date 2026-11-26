@@ -105,7 +105,7 @@ export function CamposObjetivos({ borrador, errores, onCambiar }: CamposProps) {
           onElegir={(objetivo) => onCambiar({ objetivo })}
         />
       </Campo>
-      <Campo etiqueta="Días de entreno por semana" error={errores.diasEntrenoPorSemana}>
+      <Campo etiqueta="Días de entreno por semana" ayuda="Para armar tus rutinas." error={errores.diasEntrenoPorSemana}>
         <View style={styles.dias}>
           {DIAS.map((d) => {
             const elegido = borrador.diasEntrenoPorSemana === d;

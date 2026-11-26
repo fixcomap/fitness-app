@@ -3,6 +3,7 @@ import {
   borradorDe,
   erroresDe,
   erroresPerfil,
+  kcalRecomendadas,
   leerPerfilGuardado,
   metasNutricion,
   perfilDesdeBorrador,
@@ -19,6 +20,7 @@ const perfil: PerfilUsuario = {
   objetivoPeso: 'mantener',
   objetivo: 'hipertrofia',
   diasEntrenoPorSemana: 3,
+  kcalPersonalizadas: null,
   esPremium: false,
 };
 
@@ -84,6 +86,11 @@ describe('perfilDesdeBorrador', () => {
     expect(perfilDesdeBorrador({ ...borrador, edad: '' })).toBeNull();
   });
 
+  test('conserva lo que no se edita en el formulario', () => {
+    const extras = { esPremium: true, kcalPersonalizadas: 1900 };
+    expect(perfilDesdeBorrador(borrador, extras)).toEqual({ ...perfil, ...extras });
+  });
+
   test('ida y vuelta con borradorDe', () => {
     const conDecimal = { ...perfil, pesoKg: 80.5 };
     expect(borradorDe(conDecimal).pesoKg).toBe('80,5');
@@ -92,30 +99,38 @@ describe('perfilDesdeBorrador', () => {
 });
 
 describe('metasNutricion', () => {
-  test('kcal de caloriasObjetivo, proteína 1,8 g/kg, grasas 25 %, carbos el resto', () => {
-    // Basal 1698,75 × 1,55 = 2633 kcal; 135 g prot (540 kcal), 73 g grasas (657 kcal), 1436 kcal → 359 g carbos.
-    expect(metasNutricion(perfil)).toEqual({ kcal: 2633, proteinas: 135, grasas: 73, carbos: 359 });
+  test('kcal recomendadas (basal × 1,2), proteína 1,8 g/kg, grasas 25 %, carbos el resto', () => {
+    // Basal 1698,75 × 1,2 = 2039 kcal; 135 g prot (540 kcal), 57 g grasas (513 kcal), 986 kcal → 247 g carbos.
+    expect(metasNutricion(perfil)).toEqual({ kcal: 2039, proteinas: 135, grasas: 57, carbos: 247 });
   });
 
   test('usa el objetivo de peso', () => {
     expect(metasNutricion({ ...perfil, objetivoPeso: 'bajar' })).toEqual({
-      kcal: 2233,
+      kcal: 1639,
       proteinas: 135,
-      grasas: 62,
-      carbos: 284,
+      grasas: 46,
+      carbos: 171,
     });
   });
 
+  test('los días de entreno ya no cambian las kcal', () => {
+    expect(kcalRecomendadas({ ...perfil, diasEntrenoPorSemana: 0 })).toBe(
+      kcalRecomendadas({ ...perfil, diasEntrenoPorSemana: 7 }),
+    );
+  });
+
+  test('con kcal personalizadas, las macros se calculan con esas', () => {
+    expect(metasNutricion({ ...perfil, kcalPersonalizadas: 1800 })).toEqual({
+      kcal: 1800,
+      proteinas: 135,
+      grasas: 50,
+      carbos: 203,
+    });
+    expect(kcalRecomendadas({ ...perfil, kcalPersonalizadas: 1800 })).toBe(2039);
+  });
+
   test('los carbos nunca son negativos', () => {
-    const extremo = {
-      ...perfil,
-      sexo: 'mujer' as const,
-      edad: 100,
-      alturaCm: 120,
-      pesoKg: 300,
-      diasEntrenoPorSemana: 0,
-    };
-    expect(metasNutricion(extremo).carbos).toBeGreaterThanOrEqual(0);
+    expect(metasNutricion({ ...perfil, pesoKg: 300, kcalPersonalizadas: 1000 }).carbos).toBe(0);
   });
 });
 
@@ -133,6 +148,14 @@ describe('leerPerfilGuardado', () => {
     expect(leerPerfilGuardado({ ...perfil, objetivo: 'cardio' })).toBeNull();
     expect(leerPerfilGuardado({ ...perfil, nombre: '  ' })).toBeNull();
     expect(leerPerfilGuardado({ ...perfil, diasEntrenoPorSemana: 2.5 })).toBeNull();
+  });
+
+  test('kcal personalizadas: se conservan si son válidas; si faltan (perfiles de antes) o no, null', () => {
+    expect(leerPerfilGuardado({ ...perfil, kcalPersonalizadas: 1800 })?.kcalPersonalizadas).toBe(1800);
+    const { kcalPersonalizadas: _, ...viejo } = perfil;
+    expect(leerPerfilGuardado(viejo)).toEqual(perfil);
+    expect(leerPerfilGuardado({ ...perfil, kcalPersonalizadas: 900 })).toEqual(perfil);
+    expect(leerPerfilGuardado({ ...perfil, kcalPersonalizadas: 1800.5 })).toEqual(perfil);
   });
 
   test('esPremium sólo si está en true', () => {

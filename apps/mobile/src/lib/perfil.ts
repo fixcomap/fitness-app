@@ -1,6 +1,6 @@
 // Perfil del usuario: sus datos, la validación de lo que escribe y las metas que
 // salen de ahí (kcal y macros). Funciones puras.
-import { caloriasObjetivo, type Objetivo, type Sexo } from './calorias';
+import { caloriasObjetivo, KCAL_PERSONALIZADAS, type Objetivo, type Sexo } from './calorias';
 
 export const SEXOS: readonly Sexo[] = ['hombre', 'mujer'];
 export const OBJETIVOS_PESO: readonly Objetivo[] = ['bajar', 'mantener', 'subir'];
@@ -17,7 +17,8 @@ export interface PerfilUsuario {
   pesoKg: number;
   objetivoPeso: Objetivo;
   objetivo: ObjetivoEntreno; // objetivo de entrenamiento
-  diasEntrenoPorSemana: number; // 0 a 7
+  diasEntrenoPorSemana: number; // 0 a 7 (lo usan las rutinas; no cambia las kcal)
+  kcalPersonalizadas: number | null; // si el usuario eligió otro objetivo de kcal
   esPremium: boolean;
 }
 
@@ -110,8 +111,12 @@ export function erroresDe(errores: ErroresPerfil, campos: readonly CampoPerfil[]
   return Object.fromEntries(campos.flatMap((c) => (errores[c] ? [[c, errores[c]]] : [])));
 }
 
+// Lo que no se edita en el formulario y se conserva al guardar.
+export type ExtrasPerfil = Pick<PerfilUsuario, 'esPremium' | 'kcalPersonalizadas'>;
+const SIN_EXTRAS: ExtrasPerfil = { esPremium: false, kcalPersonalizadas: null };
+
 // El perfil listo para guardar, o null si algo no es válido.
-export function perfilDesdeBorrador(b: BorradorPerfil, esPremium = false): PerfilUsuario | null {
+export function perfilDesdeBorrador(b: BorradorPerfil, extras: ExtrasPerfil = SIN_EXTRAS): PerfilUsuario | null {
   if (Object.keys(erroresPerfil(b)).length > 0) return null;
   return {
     nombre: b.nombre.trim(),
@@ -122,7 +127,8 @@ export function perfilDesdeBorrador(b: BorradorPerfil, esPremium = false): Perfi
     objetivoPeso: b.objetivoPeso as Objetivo,
     objetivo: b.objetivo as ObjetivoEntreno,
     diasEntrenoPorSemana: b.diasEntrenoPorSemana,
-    esPremium,
+    kcalPersonalizadas: extras.kcalPersonalizadas,
+    esPremium: extras.esPremium,
   };
 }
 
@@ -133,22 +139,27 @@ export const FRACCION_GRASAS = 0.25; // de las kcal
 const KCAL_POR_G = { proteinas: 4, carbos: 4, grasas: 9 } as const;
 
 export interface MetasNutricion {
-  kcal: number;
+  kcal: number; // las que se usan: personalizadas o recomendadas
   proteinas: number; // g
   carbos: number; // g
   grasas: number; // g
 }
 
-// kcal con caloriasObjetivo(); proteína 1,8 g/kg; grasas 25 % de las kcal; carbos el resto.
-export function metasNutricion(perfil: PerfilUsuario): MetasNutricion {
-  const kcal = caloriasObjetivo({
+// Las kcal recomendadas: caloriasObjetivo() con el objetivo de peso.
+export function kcalRecomendadas(perfil: PerfilUsuario): number {
+  return caloriasObjetivo({
     sexo: perfil.sexo,
     edad: perfil.edad,
     pesoKg: perfil.pesoKg,
     alturaCm: perfil.alturaCm,
-    diasEntrenoPorSemana: perfil.diasEntrenoPorSemana,
     objetivo: perfil.objetivoPeso,
   });
+}
+
+// kcal: las personalizadas si hay, si no las recomendadas. Proteína 1,8 g/kg; grasas
+// 25 % de las kcal; carbos el resto.
+export function metasNutricion(perfil: PerfilUsuario): MetasNutricion {
+  const kcal = perfil.kcalPersonalizadas ?? kcalRecomendadas(perfil);
   const proteinas = Math.round(perfil.pesoKg * PROTEINA_G_POR_KG);
   const grasas = Math.round((kcal * FRACCION_GRASAS) / KCAL_POR_G.grasas);
   const resto = kcal - proteinas * KCAL_POR_G.proteinas - grasas * KCAL_POR_G.grasas;
@@ -187,6 +198,10 @@ export function leerPerfilGuardado(datos: unknown): PerfilUsuario | null {
     objetivoPeso: d.objetivoPeso as Objetivo,
     objetivo: d.objetivo as ObjetivoEntreno,
     diasEntrenoPorSemana: d.diasEntrenoPorSemana as number,
+    // Si falta (perfiles de antes) o no es válido, se usan las recomendadas.
+    kcalPersonalizadas: enRango(d.kcalPersonalizadas, KCAL_PERSONALIZADAS, true)
+      ? (d.kcalPersonalizadas as number)
+      : null,
     esPremium: d.esPremium === true,
   };
 }
