@@ -156,6 +156,11 @@ test('el prompt del coach: el aviso de salud solo cuando la pregunta lo amerita'
   assert.match(SISTEMA_COACH, /no agregues avisos genéricos/);
 });
 
+test('el prompt del coach: no pregunta datos que ya están en el perfil', () => {
+  assert.match(SISTEMA_COACH, /No preguntes datos que ya están en el perfil/);
+  assert.match(SISTEMA_COACH, /no preguntes si la prioridad es bajar grasa o ganar músculo/);
+});
+
 test('el prompt del coach: si el usuario dice cuánto duran sus sesiones, lo comenta', () => {
   assert.match(SISTEMA_COACH, /Si el usuario menciona cuánto duran sus sesiones/);
   assert.match(SISTEMA_COACH, /comentalo en la misma respuesta/);
