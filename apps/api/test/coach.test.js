@@ -2,6 +2,8 @@ const test = require('node:test');
 const assert = require('node:assert');
 const {
   MAXIMO_NOMBRE_RUTINA,
+  MAXIMO_MENSAJES_IA,
+  mensajesParaIa,
   esquemaPedidoCoach,
   recortarNombre,
   limpiarRutina,
@@ -26,6 +28,7 @@ const pedidoValido = () => ({
     { rol: 'usuario', texto: 'Armame una rutina de 3 días' },
   ],
   contexto: {
+    hoy: '2026-11-26',
     perfil: {
       sexo: 'mujer',
       edad: 30,
@@ -48,6 +51,7 @@ const pedidoValido = () => ({
     ],
     rutinas: [
       {
+        id: 'rutina-full-body',
         nombre: 'Full body',
         dias: [0, 2],
         ejercicios: [{ ejercicioId: 'press-banca', series: 3, rango: { min: 8, max: 10 } }],
@@ -62,12 +66,17 @@ test('acepta un pedido válido', () => {
   assert.strictEqual(esquemaPedidoCoach.safeParse(pedidoValido()).success, true);
 });
 
-test('rechaza pedidos sin mensajes, con el último del coach o con datos inválidos', () => {
+test('rechaza pedidos sin mensajes, con el último del coach o con datos inválidos (hoy, ids de rutina)', () => {
   const casos = [
     (p) => (p.mensajes = []),
     (p) => p.mensajes.push({ rol: 'coach', texto: 'Listo' }),
     (p) => (p.mensajes[1].texto = '   '),
     (p) => (p.contexto.perfil.sexo = 'otro'),
+    (p) => delete p.contexto.hoy,
+    (p) => (p.contexto.hoy = '2026-02-30'),
+    (p) => (p.contexto.hoy = '26/11/2026'),
+    (p) => delete p.contexto.rutinas[0].id,
+    (p) => p.contexto.rutinas.push({ ...p.contexto.rutinas[0], nombre: 'Otra' }),
     (p) => (p.contexto.ultimos7Dias = Array.from({ length: 8 }, () => p.contexto.ultimos7Dias[0])),
   ];
   for (const cambiar of casos) {
@@ -232,6 +241,42 @@ test('el prompt pide una rutina por día, nombres cortos y no repetir los días 
   assert.match(SISTEMA_COACH, /"rutinas" va vacía/);
 });
 
+// m0 usuario, m1 coach, m2 usuario… (los pares son del usuario).
+const charla = (largo, primero = 'usuario') =>
+  Array.from({ length: largo }, (_, i) => ({
+    rol: i % 2 === 0 ? primero : primero === 'usuario' ? 'coach' : 'usuario',
+    texto: `m${i}`,
+  }));
+const textos = (mensajes) => mensajes.map((m) => m.texto);
+
+test('a la IA van solo los últimos 10 mensajes', () => {
+  assert.strictEqual(MAXIMO_MENSAJES_IA, 10);
+  // 12 mensajes: los últimos 10 arrancan en m2, del usuario.
+  assert.deepStrictEqual(textos(mensajesParaIa(charla(12))), [
+    'm2',
+    'm3',
+    'm4',
+    'm5',
+    'm6',
+    'm7',
+    'm8',
+    'm9',
+    'm10',
+    'm11',
+  ]);
+  const corta = charla(3);
+  assert.deepStrictEqual(mensajesParaIa(corta), corta);
+});
+
+test('si al recortar el primero queda del coach, se saca: siempre empieza el usuario', () => {
+  // 13 mensajes: los últimos 10 arrancan en m3, del coach; queda desde m4.
+  const recortados = mensajesParaIa(charla(13));
+  assert.deepStrictEqual(textos(recortados), ['m4', 'm5', 'm6', 'm7', 'm8', 'm9', 'm10', 'm11', 'm12']);
+  assert.strictEqual(recortados[0].rol, 'usuario');
+  // Sin recortar también: si la charla arranca con el saludo del coach, se saca.
+  assert.deepStrictEqual(textos(mensajesParaIa(charla(3, 'coach'))), ['m1', 'm2']);
+});
+
 // ── POST /coach ──
 
 const json = (cuerpo, id = DISPOSITIVO) => ({
@@ -268,9 +313,27 @@ test('responde el texto y una rutina por día, validadas contra el catálogo', a
     ]);
 
     const [llamada] = ia.llamadas;
-    assert.strictEqual(llamada.mensajes.length, 2);
+    // El saludo del coach no va: la charla con la IA arranca por el usuario.
+    assert.deepStrictEqual(
+      llamada.mensajes.map((m) => m.rol),
+      ['usuario'],
+    );
     // El catálogo no viaja en el contexto: lo pone la API en el prompt.
     assert.strictEqual(llamada.contexto.catalogo, undefined);
+  });
+});
+
+test('POST /coach acepta 40 mensajes pero a la IA le pasa los últimos 10, empezando por el usuario', async () => {
+  const ia = iaFalsa({ coach: { texto: 'Dale', rutinas: [] } });
+  const pedido = pedidoValido();
+  // Arranca el coach (m0) y termina el usuario (m39): los últimos 10 arrancan en m30, del coach.
+  pedido.mensajes = charla(40, 'coach');
+  await conApp({ ia, uso: usoEnMemoria() }, async (pedir) => {
+    const r = await pedir('POST', '/coach', json(pedido));
+    assert.strictEqual(r.status, 200);
+    assert.deepStrictEqual(textos(ia.llamadas[0].mensajes), textos(pedido.mensajes.slice(-9)));
+    assert.strictEqual(ia.llamadas[0].mensajes[0].rol, 'usuario');
+    assert.strictEqual(ia.llamadas[0].contexto.hoy, '2026-11-26');
   });
 });
 

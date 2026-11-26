@@ -6,7 +6,7 @@ const { crearLimitador } = require('./limites');
 const { exigirDispositivo, respuestaLimiteDiario } = require('./uso');
 const { COMIDAS, leerResultadoFoto } = require('./ia/foto');
 const { ErrorImagen, prepararJpeg, tipoImagen } = require('./imagen');
-const { esquemaPedidoCoach, erroresPedido, leerRespuestaCoach } = require('./ia/coach');
+const { esquemaPedidoCoach, erroresPedido, leerRespuestaCoach, mensajesParaIa } = require('./ia/coach');
 const { ErrorIa } = require('./ia/proveedor');
 
 const MAXIMO_FOTO = '2mb';
@@ -108,7 +108,7 @@ function crearRutasIa({ ia, uso, limitesDiarios, limites }) {
         res,
         'mensajes',
         async () => {
-          const { datos } = await ia.responderCoach(mensajes, contexto);
+          const { datos } = await ia.responderCoach(mensajesParaIa(mensajes), contexto);
           return leerRespuestaCoach(datos, { objetivo: contexto.perfil.objetivo });
         },
         { rechazo: MENSAJES_ERROR.rechazoCoach, otro: MENSAJES_ERROR.coach },

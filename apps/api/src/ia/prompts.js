@@ -51,7 +51,7 @@ Manual y fuentes:
 - La única excepción son los alimentos cuando armás una comida: podés dar gramos, kcal y proteínas aproximados, pero aclarando siempre si el peso es crudo o cocido (por ejemplo, "150 g de pechuga cruda") y que son valores aproximados.
 
 Cómo usar el contexto:
-- Tenés su perfil, un resumen de los últimos 7 días (comidas, entrenos y actividad) y sus rutinas actuales. El catálogo de ejercicios de la app va después del manual.
+- Tenés la fecha de hoy ("hoy", con su día en "diaHoy"), su perfil, un resumen de los últimos 7 días (comidas, entrenos y actividad) y sus rutinas actuales, cada una con su "id". El catálogo de ejercicios de la app va después del manual.
 - Basate en esos datos y no inventes los que no están. Si falta algo para responder bien, preguntalo.
 - No preguntes datos que ya están en el perfil (sexo, edad, altura, peso, objetivo de peso, objetivo de entrenamiento, días por semana, kcal objetivo): usalos. Por ejemplo, si el objetivo de peso es "bajar" y el de entrenamiento es "hipertrofia", no preguntes si la prioridad es bajar grasa o ganar músculo.
 - Si el usuario menciona cuánto duran sus sesiones (por ejemplo, "entreno 2 horas"), comentalo en la misma respuesta: si armaste una rutina, decí si entra en ese tiempo según las series y los descansos del manual; si no, decí qué influye en la duración (series y descansos). No inventes una duración ideal.
@@ -82,13 +82,18 @@ function diaDeSemana(fecha) {
 }
 
 // El contexto del usuario como último bloque de instrucciones (cambia en cada pedido).
-// A cada día de ultimos7Dias le suma el día de la semana.
+// Le suma el día de la semana a hoy (diaHoy) y a cada día de ultimos7Dias.
 function contextoCoach(contexto) {
   const dias = contexto?.ultimos7Dias?.map((d) => {
     const nombre = diaDeSemana(d.fecha);
     return nombre ? { fecha: d.fecha, dia: nombre, ...d } : d;
   });
-  const conDias = dias ? { ...contexto, ultimos7Dias: dias } : contexto;
+  const diaHoy = diaDeSemana(contexto?.hoy);
+  const conDias = {
+    ...contexto,
+    ...(diaHoy ? { diaHoy } : {}),
+    ...(dias ? { ultimos7Dias: dias } : {}),
+  };
   return `Contexto del usuario (datos de la app, en JSON):\n${JSON.stringify(conDias)}`;
 }
 

@@ -1,9 +1,10 @@
 // Coach: validación del pedido de la app y de la respuesta de la IA. Funciones puras.
 const { randomUUID } = require('crypto');
 const { z } = require('zod');
-const { ErrorIa } = require('./proveedor');
+const { ErrorIa, historialDesdeUsuario } = require('./proveedor');
 const { rangoDeLaApp } = require('./rangos');
 const { CATALOGO } = require('./catalogo');
+const { diaDeSemana } = require('./prompts');
 
 // Mismos rangos que la app (apps/mobile/src/lib/entreno/rutinas.ts y rangos.ts).
 const SERIES = { min: 1, max: 10 };
@@ -13,10 +14,13 @@ const MAXIMO_RUTINAS = 7; // una por día de la semana
 const MAXIMO_NOMBRE_RUTINA = 40;
 const NOMBRE_RUTINA_POR_DEFECTO = 'Rutina del coach';
 const MAXIMO_TEXTO = 4000;
+// La app guarda más, pero a la IA van solo los últimos: alcanza para la charla y acota el costo.
+const MAXIMO_MENSAJES_IA = 10;
 
 const entero = (min, max) => z.number().int().min(min).max(max);
 const dia = entero(0, 6);
 const fecha = z.string().regex(/^\d{4}-\d{2}-\d{2}$/);
+const fechaReal = fecha.refine((f) => diaDeSemana(f) !== null, 'La fecha no existe');
 const texto = (max) => z.string().trim().max(max);
 
 const ejercicioRutina = z.object({
@@ -33,6 +37,8 @@ const esquemaPedidoCoach = z.object({
     .max(40)
     .refine((mensajes) => mensajes.at(-1)?.rol === 'usuario', 'El último mensaje tiene que ser del usuario'),
   contexto: z.object({
+    // La fecha del celular ("AAAA-MM-DD"): así no depende de la zona horaria del servidor.
+    hoy: fechaReal,
     perfil: z.object({
       nombre: texto(30).optional(),
       sexo: z.enum(['hombre', 'mujer']),
@@ -71,15 +77,24 @@ const esquemaPedidoCoach = z.object({
     rutinas: z
       .array(
         z.object({
+          // Para que el coach pueda nombrar una rutina en sus acciones.
+          id: texto(80).min(1),
           nombre: texto(MAXIMO_NOMBRE_RUTINA),
           dias: z.array(dia).max(7),
           ejercicios: z.array(ejercicioRutina).max(30),
         }),
       )
-      .max(14),
+      .max(14)
+      .refine((rutinas) => new Set(rutinas.map((r) => r.id)).size === rutinas.length, 'Hay rutinas con el mismo id'),
     // El catálogo de ejercicios no lo manda la app: lo tiene la API (src/ia/catalogo.json).
   }),
 });
+
+// Los últimos mensajes de la charla, los que van a la IA. Si al recortar queda primero uno del coach,
+// se saca: la charla tiene que empezar por el usuario (Claude lo exige).
+function mensajesParaIa(mensajes) {
+  return historialDesdeUsuario(mensajes.slice(-MAXIMO_MENSAJES_IA));
+}
 
 // Lista corta de qué está mal en el pedido, para el 400.
 function erroresPedido(error) {
@@ -167,6 +182,8 @@ function leerRespuestaCoach(datos, { objetivo, catalogo = CATALOGO, ...opciones 
 
 module.exports = {
   MAXIMO_NOMBRE_RUTINA,
+  MAXIMO_MENSAJES_IA,
+  mensajesParaIa,
   esquemaPedidoCoach,
   erroresPedido,
   recortarNombre,

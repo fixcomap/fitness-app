@@ -124,6 +124,16 @@ test('diaDeSemana: el día de una fecha AAAA-MM-DD, o null si no existe', () => 
   }
 });
 
+test('el contexto del coach suma el día de la semana a hoy', () => {
+  const datos = (texto) => JSON.parse(texto.slice(texto.indexOf('\n') + 1));
+  assert.deepStrictEqual(datos(contextoCoach({ hoy: '2026-11-26', perfil: {} })), {
+    hoy: '2026-11-26',
+    perfil: {},
+    diaHoy: 'jueves',
+  });
+  assert.strictEqual(datos(contextoCoach({ hoy: '2026-02-30' })).diaHoy, undefined);
+});
+
 test('el contexto del coach suma el día de la semana a cada día de ultimos7Dias', () => {
   const datos = (texto) => JSON.parse(texto.slice(texto.indexOf('{')));
   const r = datos(

@@ -86,6 +86,7 @@ test('el pedido ya no lleva catálogo: si una app vieja lo manda, se ignora', ()
   const pedido = {
     mensajes: [{ rol: 'usuario', texto: 'Hola' }],
     contexto: {
+      hoy: '2026-11-26',
       perfil: {
         sexo: 'hombre',
         edad: 24,
@@ -115,6 +116,7 @@ test('POST /coach aplica los rangos con el objetivo del perfil', async () => {
   const cuerpo = {
     mensajes: [{ rol: 'usuario', texto: 'Armame una rutina' }],
     contexto: {
+      hoy: '2026-11-26',
       perfil: {
         sexo: 'hombre',
         edad: 24,
