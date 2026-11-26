@@ -36,9 +36,9 @@ const {
 const MAXIMO_FOTO = 2 * 1024 * 1024;
 const precios = JSON.parse(fs.readFileSync(path.join(aqui, 'precios-ia.json'), 'utf8')).modelos;
 const ejemplo = JSON.parse(fs.readFileSync(path.join(aqui, 'preguntas-coach.json'), 'utf8'));
-// El catálogo real de la app (ids + nombres), como lo va a mandar la app.
+// El catálogo real de la app (id, nombre, equipo y tipo), como lo va a mandar la app.
 const catalogo = JSON.parse(fs.readFileSync(path.join(raizRepo, 'apps/mobile/src/data/ejercicios.json'), 'utf8')).map(
-  ({ id, nombre }) => ({ id, nombre }),
+  ({ id, nombre, equipo, tipo }) => ({ id, nombre, equipo, ...(tipo ? { tipo } : {}) }),
 );
 console.log(`Catálogo: ${catalogo.length} ejercicios de apps/mobile/src/data/ejercicios.json`);
 const contexto = { ...ejemplo.contexto, catalogo };
@@ -141,7 +141,10 @@ async function probar({ proveedor, modelo }, fotos, solo) {
       const r = conCosto(
         await medir(async () => {
           const respuesta = await ia.responderCoach([{ rol: 'usuario', texto: pregunta }], contexto);
-          return { ...respuesta, salida: leerRespuestaCoach(respuesta.datos, catalogo) };
+          return {
+            ...respuesta,
+            salida: leerRespuestaCoach(respuesta.datos, catalogo, { objetivo: contexto.perfil.objetivo }),
+          };
         }),
       );
       mostrar(`"${pregunta}"`, r, detalleCoach);

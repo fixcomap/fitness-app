@@ -2,6 +2,7 @@
 const { randomUUID } = require('crypto');
 const { z } = require('zod');
 const { ErrorIa } = require('./proveedor');
+const { EQUIPOS, TIPOS, rangoDeLaApp } = require('./rangos');
 
 // Mismos rangos que la app (apps/mobile/src/lib/entreno/rutinas.ts y rangos.ts).
 const SERIES = { min: 1, max: 10 };
@@ -76,7 +77,15 @@ const esquemaPedidoCoach = z.object({
       )
       .max(14),
     catalogo: z
-      .array(z.object({ id: texto(80).min(1), nombre: texto(100).min(1) }))
+      .array(
+        z.object({
+          id: texto(80).min(1),
+          nombre: texto(100).min(1),
+          // Con el equipo (y el tipo, si el catálogo lo corrige) la API aplica los rangos de la app.
+          equipo: z.enum(EQUIPOS).optional(),
+          tipo: z.enum(TIPOS).optional(),
+        }),
+      )
       .min(1)
       .max(1000),
   }),
@@ -99,8 +108,13 @@ function recortarNombre(nombre, maximo = MAXIMO_NOMBRE_RUTINA) {
 
 // Una rutina de la IA en el formato de Mis rutinas, solo con ejercicios del catálogo y en rango.
 // diasOcupados: días que ya tiene otra rutina de la lista (en la app, un día tiene una sola rutina).
+// rangoPara: id -> rango de la app para ese ejercicio, o null (se queda el que dio la IA).
 // { rutina, descartados } — rutina es null si no queda ningún ejercicio válido.
-function limpiarRutina(rutina, idsCatalogo, { crearId = randomUUID, diasOcupados = new Set() } = {}) {
+function limpiarRutina(
+  rutina,
+  idsCatalogo,
+  { crearId = randomUUID, diasOcupados = new Set(), rangoPara = () => null } = {},
+) {
   if (!rutina || typeof rutina !== 'object') return { rutina: null, descartados: [] };
   const nombre = recortarNombre(typeof rutina.nombre === 'string' ? rutina.nombre : '') || NOMBRE_RUTINA_POR_DEFECTO;
   const descartados = [];
@@ -108,7 +122,8 @@ function limpiarRutina(rutina, idsCatalogo, { crearId = randomUUID, diasOcupados
   const usados = new Set();
   const ejercicios = [];
   for (const crudo of Array.isArray(rutina.ejercicios) ? rutina.ejercicios : []) {
-    const r = ejercicioRutina.safeParse(crudo);
+    const rangoApp = typeof crudo?.ejercicioId === 'string' ? rangoPara(crudo.ejercicioId) : null;
+    const r = ejercicioRutina.safeParse(rangoApp ? { ...crudo, rango: rangoApp } : crudo);
     const id = r.success ? r.data.ejercicioId : String(crudo?.ejercicioId ?? '?');
     if (!idsCatalogo.has(id)) descartar(id, 'no-existe');
     else if (!r.success || r.data.rango.min > r.data.rango.max) descartar(id, 'fuera-de-rango');
@@ -133,12 +148,12 @@ function limpiarRutina(rutina, idsCatalogo, { crearId = randomUUID, diasOcupados
 
 // Las rutinas de la IA (una por día de entrenamiento). Un día queda en la primera rutina que lo pide.
 // { rutinas, descartados }
-function limpiarRutinas(lista, idsCatalogo, { crearId = randomUUID } = {}) {
+function limpiarRutinas(lista, idsCatalogo, { crearId = randomUUID, rangoPara } = {}) {
   const rutinas = [];
   const descartados = [];
   const diasOcupados = new Set();
   for (const cruda of (Array.isArray(lista) ? lista : []).slice(0, MAXIMO_RUTINAS)) {
-    const r = limpiarRutina(cruda, idsCatalogo, { crearId, diasOcupados });
+    const r = limpiarRutina(cruda, idsCatalogo, { crearId, diasOcupados, rangoPara });
     descartados.push(...r.descartados);
     if (!r.rutina) continue;
     for (const d of r.rutina.dias) diasOcupados.add(d);
@@ -148,11 +163,14 @@ function limpiarRutinas(lista, idsCatalogo, { crearId = randomUUID } = {}) {
 }
 
 // { texto, rutinas, descartados }. Tira ErrorIa si no vino el texto.
-function leerRespuestaCoach(datos, catalogo, opciones) {
+// objetivo (hipertrofia o fuerza, del perfil): para los rangos de la app.
+function leerRespuestaCoach(datos, catalogo, { objetivo, ...opciones } = {}) {
   const textoIa = typeof datos?.texto === 'string' ? datos.texto.trim() : '';
   if (!textoIa) throw new ErrorIa('formato', 'La IA no devolvió el texto');
   const ids = new Set(catalogo.map((e) => e.id));
-  const { rutinas, descartados } = limpiarRutinas(datos.rutinas, ids, opciones);
+  const porId = new Map(catalogo.map((e) => [e.id, e]));
+  const rangoPara = (id) => rangoDeLaApp(porId.get(id), objetivo);
+  const { rutinas, descartados } = limpiarRutinas(datos.rutinas, ids, { ...opciones, rangoPara });
   return { texto: textoIa.slice(0, MAXIMO_TEXTO), rutinas, descartados };
 }
 
