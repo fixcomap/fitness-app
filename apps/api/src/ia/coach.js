@@ -2,7 +2,8 @@
 const { randomUUID } = require('crypto');
 const { z } = require('zod');
 const { ErrorIa } = require('./proveedor');
-const { EQUIPOS, TIPOS, rangoDeLaApp } = require('./rangos');
+const { rangoDeLaApp } = require('./rangos');
+const { CATALOGO } = require('./catalogo');
 
 // Mismos rangos que la app (apps/mobile/src/lib/entreno/rutinas.ts y rangos.ts).
 const SERIES = { min: 1, max: 10 };
@@ -76,18 +77,7 @@ const esquemaPedidoCoach = z.object({
         }),
       )
       .max(14),
-    catalogo: z
-      .array(
-        z.object({
-          id: texto(80).min(1),
-          nombre: texto(100).min(1),
-          // Con el equipo (y el tipo, si el catálogo lo corrige) la API aplica los rangos de la app.
-          equipo: z.enum(EQUIPOS).optional(),
-          tipo: z.enum(TIPOS).optional(),
-        }),
-      )
-      .min(1)
-      .max(1000),
+    // El catálogo de ejercicios no lo manda la app: lo tiene la API (src/ia/catalogo.json).
   }),
 });
 
@@ -164,7 +154,8 @@ function limpiarRutinas(lista, idsCatalogo, { crearId = randomUUID, rangoPara } 
 
 // { texto, rutinas, descartados }. Tira ErrorIa si no vino el texto.
 // objetivo (hipertrofia o fuerza, del perfil): para los rangos de la app.
-function leerRespuestaCoach(datos, catalogo, { objetivo, ...opciones } = {}) {
+// catalogo: el de la API salvo en los tests.
+function leerRespuestaCoach(datos, { objetivo, catalogo = CATALOGO, ...opciones } = {}) {
   const textoIa = typeof datos?.texto === 'string' ? datos.texto.trim() : '';
   if (!textoIa) throw new ErrorIa('formato', 'La IA no devolvió el texto');
   const ids = new Set(catalogo.map((e) => e.id));

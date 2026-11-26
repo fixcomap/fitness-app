@@ -53,7 +53,6 @@ const pedidoValido = () => ({
         ejercicios: [{ ejercicioId: 'press-banca', series: 3, rango: { min: 8, max: 10 } }],
       },
     ],
-    catalogo,
   },
 });
 
@@ -63,12 +62,11 @@ test('acepta un pedido válido', () => {
   assert.strictEqual(esquemaPedidoCoach.safeParse(pedidoValido()).success, true);
 });
 
-test('rechaza pedidos sin mensajes, con el último del coach o sin catálogo', () => {
+test('rechaza pedidos sin mensajes, con el último del coach o con datos inválidos', () => {
   const casos = [
     (p) => (p.mensajes = []),
     (p) => p.mensajes.push({ rol: 'coach', texto: 'Listo' }),
     (p) => (p.mensajes[1].texto = '   '),
-    (p) => (p.contexto.catalogo = []),
     (p) => (p.contexto.perfil.sexo = 'otro'),
     (p) => (p.contexto.ultimos7Dias = Array.from({ length: 8 }, () => p.contexto.ultimos7Dias[0])),
   ];
@@ -214,14 +212,14 @@ test('como mucho 7 rutinas', () => {
 });
 
 test('la respuesta tiene que traer texto', () => {
-  assert.deepStrictEqual(leerRespuestaCoach({ texto: ' Dale con todo ', rutinas: [] }, catalogo), {
+  assert.deepStrictEqual(leerRespuestaCoach({ texto: ' Dale con todo ', rutinas: [] }, { catalogo }), {
     texto: 'Dale con todo',
     rutinas: [],
     descartados: [],
   });
   for (const datos of [null, {}, { texto: '' }, { texto: 3 }]) {
     assert.throws(
-      () => leerRespuestaCoach(datos, catalogo),
+      () => leerRespuestaCoach(datos, { catalogo }),
       (e) => e instanceof ErrorIa && e.tipo === 'formato',
     );
   }
@@ -246,7 +244,7 @@ test('responde el texto y una rutina por día, validadas contra el catálogo', a
     coach: {
       texto: 'Te armé un plan de empuje, tirón y piernas.',
       rutinas: [
-        { nombre: 'Empuje', dias: [0], ejercicios: [ej('press-banca', 4, 8, 10)] },
+        { nombre: 'Empuje', dias: [0], ejercicios: [ej('press-banca-barra', 4, 6, 10)] },
         { nombre: 'Tirón', dias: [2], ejercicios: [ej('remo-barra'), ej('hip-thrust-inventado')] },
         { nombre: 'Piernas', dias: [4], ejercicios: [ej('sentadilla-barra', 4, 6, 8)] },
       ],
@@ -271,7 +269,8 @@ test('responde el texto y una rutina por día, validadas contra el catálogo', a
 
     const [llamada] = ia.llamadas;
     assert.strictEqual(llamada.mensajes.length, 2);
-    assert.deepStrictEqual(llamada.contexto.catalogo, catalogo);
+    // El catálogo no viaja en el contexto: lo pone la API en el prompt.
+    assert.strictEqual(llamada.contexto.catalogo, undefined);
   });
 });
 

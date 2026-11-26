@@ -64,7 +64,7 @@ test('las rutinas del coach salen con los rangos de la app, aunque la IA mande o
       },
     ],
   };
-  const r = leerRespuestaCoach(datos, catalogo, { objetivo: 'fuerza', crearId: () => 'r1' });
+  const r = leerRespuestaCoach(datos, { catalogo, objetivo: 'fuerza', crearId: () => 'r1' });
   assert.deepStrictEqual(r.rutinas[0].ejercicios, [
     ej('press-banca-barra', 4, 4, 6),
     ej('curl-barra', 3, 10, 15),
@@ -78,12 +78,12 @@ test('las rutinas del coach salen con los rangos de la app, aunque la IA mande o
 
 test('las series fuera de rango se siguen descartando', () => {
   const datos = { texto: 'Listo', rutinas: [{ nombre: 'A', dias: [0], ejercicios: [ej('curl-barra', 11)] }] };
-  const r = leerRespuestaCoach(datos, catalogo, { objetivo: 'hipertrofia' });
+  const r = leerRespuestaCoach(datos, { catalogo, objetivo: 'hipertrofia' });
   assert.deepStrictEqual(r.descartados, [{ rutina: 'A', ejercicioId: 'curl-barra', motivo: 'fuera-de-rango' }]);
 });
 
-test('el catálogo del pedido acepta equipo y tipo, y rechaza valores que la app no tiene', () => {
-  const pedido = (item) => ({
+test('el pedido ya no lleva catálogo: si una app vieja lo manda, se ignora', () => {
+  const pedido = {
     mensajes: [{ rol: 'usuario', texto: 'Hola' }],
     contexto: {
       perfil: {
@@ -97,13 +97,12 @@ test('el catálogo del pedido acepta equipo y tipo, y rechaza valores que la app
       },
       ultimos7Dias: [],
       rutinas: [],
-      catalogo: [item],
     },
-  });
-  assert.ok(esquemaPedidoCoach.safeParse(pedido(catalogo[5])).success);
-  assert.ok(esquemaPedidoCoach.safeParse(pedido(catalogo[6])).success);
-  assert.ok(!esquemaPedidoCoach.safeParse(pedido({ id: 'x', nombre: 'X', equipo: 'trineo' })).success);
-  assert.ok(!esquemaPedidoCoach.safeParse(pedido({ id: 'x', nombre: 'X', tipo: 'mixto' })).success);
+  };
+  assert.ok(esquemaPedidoCoach.safeParse(pedido).success);
+  const conCatalogo = esquemaPedidoCoach.safeParse({ ...pedido, contexto: { ...pedido.contexto, catalogo } });
+  assert.ok(conCatalogo.success);
+  assert.strictEqual(conCatalogo.data.contexto.catalogo, undefined);
 });
 
 test('POST /coach aplica los rangos con el objetivo del perfil', async () => {
@@ -127,7 +126,6 @@ test('POST /coach aplica los rangos con el objetivo del perfil', async () => {
       },
       ultimos7Dias: [],
       rutinas: [],
-      catalogo,
     },
   };
   await conApp({ ia, uso: usoEnMemoria() }, async (pedir) => {

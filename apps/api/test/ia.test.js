@@ -15,9 +15,10 @@ const {
   contextoCoach,
   diaDeSemana,
 } = require('../src/ia/prompts');
+const { TEXTO_CATALOGO } = require('../src/ia/catalogo');
 
 const imagen = Buffer.from([0xff, 0xd8, 0xff, 0xe0, 1, 2, 3]);
-const contexto = { perfil: { sexo: 'mujer' }, catalogo: [{ id: 'sentadilla', nombre: 'Sentadilla' }] };
+const contexto = { perfil: { sexo: 'mujer' }, rutinas: [{ nombre: 'Piernas' }] };
 const mensajes = [
   { rol: 'coach', texto: '¡Hola! ¿En qué te ayudo?' },
   { rol: 'usuario', texto: 'Armame una rutina' },
@@ -240,9 +241,9 @@ test('Gemini: el coach manda el historial con roles user/model y el contexto en 
     pedido.contents.map((c) => c.role),
     ['user', 'model', 'user'],
   );
-  // Lo fijo primero (instrucciones y manual) y el contexto al final.
+  // Lo fijo primero (instrucciones, manual y catálogo) y el contexto al final.
   const sistema = pedido.config.systemInstruction;
-  assert.ok(sistema.startsWith(`${SISTEMA_COACH}\n\n${MANUAL_COACH}\n\n`));
+  assert.ok(sistema.startsWith(`${SISTEMA_COACH}\n\n${MANUAL_COACH}\n\n${TEXTO_CATALOGO}\n\n`));
   assert.ok(sistema.endsWith(JSON.stringify(contexto)));
 });
 
@@ -310,14 +311,16 @@ test('Claude: el coach manda el historial, el manual cacheado y el contexto apar
     pedido.messages.map((m) => m.role),
     ['user', 'assistant', 'user'],
   );
-  assert.deepStrictEqual(pedido.system.slice(0, 2), [
+  // Un solo punto de caché, al final del catálogo: cubre instrucciones, manual y catálogo.
+  assert.deepStrictEqual(pedido.system.slice(0, 3), [
     { type: 'text', text: SISTEMA_COACH },
-    { type: 'text', text: MANUAL_COACH, cache_control: { type: 'ephemeral' } },
+    { type: 'text', text: MANUAL_COACH },
+    { type: 'text', text: TEXTO_CATALOGO, cache_control: { type: 'ephemeral' } },
   ]);
   // El contexto va después del punto de caché y sin cache_control: cambia en cada pedido.
-  assert.strictEqual(pedido.system.length, 3);
-  assert.ok(pedido.system[2].text.includes('"sentadilla"'));
-  assert.strictEqual(pedido.system[2].cache_control, undefined);
+  assert.strictEqual(pedido.system.length, 4);
+  assert.ok(pedido.system[3].text.includes('"Piernas"'));
+  assert.strictEqual(pedido.system[3].cache_control, undefined);
 });
 
 test('Claude: rechazo, respuesta cortada o sin JSON son ErrorIa', async () => {
