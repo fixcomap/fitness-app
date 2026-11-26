@@ -1,6 +1,7 @@
 // Límites de pedidos por IP. Cada grupo de rutas tiene el suyo: para sumar uno nuevo
-// (por ejemplo, los endpoints de IA) se agrega acá y se usa con crearLimitador().
-// El conteo es en memoria, por instancia de Cloud Run.
+// se agrega acá y se usa con crearLimitador().
+// El conteo es en memoria, por instancia de Cloud Run. Los límites por usuario y por día
+// de la IA están aparte, en la base (uso.js).
 const { rateLimit } = require('express-rate-limit');
 
 const MINUTO_MS = 60 * 1000;
@@ -10,6 +11,8 @@ const LIMITES = {
   general: { ventanaMs: MINUTO_MS, maximo: 120 },
   // /salud consulta la base
   salud: { ventanaMs: MINUTO_MS, maximo: 30 },
+  // Rutas de IA (foto y coach, compartido): cada pedido cuesta plata
+  ia: { ventanaMs: MINUTO_MS, maximo: 10 },
 };
 
 const MENSAJE_LIMITE = { error: 'Demasiados pedidos, probá en un momento' };

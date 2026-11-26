@@ -2,7 +2,9 @@ const config = require('./config');
 const pool = require('./db');
 const { crearApp } = require('./app');
 
-const app = crearApp({ pool });
+const { crearProveedor } = require('./ia');
+
+const app = crearApp({ pool, ia: crearProveedor(config.ia), limitesDiarios: config.ia.limitesDiarios });
 
 const servidor = app.listen(config.puerto, () => {
   console.log(`API escuchando en el puerto ${config.puerto}`);
