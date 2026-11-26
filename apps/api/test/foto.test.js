@@ -1,6 +1,6 @@
 const test = require('node:test');
 const assert = require('node:assert');
-const { leerResultadoFoto, esJpeg, MAXIMO_ITEMS } = require('../src/ia/foto');
+const { leerResultadoFoto, MAXIMO_ITEMS } = require('../src/ia/foto');
 const { ErrorIa } = require('../src/ia/proveedor');
 const { DISPOSITIVO, OTRO_DISPOSITIVO, iaFalsa, usoEnMemoria, conApp, jpeg } = require('./ayudas');
 
@@ -69,12 +69,6 @@ test('si no vino una lista de ítems es un error de formato', () => {
   }
 });
 
-test('reconoce un JPEG por sus primeros bytes', () => {
-  assert.strictEqual(esJpeg(jpeg()), true);
-  assert.strictEqual(esJpeg(Buffer.from('\x89PNG\r\n')), false);
-  assert.strictEqual(esJpeg({}), false);
-});
-
 // ── POST /comida/foto ──
 
 const conDispositivo = (id = DISPOSITIVO) => ({ 'X-Dispositivo': id, 'Content-Type': 'image/jpeg' });
@@ -101,7 +95,7 @@ test('la comida es opcional', async () => {
   });
 });
 
-test('pedidos inválidos: sin dispositivo, otra comida, no JPEG o más de 2 MB', async () => {
+test('pedidos inválidos: sin dispositivo, otra comida, ni JPEG ni PNG, o más de 2 MB', async () => {
   const ia = iaFalsa({ foto: { items: [] } });
   await conApp({ ia, uso: usoEnMemoria() }, async (pedir) => {
     const sinDispositivo = await pedir('POST', '/comida/foto', {
@@ -114,11 +108,12 @@ test('pedidos inválidos: sin dispositivo, otra comida, no JPEG o más de 2 MB',
     const otraComida = await pedir('POST', '/comida/foto?comida=brunch', { headers: conDispositivo(), cuerpo: jpeg() });
     assert.strictEqual(otraComida.status, 400);
 
-    const png = await pedir('POST', '/comida/foto', {
-      headers: { 'X-Dispositivo': DISPOSITIVO, 'Content-Type': 'image/png' },
-      cuerpo: Buffer.from('\x89PNG\r\n'),
+    const gif = await pedir('POST', '/comida/foto', {
+      headers: { 'X-Dispositivo': DISPOSITIVO, 'Content-Type': 'image/gif' },
+      cuerpo: Buffer.from('GIF89a\x01\x00\x01\x00\x00\x00'),
     });
-    assert.strictEqual(png.status, 415);
+    assert.strictEqual(gif.status, 415);
+    assert.match(gif.body.error, /JPEG o PNG/);
 
     const disfrazado = await pedir('POST', '/comida/foto', { headers: conDispositivo(), cuerpo: Buffer.from('hola') });
     assert.strictEqual(disfrazado.status, 415);

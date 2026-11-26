@@ -55,9 +55,4 @@ function leerResultadoFoto(datos) {
   return { items, total: totalFoto(items) };
 }
 
-// Los JPEG empiezan con FF D8 FF.
-function esJpeg(buffer) {
-  return Buffer.isBuffer(buffer) && buffer.length > 3 && buffer[0] === 0xff && buffer[1] === 0xd8 && buffer[2] === 0xff;
-}
-
-module.exports = { COMIDAS, MAXIMO_ITEMS, leerResultadoFoto, totalFoto, esJpeg };
+module.exports = { COMIDAS, MAXIMO_ITEMS, leerResultadoFoto, totalFoto };

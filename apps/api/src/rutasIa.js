@@ -4,7 +4,8 @@ const express = require('express');
 const { z } = require('zod');
 const { crearLimitador } = require('./limites');
 const { exigirDispositivo, respuestaLimiteDiario } = require('./uso');
-const { COMIDAS, esJpeg, leerResultadoFoto } = require('./ia/foto');
+const { COMIDAS, leerResultadoFoto } = require('./ia/foto');
+const { ErrorImagen, prepararJpeg, tipoImagen } = require('./imagen');
 const { esquemaPedidoCoach, erroresPedido, leerRespuestaCoach } = require('./ia/coach');
 const { ErrorIa } = require('./ia/proveedor');
 
@@ -49,19 +50,35 @@ function crearRutasIa({ ia, uso, limitesDiarios, limites }) {
     limitadorIa,
     exigirDispositivo,
     iaDisponible,
-    express.raw({ type: 'image/jpeg', limit: MAXIMO_FOTO }),
+    express.raw({ type: ['image/jpeg', 'image/png'], limit: MAXIMO_FOTO }),
     async (req, res) => {
-      if (!esJpeg(req.body)) {
-        return res.status(415).json({ error: 'Mandá la foto como JPEG (Content-Type: image/jpeg)' });
+      // El formato se decide por el contenido, no por el Content-Type.
+      const tipo = tipoImagen(req.body);
+      if (tipo !== 'jpeg' && tipo !== 'png') {
+        return res.status(415).json({ error: 'Mandá la foto como JPEG o PNG (Content-Type: image/jpeg o image/png)' });
       }
       const comida = esquemaComida.safeParse(req.query.comida || undefined);
       if (!comida.success) return res.status(400).json({ error: `comida tiene que ser: ${COMIDAS.join(', ')}` });
+
+      // A la IA siempre le llega JPEG: el PNG se convierte acá.
+      let foto = req.body;
+      if (tipo === 'png') {
+        try {
+          foto = await prepararJpeg(req.body);
+        } catch (error) {
+          if (!(error instanceof ErrorImagen)) throw error;
+          const grande = error.tipo === 'grande';
+          return res
+            .status(grande ? 413 : 415)
+            .json({ error: grande ? 'La foto tiene demasiados píxeles' : 'No pudimos leer la foto' });
+        }
+      }
 
       await conUsoDiario(
         req,
         res,
         'fotos',
-        async () => leerResultadoFoto((await ia.analizarFoto(req.body, { comida: comida.data ?? null })).datos),
+        async () => leerResultadoFoto((await ia.analizarFoto(foto, { comida: comida.data ?? null })).datos),
         { rechazo: MENSAJES_ERROR.rechazoFoto, otro: MENSAJES_ERROR.foto },
       );
     },

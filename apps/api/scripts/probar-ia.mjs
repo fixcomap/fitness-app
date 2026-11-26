@@ -1,5 +1,6 @@
 // Compara proveedores y modelos de IA con fotos reales y preguntas de ejemplo para el coach.
 // Muestra, para cada uno: resultado, tiempo y costo estimado (tokens × precios-ia.json).
+// Acepta fotos .jpg, .jpeg, .png y .heic: las pasa a JPEG (como la app) antes de mandarlas.
 // Llama a la IA de verdad (y gasta): no es un test.
 //
 //   node scripts/probar-ia.mjs ~/fotos-platos --con gemini:gemini-3.8-flash --con claude:claude-haiku-5-5
@@ -18,7 +19,8 @@ require('dotenv').config({ path: path.join(raizRepo, '.env'), quiet: true });
 
 const { leerConfigIa } = require('../src/ia/config');
 const { crearProveedor } = require('../src/ia');
-const { leerResultadoFoto, esJpeg } = require('../src/ia/foto');
+const { leerResultadoFoto } = require('../src/ia/foto');
+const { EXTENSIONES, esFoto, fotoAJpeg } = require('./fotos');
 const { leerRespuestaCoach } = require('../src/ia/coach');
 const { USO, leerArgumentos, estaDentro, costoEstimado, formatoCosto, resumir } = require('./comparacion');
 
@@ -35,14 +37,28 @@ function salir(mensaje) {
   process.exit(1);
 }
 
-function leerFotos(carpeta) {
+const kb = (bytes) => `${Math.round(bytes / 1024)} KB`;
+
+// Lee las fotos y las pasa a JPEG una sola vez (se usan para todos los candidatos).
+async function leerFotos(carpeta) {
   if (estaDentro(carpeta, raizRepo)) salir('Las fotos van en una carpeta fuera del repo.');
   if (!fs.existsSync(carpeta)) salir(`No existe la carpeta ${carpeta}`);
-  return fs
-    .readdirSync(carpeta)
-    .filter((f) => /\.jpe?g$/i.test(f))
-    .sort()
-    .map((nombre) => ({ nombre, datos: fs.readFileSync(path.join(carpeta, nombre)) }));
+  const nombres = fs.readdirSync(carpeta).filter(esFoto).sort();
+  console.log(`Fotos (${nombres.length}), pasadas a JPEG:`);
+  const fotos = [];
+  for (const nombre of nombres) {
+    const original = fs.readFileSync(path.join(carpeta, nombre));
+    try {
+      const datos = await fotoAJpeg(original);
+      const grande = datos.length > MAXIMO_FOTO;
+      console.log(`  ${nombre}: ${kb(original.length)} → ${kb(datos.length)}${grande ? ' (más de 2 MB)' : ''}`);
+      fotos.push({ nombre, datos, error: grande ? 'pesa más de 2 MB: la API la rechazaría' : null });
+    } catch (error) {
+      console.log(`  ${nombre}: no se pudo convertir (${error.message})`);
+      fotos.push({ nombre, datos: null, error: error.message });
+    }
+  }
+  return fotos;
 }
 
 async function medir(pedido) {
@@ -105,8 +121,8 @@ async function probar({ proveedor, modelo }, fotos, solo) {
   const resultados = { fotos: [], coach: [] };
   if (solo !== 'coach') {
     for (const foto of fotos) {
-      if (foto.datos.length > MAXIMO_FOTO || !esJpeg(foto.datos)) {
-        console.log(`\n  ▸ ${foto.nombre}: se saltea (no es JPEG o pesa más de 2 MB, la API la rechazaría)`);
+      if (foto.error) {
+        console.log(`\n  ▸ ${foto.nombre}: se saltea (${foto.error})`);
         continue;
       }
       const r = conCosto(
@@ -136,8 +152,8 @@ async function probar({ proveedor, modelo }, fotos, solo) {
 
 const args = leerArgumentos(process.argv.slice(2));
 if (args.error) salir(args.error);
-const fotos = args.solo === 'coach' ? [] : leerFotos(path.resolve(args.carpeta));
-if (args.solo !== 'coach' && fotos.length === 0) salir('No hay fotos .jpg en la carpeta');
+const fotos = args.solo === 'coach' ? [] : await leerFotos(path.resolve(args.carpeta));
+if (args.solo !== 'coach' && fotos.length === 0) salir(`No hay fotos (${EXTENSIONES.join(', ')}) en la carpeta`);
 
 const resumen = [];
 for (const candidato of args.candidatos) {
