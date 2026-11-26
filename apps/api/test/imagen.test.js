@@ -28,6 +28,8 @@ test('reconoce el formato por los primeros bytes', async () => {
   assert.strictEqual(tipoImagen(Buffer.from('GIF89a\x01\x00\x01\x00\x00\x00')), null);
   assert.strictEqual(tipoImagen(Buffer.from('\x89PNG')), null);
   assert.strictEqual(tipoImagen('hola'), null);
+  assert.strictEqual(tipoImagen([0xff, 0xd8, 0xff, 0xe0, 0, 0, 0, 0, 0, 0, 0, 0]), null);
+  assert.strictEqual(tipoImagen({ length: 12, 0: 0xff, 1: 0xd8, 2: 0xff }), null);
 });
 
 test('PNG a JPEG, del mismo tamaño si es chico', async () => {

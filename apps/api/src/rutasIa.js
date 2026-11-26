@@ -56,7 +56,10 @@ function crearRutasIa({ ia, uso, limitesDiarios, limites }) {
       // Solo express.raw (image/jpeg o image/png) deja un Buffer. Con otro Content-Type el cuerpo
       // no se lee (undefined); si lo leyó otro parser es un objeto o un array. En los dos casos se corta acá.
       if (req.body === undefined) return res.status(415).json({ error: MENSAJE_NO_JPEG_NI_PNG });
-      if (!Buffer.isBuffer(req.body)) return res.status(400).json({ error: 'Cuerpo de foto inválido' });
+      // typeof y Array.isArray además de Buffer.isBuffer: son las guardas que reconoce CodeQL.
+      if (typeof req.body === 'string' || Array.isArray(req.body) || !Buffer.isBuffer(req.body)) {
+        return res.status(400).json({ error: 'Cuerpo de foto inválido' });
+      }
       // El formato se decide por el contenido, no por el Content-Type.
       const tipo = tipoImagen(req.body);
       if (tipo !== 'jpeg' && tipo !== 'png') return res.status(415).json({ error: MENSAJE_NO_JPEG_NI_PNG });
