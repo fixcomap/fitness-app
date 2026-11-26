@@ -6,6 +6,7 @@ import { useEffect, useRef } from 'react';
 import { useEntreno } from '../estado/Entreno';
 import { EditarRutinaScreen } from '../screens/EditarRutinaScreen';
 import { PerfilScreen } from '../screens/PerfilScreen';
+import { BuscarAlimentoScreen } from '../screens/BuscarAlimentoScreen';
 import { ResumenSesionScreen } from '../screens/ResumenSesionScreen';
 import { SesionArmadaScreen } from '../screens/SesionArmadaScreen';
 import { SesionEnCursoScreen } from '../screens/SesionEnCursoScreen';
@@ -69,6 +70,17 @@ function PerfilRuta({ navigation }: NativeStackScreenProps<RaizParamList, 'Perfi
   return <PerfilScreen onVolver={() => navigation.goBack()} />;
 }
 
+function BuscarAlimentoRuta({ navigation, route }: NativeStackScreenProps<RaizParamList, 'BuscarAlimento'>) {
+  const { dia, comida } = route.params;
+  return (
+    <BuscarAlimentoScreen
+      dia={dia}
+      comida={comida}
+      onVolver={() => navigation.goBack()}
+    />
+  );
+}
+
 export function Raiz() {
   return (
     <Stack.Navigator
@@ -102,6 +114,7 @@ export function Raiz() {
         options={{ headerShown: false, presentation: 'fullScreenModal', gestureEnabled: false }}
       />
       <Stack.Screen name="Perfil" component={PerfilRuta} options={{ headerShown: false }} />
+      <Stack.Screen name="BuscarAlimento" component={BuscarAlimentoRuta} options={{ headerShown: false }} />
     </Stack.Navigator>
   );
 }
