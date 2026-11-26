@@ -15,6 +15,7 @@ import { useEntreno } from '../estado/Entreno';
 import { kcalEntrenoDelDia } from '../lib/entreno/resumen';
 import { entrenoDeHoy as elegirEntrenoDeHoy, rutinaDelDia } from '../lib/entreno/rutinas';
 import { claveDia } from '../lib/pasosManuales';
+import { metasNutricion } from '../lib/perfil';
 import {
   armarResumenDia,
   kcalRestantes,
@@ -77,6 +78,7 @@ export function InicioScreen({ onEmpezarEntreno, onArmarSesion, onAbrirCoach }: 
         perfil,
         kcalEntreno: kcalEntrenoDelDia(historial, claveDia(new Date())),
         entreno: entrenoDeHoy,
+        metas: metasNutricion(perfil),
       }),
     [config.metaPasos, pasosSensorHoy, totalesDeHoy, minutos, perfil, historial, entrenoDeHoy],
   );
