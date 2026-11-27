@@ -187,6 +187,11 @@ test('el prompt: plan nuevo sobre días ocupados pregunta una vez si reemplaza o
   assert.match(SISTEMA_COACH, /Si suma, mandá solo las crear_rutina/);
 });
 
+test('el prompt: los días que dice el usuario mandan por sobre los del perfil', () => {
+  assert.match(SISTEMA_COACH, /eso manda por sobre diasEntrenoPorSemana del perfil/);
+  assert.match(SISTEMA_COACH, /Si el usuario dice otra cosa en la charla, vale lo que dijo/);
+});
+
 test('el prompt de acciones: solo si pide un cambio, sin decir que ya lo hizo y preguntando si es ambiguo', () => {
   assert.match(SISTEMA_COACH, /Si solo pregunta algo, "acciones" va vacía/);
   assert.match(SISTEMA_COACH, /Nunca digas que ya lo hiciste ni que lo vas a hacer vos/);
