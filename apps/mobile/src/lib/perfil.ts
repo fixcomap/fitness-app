@@ -169,6 +169,12 @@ export function perfilDesdeBorrador(
   };
 }
 
+// "Repetir bienvenida" (solo en desarrollo): lo que se contestó en el onboarding, sin perder lo que no se
+// pregunta ahí (kcal personalizadas y plan).
+export function perfilDeBienvenidaRepetida(nuevo: PerfilUsuario, actual: PerfilUsuario): PerfilUsuario {
+  return { ...nuevo, kcalPersonalizadas: actual.kcalPersonalizadas, esPremium: actual.esPremium };
+}
+
 // ── Metas de kcal y macros ──
 
 export const PROTEINA_G_POR_KG = 1.8;

@@ -28,8 +28,14 @@ const TOTAL_PASOS = TITULOS.length;
 const PASO_PLAN = TOTAL_PASOS - 1;
 
 // La primera vez: datos, objetivos, nivel, dónde entrena (una pregunta por pantalla) y el resultado
-// con las kcal calculadas.
-export function OnboardingScreen({ onListo }: { onListo: (perfil: PerfilUsuario) => void }) {
+// con las kcal calculadas. onCancelar: solo al repetirla desde Perfil (en desarrollo), para salir sin guardar.
+export function OnboardingScreen({
+  onListo,
+  onCancelar,
+}: {
+  onListo: (perfil: PerfilUsuario) => void;
+  onCancelar?: () => void;
+}) {
   const insets = useSafeAreaInsets();
   const [paso, setPaso] = useState(0);
   const [borrador, setBorrador] = useState<BorradorPerfil>(BORRADOR_VACIO);
@@ -60,9 +66,16 @@ export function OnboardingScreen({ onListo }: { onListo: (perfil: PerfilUsuario)
             <View key={i} style={[styles.barraPaso, i <= paso && styles.barraPasoHecha]} />
           ))}
         </View>
-        <Text style={styles.numeroPaso}>
-          Paso {paso + 1} de {TOTAL_PASOS}
-        </Text>
+        <View style={styles.filaPaso}>
+          <Text style={styles.numeroPaso}>
+            Paso {paso + 1} de {TOTAL_PASOS}
+          </Text>
+          {onCancelar && (
+            <Pressable onPress={onCancelar} hitSlop={8} accessibilityRole="button">
+              <Text style={styles.textoCancelar}>Cancelar</Text>
+            </Pressable>
+          )}
+        </View>
         <Text style={styles.titulo} accessibilityRole="header">
           {TITULOS[paso]}
         </Text>
@@ -115,7 +128,14 @@ const styles = StyleSheet.create({
   pasos: { flexDirection: 'row', gap: 6 },
   barraPaso: { flex: 1, height: 4, borderRadius: 2, backgroundColor: colores.pista },
   barraPasoHecha: { backgroundColor: colores.acento },
-  numeroPaso: { color: colores.textoSecundario, fontSize: 13, fontWeight: '700', marginTop: espacios.s },
+  filaPaso: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: espacios.s,
+  },
+  numeroPaso: { color: colores.textoSecundario, fontSize: 13, fontWeight: '700' },
+  textoCancelar: { color: colores.textoSecundario, fontSize: 15, fontWeight: '700' },
   titulo: { color: colores.texto, fontSize: 30, fontWeight: '800' },
   contenido: { padding: espacios.m, paddingBottom: espacios.xl },
   resultado: { gap: espacios.m },

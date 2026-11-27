@@ -6,6 +6,7 @@ import {
   kcalRecomendadas,
   leerPerfilGuardado,
   metasNutricion,
+  perfilDeBienvenidaRepetida,
   perfilDesdeBorrador,
   type BorradorPerfil,
   type PerfilUsuario,
@@ -111,6 +112,14 @@ describe('perfilDesdeBorrador', () => {
     const conDecimal = { ...perfil, pesoKg: 80.5 };
     expect(borradorDe(conDecimal).pesoKg).toBe('80,5');
     expect(perfilDesdeBorrador(borradorDe(conDecimal))).toEqual(conDecimal);
+  });
+});
+
+describe('perfilDeBienvenidaRepetida', () => {
+  test('usa lo contestado y conserva las kcal personalizadas y el plan', () => {
+    const actual = { ...perfil, kcalPersonalizadas: 2100, esPremium: true };
+    const nuevo = { ...perfil, nombre: 'Juan', nivel: 'principiante' as const };
+    expect(perfilDeBienvenidaRepetida(nuevo, actual)).toEqual({ ...nuevo, kcalPersonalizadas: 2100, esPremium: true });
   });
 });
 

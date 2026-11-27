@@ -2,7 +2,7 @@ import { Ionicons } from '@expo/vector-icons';
 import Constants from 'expo-constants';
 import * as Linking from 'expo-linking';
 import { useEffect, useMemo, useState, type ReactNode } from 'react';
-import { KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { KeyboardAvoidingView, Modal, Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { CampoLugar, CampoNivel, CamposDatos, CamposObjetivos } from '../components/perfil/CamposPerfil';
@@ -19,11 +19,13 @@ import {
   erroresPerfil,
   kcalRecomendadas,
   metasNutricion,
+  perfilDeBienvenidaRepetida,
   perfilDesdeBorrador,
   type BorradorPerfil,
   type PerfilUsuario,
 } from '../lib/perfil';
 import { quitarReporte, reportesRecientes, type VideoReportado } from '../lib/videosReportados';
+import { OnboardingScreen } from './OnboardingScreen';
 import { colores, espacios, radios } from '../theme/tema';
 
 const URL_FIXCOMAP = 'https://fixcomap.com';
@@ -36,6 +38,8 @@ export function PerfilScreen({ onVolver }: { onVolver: () => void }) {
   const { guardar } = usePerfil();
   const { config, cambiarMetaPasos } = useDatosDelDia();
   const metas = useMemo(() => metasNutricion(perfil), [perfil]);
+  // Solo en desarrollo: el onboarding de nuevo, encima de la app (no se desmonta nada ni se borran datos).
+  const [bienvenida, setBienvenida] = useState(false);
 
   return (
     <KeyboardAvoidingView
@@ -106,6 +110,22 @@ export function PerfilScreen({ onVolver }: { onVolver: () => void }) {
           </View>
         </Seccion>
 
+        {__DEV__ && (
+          <Seccion titulo="Desarrollo">
+            <Pressable
+              onPress={() => setBienvenida(true)}
+              style={({ pressed }) => [styles.botonDesarrollo, pressed && styles.presionado]}
+              accessibilityRole="button"
+            >
+              <Text style={styles.textoGuardar}>Repetir bienvenida</Text>
+            </Pressable>
+            <Text style={styles.ayuda}>
+              Muestra el onboarding de nuevo. Si lo terminás, guarda lo que contestes (conserva las kcal personalizadas
+              y el plan); Cancelar no cambia nada. Comidas, rutinas y entrenos no se tocan.
+            </Text>
+          </Seccion>
+        )}
+
         <View style={styles.pie}>
           <Text style={styles.textoPie}>Fitness app v{VERSION}</Text>
           <Pressable onPress={() => Linking.openURL(URL_FIXCOMAP)} hitSlop={8} accessibilityRole="link">
@@ -113,6 +133,23 @@ export function PerfilScreen({ onVolver }: { onVolver: () => void }) {
           </Pressable>
         </View>
       </ScrollView>
+
+      {__DEV__ && (
+        <Modal
+          visible={bienvenida}
+          animationType="slide"
+          presentationStyle="fullScreen"
+          onRequestClose={() => setBienvenida(false)}
+        >
+          <OnboardingScreen
+            onCancelar={() => setBienvenida(false)}
+            onListo={(nuevo) => {
+              guardar(perfilDeBienvenidaRepetida(nuevo, perfil));
+              setBienvenida(false);
+            }}
+          />
+        </Modal>
+      )}
     </KeyboardAvoidingView>
   );
 }
@@ -271,6 +308,13 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   textoGuardar: { color: colores.texto, fontSize: 16, fontWeight: '800' },
+  botonDesarrollo: {
+    height: 52,
+    borderRadius: radios.pill,
+    backgroundColor: colores.tarjeta,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   filaVideo: { flexDirection: 'row', alignItems: 'center', gap: espacios.s, paddingVertical: espacios.s + 2 },
   separador: { borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: colores.borde },
   nombreVideo: { color: colores.texto, fontSize: 15, fontWeight: '700' },
