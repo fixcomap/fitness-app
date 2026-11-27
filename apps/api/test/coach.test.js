@@ -174,7 +174,7 @@ test('el prompt pide una rutina por día, nombres cortos y no repetir los días 
 });
 
 test('el prompt: calidad de las rutinas (4 a 7 ejercicios, compuestos primero, nombre por grupos, split equilibrado)', () => {
-  assert.match(SISTEMA_COACH, /Cada día lleva entre 4 y 7 ejercicios, con los compuestos/);
+  assert.match(SISTEMA_COACH, /Cada día lleva entre 4 y 7 ejercicios \(un principiante, 4 o 5\), con los compuestos/);
   assert.match(SISTEMA_COACH, /Nunca el nombre de un ejercicio/);
   assert.match(SISTEMA_COACH, /unas 10 series semanales por músculo grande/);
   assert.match(SISTEMA_COACH, /no repitas el mismo grupo muscular en días seguidos/);

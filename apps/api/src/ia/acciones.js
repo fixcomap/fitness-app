@@ -8,7 +8,7 @@ const { ErrorIa } = require('./proveedor');
 const { CATALOGO } = require('./catalogo');
 const { rangoDeLaApp } = require('./rangos');
 const { COMIDAS, MAXIMO_ITEMS } = require('./foto');
-const { equipoDisponible } = require('./nivelLugar');
+const { equipoDisponible, maximoEjerciciosDia } = require('./nivelLugar');
 
 const TIPOS_ACCION = [
   'crear_rutina',
@@ -107,7 +107,7 @@ function diaPermitido(dia, hoy) {
   return dia <= hoy && dia >= restarDias(hoy, DIAS_ATRAS);
 }
 
-function crearRutina(a, { diasOcupados, idsCatalogo, rangoPara, equipoPermitido }) {
+function crearRutina(a, { diasOcupados, idsCatalogo, rangoPara, equipoPermitido, maximoDia }) {
   const { rutina, descartados } = limpiarRutina(
     { nombre: a.nombre, dias: a.dia === null ? [] : [a.dia], ejercicios: a.ejercicios },
     idsCatalogo,
@@ -116,6 +116,17 @@ function crearRutina(a, { diasOcupados, idsCatalogo, rangoPara, equipoPermitido 
   );
   const sueltos = descartados.map((d) => ({ accion: a.tipo, ...d }));
   if (!rutina) return { descartados: [...sueltos, { accion: a.tipo, motivo: 'sin-ejercicios' }] };
+  // Un principiante hace menos ejercicios por día: se quedan los primeros (los compuestos van primero).
+  if (maximoDia !== null && rutina.ejercicios.length > maximoDia) {
+    for (const e of rutina.ejercicios.splice(maximoDia)) {
+      sueltos.push({
+        accion: a.tipo,
+        rutina: rutina.nombre,
+        ejercicioId: e.ejercicioId,
+        motivo: 'de-mas-para-el-nivel',
+      });
+    }
+  }
   if (rutina.ejercicios.length < MINIMO_EJERCICIOS_DIA) {
     return { descartados: [...sueltos, { accion: a.tipo, rutina: rutina.nombre, motivo: 'pocos-ejercicios' }] };
   }
@@ -224,7 +235,7 @@ function pideTodo(texto) {
 }
 
 // Las acciones de la IA validadas contra el contexto del pedido. Cada una sale con un id nuevo.
-// contexto: { hoy, perfil: { objetivo, lugar }, rutinas: [{ id, ejercicios }] } (ya validado por esquemaPedidoCoach).
+// contexto: { hoy, perfil: { objetivo, nivel, lugar }, rutinas: [{ id, ejercicios }] } (ya validado por esquemaPedidoCoach).
 // { acciones, descartados }
 function limpiarAcciones(lista, contexto, { catalogo = CATALOGO, crearId = randomUUID } = {}) {
   const porId = new Map(catalogo.map((e) => [e.id, e]));
@@ -235,6 +246,8 @@ function limpiarAcciones(lista, contexto, { catalogo = CATALOGO, crearId = rando
     rangoPara: (id) => rangoDeLaApp(porId.get(id), contexto.perfil?.objetivo),
     // Solo ejercicios con el equipo de donde entrena (sin lugar en el perfil: gym completo, todos).
     equipoPermitido: (id) => equipoDisponible(porId.get(id)?.equipo, contexto.perfil?.lugar),
+    // Máximo de ejercicios de un día nuevo según el nivel (null: el general).
+    maximoDia: maximoEjerciciosDia(contexto.perfil?.nivel),
     diasOcupados: new Set(), // días que ya pidió otra crear_rutina de esta misma respuesta
     crearId,
   };

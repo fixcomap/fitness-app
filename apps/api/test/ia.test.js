@@ -168,8 +168,12 @@ test('el contexto del coach dice qué equipos hay donde entrena', () => {
 });
 
 test('el prompt del coach ajusta por nivel y pide nivel y lugar si faltan', () => {
-  assert.match(SISTEMA_COACH, /principiante: menos series/);
+  assert.match(SISTEMA_COACH, /principiante: 4 o 5 ejercicios por día, nunca más/);
+  assert.match(SISTEMA_COACH, /de 2 a 3 series por ejercicio/);
   assert.match(SISTEMA_COACH, /no lleve las series al fallo/);
+  assert.match(SISTEMA_COACH, /más de 10 series semanales por cada músculo grande/);
+  assert.match(SISTEMA_COACH, /al menos 2 veces por semana/);
+  assert.match(SISTEMA_COACH, /cerca del fallo/);
   assert.match(SISTEMA_COACH, /Si el perfil no trae "nivel" o "lugar"/);
   assert.match(SISTEMA_COACH, /Usá únicamente ejercicios con esos equipos/);
 });

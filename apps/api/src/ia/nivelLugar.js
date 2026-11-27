@@ -14,6 +14,14 @@ const EQUIPOS_POR_LUGAR = {
   'peso-corporal': ['peso-corporal', 'bandas'],
 };
 
+// Máximo de ejercicios por día según el nivel; sin entrada, el general de la app (MAXIMO_EJERCICIOS_RUTINA).
+const MAXIMO_EJERCICIOS_DIA = { principiante: 5 };
+
+// El máximo de ejercicios de un día para ese nivel, o null si no tiene uno propio.
+function maximoEjerciciosDia(nivel) {
+  return MAXIMO_EJERCICIOS_DIA[nivel] ?? null;
+}
+
 // true si un ejercicio con ese equipo se puede hacer en ese lugar (sin lugar, el de por defecto).
 function equipoDisponible(equipo, lugar = LUGAR_POR_DEFECTO) {
   const equipos = EQUIPOS_POR_LUGAR[lugar] ?? EQUIPOS_POR_LUGAR[LUGAR_POR_DEFECTO];
@@ -26,5 +34,7 @@ module.exports = {
   NIVEL_POR_DEFECTO,
   LUGAR_POR_DEFECTO,
   EQUIPOS_POR_LUGAR,
+  MAXIMO_EJERCICIOS_DIA,
   equipoDisponible,
+  maximoEjerciciosDia,
 };

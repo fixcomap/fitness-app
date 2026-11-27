@@ -111,6 +111,7 @@ const MOTIVOS = {
   'fecha-no-permitida': 'fecha fuera de los últimos 7 días',
   'item-invalido': 'alimentos mal formados',
   'pocos-ejercicios': 'rutinas con menos de 4 ejercicios',
+  'de-mas-para-el-nivel': 'pasaban el máximo de ejercicios por día del nivel',
 };
 
 // "Pechuga a la plancha (cocido): 150 g" o "Empanada de carne (cocido, asumido): 2 × empanada ~90 g c/u",

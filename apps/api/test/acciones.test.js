@@ -450,6 +450,26 @@ test('crear_rutina en el gym o sin lugar en el perfil (perfiles de antes): todos
   }
 });
 
+test('crear_rutina de un principiante: hasta 5 ejercicios por día; los de más se descartan con motivo', () => {
+  const siete = { ...rutinaDeCadaEquipo, ejercicios: rutinaDeCadaEquipo.ejercicios.slice(0, 7) };
+  const conNivel = (nivel) => ({ ...contexto, perfil: { objetivo: 'hipertrofia', ...(nivel ? { nivel } : {}) } });
+  const r = limpiarAcciones([siete], conNivel('principiante'));
+  assert.deepStrictEqual(quedan(r), DE_CADA_EQUIPO.slice(0, 5));
+  assert.deepStrictEqual(
+    r.descartados,
+    DE_CADA_EQUIPO.slice(5, 7).map((ejercicioId) => ({
+      accion: 'crear_rutina',
+      rutina: 'Full body',
+      ejercicioId,
+      motivo: 'de-mas-para-el-nivel',
+    })),
+  );
+  // Intermedio, avanzado o sin nivel (perfiles de antes): el máximo general.
+  for (const nivel of ['intermedio', 'avanzado', null]) {
+    assert.deepStrictEqual(quedan(limpiarAcciones([siete], conNivel(nivel))), DE_CADA_EQUIPO.slice(0, 7), String(nivel));
+  }
+});
+
 test('agregar_ejercicios también descarta lo que no se puede hacer donde entrena', () => {
   const ejercicios = [
     { ejercicioId: 'curl-barra', series: 3 },
