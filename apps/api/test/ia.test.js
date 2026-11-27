@@ -155,7 +155,7 @@ test('el contexto del coach suma el día de la semana a cada día de ultimos7Dia
 });
 
 test('el prompt del coach: sin cifras fuera del manual o del contexto; alimentos con peso crudo o cocido', () => {
-  assert.match(SISTEMA_COACH, /No agregues cifras que no estén en el manual o en el contexto/);
+  assert.match(SISTEMA_COACH, /Esos salen del manual o del contexto/);
   assert.match(SISTEMA_COACH, /si el peso es crudo o cocido/);
 });
 

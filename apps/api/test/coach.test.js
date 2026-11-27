@@ -173,6 +173,14 @@ test('el prompt pide una rutina por día, nombres cortos y no repetir los días 
   assert.match(SISTEMA_COACH, /No repitas los días/);
 });
 
+test('el prompt: conceptos generales con libertad, sin inventar números y sin nombrar las guías siempre', () => {
+  assert.match(SISTEMA_COACH, /conceptos generales de entrenamiento y nutrición respondelos con libertad y directo/);
+  assert.match(SISTEMA_COACH, /qué es un músculo grande/);
+  assert.match(SISTEMA_COACH, /La regla de no inventar es para los números/);
+  assert.match(SISTEMA_COACH, /No menciones el manual ni "tus guías" en cada respuesta/);
+  assert.doesNotMatch(SISTEMA_COACH, /decí que tus guías no lo tienen/);
+});
+
 test('el prompt de acciones: solo si pide un cambio, sin decir que ya lo hizo y preguntando si es ambiguo', () => {
   assert.match(SISTEMA_COACH, /Si solo pregunta algo, "acciones" va vacía/);
   assert.match(SISTEMA_COACH, /Nunca digas que ya lo hiciste ni que lo vas a hacer vos/);
