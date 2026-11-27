@@ -48,11 +48,14 @@ export function usePasosManuales(perfil: DatosPaso) {
 
   const borrar = useCallback((id: string) => setCargas((actuales) => borrarCarga(actuales, id)), []);
 
+  // Todas las cargas de una vez (acciones del coach y su deshacer).
+  const reemplazar = useCallback((nuevas: CargaPasos[]) => setCargas(nuevas), []);
+
   const dia = claveDia(new Date());
   const cargasDeHoy = useMemo(() => cargasDelDia(cargas, dia), [cargas, dia]);
   const totalesDeHoy = useMemo(() => totalesCargas(cargasDeHoy), [cargasDeHoy]);
   return useMemo(
-    () => ({ cargas, listo, cargasDeHoy, totalesDeHoy, agregar, borrar }),
-    [cargas, listo, cargasDeHoy, totalesDeHoy, agregar, borrar],
+    () => ({ cargas, listo, cargasDeHoy, totalesDeHoy, agregar, borrar, reemplazar }),
+    [cargas, listo, cargasDeHoy, totalesDeHoy, agregar, borrar, reemplazar],
   );
 }

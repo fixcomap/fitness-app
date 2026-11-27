@@ -35,21 +35,24 @@ import { CatalogoScreen } from './CatalogoScreen';
 interface EditarRutinaScreenProps {
   rutinaId?: string; // sin id: rutina nueva
   dia?: DiaSemana; // para una nueva: el día que ya viene marcado
+  // Desde el coach: la rutina como la propone (precargada) y qué hacer al guardar en vez de guardarla acá.
+  propuesta?: { rutina: Rutina; onGuardar: (rutina: Rutina) => void };
   onCerrar: () => void;
 }
 
 const nuevoId = () => `r-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 6)}`;
 
 // Editor de una rutina: nombre, días, ejercicios (orden, series y rango de reps).
-export function EditarRutinaScreen({ rutinaId, dia, onCerrar }: EditarRutinaScreenProps) {
+export function EditarRutinaScreen({ rutinaId, dia, propuesta, onCerrar }: EditarRutinaScreenProps) {
   const insets = useSafeAreaInsets();
   const { perfil } = useDatosDelDia();
   const { rutinas, guardarRutina, borrarRutina } = useEntreno();
-  const original = rutinas.find((r) => r.id === rutinaId) ?? null;
+  const original = rutinas.find((r) => r.id === (propuesta?.rutina.id ?? rutinaId)) ?? null;
   const [borrador, setBorrador] = useState<Rutina>(
-    () => original ?? nuevaRutina(nuevoId(), dia === undefined ? [] : [dia]),
+    () => propuesta?.rutina ?? original ?? nuevaRutina(nuevoId(), dia === undefined ? [] : [dia]),
   );
-  const [cambiado, setCambiado] = useState(false);
+  // Lo que propuso el coach todavía no está guardado: cancelar pregunta si se descarta.
+  const [cambiado, setCambiado] = useState(propuesta !== undefined);
   const [enfocado, setEnfocado] = useState(false);
   const [error, setError] = useState<string | null>(null);
   // Ejercicios tildados en el catálogo (modo selección), o null si está cerrado.
@@ -97,7 +100,8 @@ export function EditarRutinaScreen({ rutinaId, dia, onCerrar }: EditarRutinaScre
   const guardar = () => {
     const problema = errorRutina(borrador);
     if (problema) return setError(problema);
-    guardarRutina(borrador);
+    if (propuesta) propuesta.onGuardar(borrador);
+    else guardarRutina(borrador);
     onCerrar();
   };
 
@@ -131,7 +135,7 @@ export function EditarRutinaScreen({ rutinaId, dia, onCerrar }: EditarRutinaScre
           {original ? 'Editar rutina' : 'Nueva rutina'}
         </Text>
         <View style={[styles.ladoEncabezado, styles.derecha]}>
-          {original && (
+          {original && !propuesta && (
             <Pressable onPress={pedirBorrar} hitSlop={8} accessibilityRole="button">
               <Text style={[styles.textoEncabezado, styles.textoBorrar]}>Borrar</Text>
             </Pressable>
@@ -226,7 +230,7 @@ export function EditarRutinaScreen({ rutinaId, dia, onCerrar }: EditarRutinaScre
           style={({ pressed }) => [styles.botonGuardar, pressed && styles.presionado]}
           accessibilityRole="button"
         >
-          <Text style={styles.textoGuardar}>Guardar rutina</Text>
+          <Text style={styles.textoGuardar}>{propuesta ? 'Guardar y aplicar' : 'Guardar rutina'}</Text>
         </Pressable>
       </View>
 

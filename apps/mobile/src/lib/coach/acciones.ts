@@ -384,7 +384,8 @@ export type ResultadoAplicar =
   | { ok: true; estadoNuevo: EstadoApp; deshacer: Deshacer }
   | { ok: false; problema: ProblemaAccion };
 
-function franjaCaminata(accion: AccionDe<'cargar_pasos'>, entorno: EntornoAcciones): Franja {
+// La franja de la caminata: termina a la hora que dijo (o ahora) y dura lo que dan los km o minutos.
+export function franjaCaminata(accion: AccionDe<'cargar_pasos'>, entorno: Pick<EntornoAcciones, 'ahora' | 'perfil'>): Franja {
   const fin = finCaminata(accion, entorno.ahora);
   const { minutos } = convertir(accion.unidad, accion.valor, entorno.perfil);
   const inicio = sumarMinutos(fin, -Math.max(minutos, FRANJA_MINIMA_MIN));

@@ -9,7 +9,7 @@ Resumen propio de consensos de nutrición deportiva y de un libro de fisiología
 - **Libro** = _Open Textbook of Exercise Physiology_, editado por Brian R. MacIntosh, Universidad de Calgary, versión 1.0, 2025. Se usa solo para lo que los otros documentos no cubren (recuperación, chicos y adolescentes).
 - Cuando hay dos versiones de un mismo consenso, manda la más nueva. Las contradicciones están marcadas con **Contradicción** y dicen cuál se prioriza.
 - Los números son rangos de estudios en personas sanas que entrenan. No son una receta para una persona en particular: el coach los usa para orientar, no para recetar.
-- Lo que no está en este manual no tiene respaldo de estas fuentes. Si te preguntan algo que no está, decilo ("eso no está en mis guías") y respondé con prudencia o derivá.
+- Lo que no está acá no tiene respaldo de estas fuentes. Eso pesa en los números: si te piden uno que no está, decí que no tenés un dato respaldado. Los conceptos generales respondelos directo.
 
 ### Fuentes
 

@@ -3,11 +3,12 @@ import { useState } from 'react';
 import { KeyboardAvoidingView, Modal, Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { subtituloAlimento, type Alimento } from '../../lib/comida/alimentos';
+import { esAproximado, subtituloAlimento, type Alimento, type Nutrientes } from '../../lib/comida/alimentos';
 import { nutrientesCantidad, type Cantidad } from '../../lib/comida/porciones';
 import { formatearNumero } from '../../lib/formato';
 import { colores, radios } from '../../theme/tema';
 import { ControlPorcion } from './ControlPorcion';
+import { CorregirValores } from './CorregirValores';
 
 interface HojaPorcionProps {
   // null = cerrada. La cantidad inicial viene con el alimento (al editar, la ya cargada).
@@ -15,11 +16,13 @@ interface HojaPorcionProps {
   textoBoton: string; // "Agregar al almuerzo" o "Guardar cambios"
   onConfirmar: (alimento: Alimento, cantidad: Cantidad) => void;
   onBorrar?: () => void; // sólo al editar algo ya cargado
+  // Sólo al editar un alimento aproximado ya cargado: corregir sus valores cada 100 g.
+  onCorregirValores?: (valores: Nutrientes) => void;
   onCerrar: () => void;
 }
 
 // Hoja de porción: cuánto, y las kcal y macros de eso.
-export function HojaPorcion({ abierta, textoBoton, onConfirmar, onBorrar, onCerrar }: HojaPorcionProps) {
+export function HojaPorcion({ abierta, textoBoton, onConfirmar, onBorrar, onCorregirValores, onCerrar }: HojaPorcionProps) {
   const insets = useSafeAreaInsets();
   return (
     <Modal visible={abierta !== null} transparent animationType="slide" onRequestClose={onCerrar}>
@@ -36,6 +39,7 @@ export function HojaPorcion({ abierta, textoBoton, onConfirmar, onBorrar, onCerr
               textoBoton={textoBoton}
               onConfirmar={onConfirmar}
               onBorrar={onBorrar}
+              onCorregirValores={onCorregirValores}
               onCerrar={onCerrar}
             />
           )}
@@ -51,6 +55,7 @@ function Contenido({
   textoBoton,
   onConfirmar,
   onBorrar,
+  onCorregirValores,
   onCerrar,
 }: {
   alimento: Alimento;
@@ -58,10 +63,14 @@ function Contenido({
   textoBoton: string;
   onConfirmar: (alimento: Alimento, cantidad: Cantidad) => void;
   onBorrar?: () => void;
+  onCorregirValores?: (valores: Nutrientes) => void;
   onCerrar: () => void;
 }) {
   const [cantidad, setCantidad] = useState(inicial);
   const [verFuente, setVerFuente] = useState(false);
+  // Dentro de la misma hoja (otro modal encima no anda bien en iOS).
+  const [corrigiendo, setCorrigiendo] = useState(false);
+  const corregible = onCorregirValores && esAproximado(alimento);
   const kcal = nutrientesCantidad(alimento, cantidad).kcal;
   const estimada = cantidad.modo === 'unidades' && alimento.porciones[cantidad.porcion]?.estimada;
 
@@ -83,28 +92,48 @@ function Contenido({
         </Pressable>
       </View>
 
-      <ControlPorcion alimento={alimento} cantidad={cantidad} onCambiar={setCantidad} />
+      {corrigiendo && onCorregirValores ? (
+        <CorregirValores
+          inicial={alimento}
+          onGuardar={(valores) => {
+            onCorregirValores(valores);
+            setCorrigiendo(false);
+          }}
+          onVolver={() => setCorrigiendo(false)}
+        />
+      ) : (
+        <>
+          <ControlPorcion alimento={alimento} cantidad={cantidad} onCambiar={setCantidad} />
 
-      <Pressable onPress={() => setVerFuente((v) => !v)} accessibilityRole="button">
-        <Text style={styles.fuente} numberOfLines={verFuente ? undefined : 1}>
-          {estimada ? 'Porción estimada. ' : ''}Valores: {alimento.fuente}
-        </Text>
-      </Pressable>
+          <Pressable onPress={() => setVerFuente((v) => !v)} accessibilityRole="button">
+            <Text style={styles.fuente} numberOfLines={verFuente ? undefined : 1}>
+              {estimada ? 'Porción estimada. ' : ''}Valores: {alimento.fuente}
+            </Text>
+          </Pressable>
 
-      <Pressable
-        onPress={() => onConfirmar(alimento, cantidad)}
-        style={({ pressed }) => [styles.boton, pressed && styles.presionado]}
-        accessibilityRole="button"
-      >
-        <Text style={styles.textoBoton}>{textoBoton}</Text>
-        <Text style={styles.textoBoton}>{formatearNumero(kcal)} kcal</Text>
-      </Pressable>
+          <Pressable
+            onPress={() => onConfirmar(alimento, cantidad)}
+            style={({ pressed }) => [styles.boton, pressed && styles.presionado]}
+            accessibilityRole="button"
+          >
+            <Text style={styles.textoBoton}>{textoBoton}</Text>
+            <Text style={styles.textoBoton}>{formatearNumero(kcal)} kcal</Text>
+          </Pressable>
 
-      {onBorrar && (
-        <Pressable onPress={onBorrar} style={styles.borrar} accessibilityRole="button">
-          <Ionicons name="trash-outline" size={18} color={colores.acento} />
-          <Text style={styles.textoBorrar}>Borrar del diario</Text>
-        </Pressable>
+          {corregible && (
+            <Pressable onPress={() => setCorrigiendo(true)} style={styles.borrar} accessibilityRole="button">
+              <Ionicons name="create-outline" size={18} color={colores.oro} />
+              <Text style={[styles.textoBorrar, styles.textoCorregir]}>Corregir valores aproximados</Text>
+            </Pressable>
+          )}
+
+          {onBorrar && (
+            <Pressable onPress={onBorrar} style={styles.borrar} accessibilityRole="button">
+              <Ionicons name="trash-outline" size={18} color={colores.acento} />
+              <Text style={styles.textoBorrar}>Borrar del diario</Text>
+            </Pressable>
+          )}
+        </>
       )}
     </ScrollView>
   );
@@ -141,4 +170,5 @@ const styles = StyleSheet.create({
   textoBoton: { color: colores.texto, fontSize: 17, fontWeight: '800' },
   borrar: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, paddingVertical: 6 },
   textoBorrar: { color: colores.acento, fontSize: 15, fontWeight: '700' },
+  textoCorregir: { color: colores.oro },
 });

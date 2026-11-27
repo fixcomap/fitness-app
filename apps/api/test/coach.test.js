@@ -169,8 +169,47 @@ test('nombres largos se recortan en una palabra completa', () => {
 test('el prompt pide una rutina por día, nombres cortos y no repetir los días en el texto', () => {
   assert.match(SISTEMA_COACH, /Una rutina por cada día de entrenamiento/);
   assert.match(SISTEMA_COACH, /3 acciones crear_rutina/);
-  assert.match(SISTEMA_COACH, /"Empuje", "Tirón", "Piernas"/);
+  assert.match(SISTEMA_COACH, /"Pecho y tríceps" el lunes, "Espalda y bíceps" el miércoles/);
   assert.match(SISTEMA_COACH, /No repitas los días/);
+});
+
+test('el prompt: calidad de las rutinas (4 a 7 ejercicios, compuestos primero, nombre por grupos, split equilibrado)', () => {
+  assert.match(SISTEMA_COACH, /Cada día lleva entre 4 y 7 ejercicios, con los compuestos/);
+  assert.match(SISTEMA_COACH, /Nunca el nombre de un ejercicio/);
+  assert.match(SISTEMA_COACH, /unas 10 series semanales por músculo grande/);
+  assert.match(SISTEMA_COACH, /no repitas el mismo grupo muscular en días seguidos/);
+  assert.match(SISTEMA_COACH, /no armes días de un solo músculo chico/);
+  assert.match(SISTEMA_COACH, /Para 5 días usá un split equilibrado/);
+});
+
+test('el prompt: conceptos generales con libertad, sin inventar números y sin nombrar las guías siempre', () => {
+  assert.match(SISTEMA_COACH, /conceptos generales de entrenamiento y nutrición respondelos con libertad y directo/);
+  assert.match(SISTEMA_COACH, /qué es un músculo grande/);
+  assert.match(SISTEMA_COACH, /La regla de no inventar es para los números/);
+  assert.match(SISTEMA_COACH, /No menciones el manual ni "tus guías" en cada respuesta/);
+  assert.doesNotMatch(SISTEMA_COACH, /decí que tus guías no lo tienen/);
+});
+
+test('el prompt: plan nuevo sobre días ocupados pregunta una vez si reemplaza o suma; si reemplaza, borra las viejas', () => {
+  assert.match(SISTEMA_COACH, /si no dijo si reemplaza las que tiene o suma las nuevas, preguntáselo una sola vez/);
+  assert.match(SISTEMA_COACH, /un borrar_rutinas con los ids de las rutinas viejas que se reemplazan/);
+  assert.match(SISTEMA_COACH, /Si suma, mandá solo las crear_rutina/);
+});
+
+test('el prompt: los días que dice el usuario mandan por sobre los del perfil', () => {
+  assert.match(SISTEMA_COACH, /eso manda por sobre diasEntrenoPorSemana del perfil/);
+  assert.match(SISTEMA_COACH, /Si el usuario dice otra cosa en la charla, vale lo que dijo/);
+});
+
+test('el prompt: si el usuario duda o le pide que decida, elige una opción y la justifica', () => {
+  assert.match(SISTEMA_COACH, /elegí UNA opción concreta según su perfil/);
+  assert.match(SISTEMA_COACH, /Nada de "las dos sirven" o "depende" sin elegir/);
+  assert.match(SISTEMA_COACH, /preguntá uno solo/);
+});
+
+test('el prompt: ve lo que propuso antes y, si el usuario solo confirma, lo manda a las tarjetas', () => {
+  assert.match(SISTEMA_COACH, /pueden terminar con "\[Propuse: …\]"/);
+  assert.match(SISTEMA_COACH, /no armes otro plan ni repitas las acciones: decile que toque Aplicar en las tarjetas de arriba/);
 });
 
 test('el prompt de acciones: solo si pide un cambio, sin decir que ya lo hizo y preguntando si es ambiguo', () => {
@@ -251,9 +290,9 @@ test('responde el texto y las acciones validadas contra el catálogo y el contex
     coach: {
       texto: 'Te dejo empuje, tirón y piernas para que las apliques.',
       acciones: [
-        nueva('Empuje', 0, 'press-banca-barra'),
-        nueva('Tirón', 2, 'remo-barra', 'hip-thrust-inventado'),
-        nueva('Piernas', 4, 'sentadilla-barra'),
+        nueva('Empuje', 0, 'press-banca-barra', 'press-militar-mancuernas', 'fondos-paralelas', 'triceps-polea'),
+        nueva('Tirón', 2, 'remo-barra', 'jalon-al-pecho', 'face-pull', 'curl-barra', 'hip-thrust-inventado'),
+        nueva('Piernas', 4, 'sentadilla-barra', 'hip-thrust-barra', 'curl-femoral-sentado', 'gemelos-de-pie-maquina'),
         { tipo: 'borrar_rutinas', rutinaIds: ['rutina-full-body'] },
         { tipo: 'borrar_rutinas', rutinaIds: ['rutina-inventada'] },
       ],
@@ -267,9 +306,9 @@ test('responde el texto y las acciones validadas contra el catálogo y el contex
     assert.deepStrictEqual(
       r.body.acciones.map((a) => [a.tipo, a.nombre ?? a.rutinaIds, a.dia, a.ejercicios?.length]),
       [
-        ['crear_rutina', 'Empuje', 0, 1],
-        ['crear_rutina', 'Tirón', 2, 1],
-        ['crear_rutina', 'Piernas', 4, 1],
+        ['crear_rutina', 'Empuje', 0, 4],
+        ['crear_rutina', 'Tirón', 2, 4],
+        ['crear_rutina', 'Piernas', 4, 4],
         ['borrar_rutinas', ['rutina-full-body'], undefined, undefined],
       ],
     );
@@ -304,7 +343,7 @@ test('POST /coach acepta 40 mensajes pero a la IA le pasa los últimos 10, empez
   });
 });
 
-test('POST /coach no deja borrar todas las rutinas si el último mensaje no lo pide', async () => {
+test('POST /coach deja borrar todas las rutinas aunque el mensaje no diga "todas" (confirma la tarjeta)', async () => {
   const ia = iaFalsa({
     coach: {
       texto: 'Te dejo el borrado',
@@ -318,12 +357,9 @@ test('POST /coach no deja borrar todas las rutinas si el último mensaje no lo p
     return p;
   };
   await conApp({ ia, uso: usoEnMemoria() }, async (pedir) => {
-    const ambiguo = await pedir('POST', '/coach', json(pedido('borrá la rutina')));
-    assert.deepStrictEqual(ambiguo.body.acciones, []);
-    assert.deepStrictEqual(ambiguo.body.descartados, [{ accion: 'borrar_rutinas', motivo: 'ambiguo' }]);
-
-    const pedidoTodas = await pedir('POST', '/coach', json(pedido('borrá todas las rutinas')));
-    assert.deepStrictEqual(pedidoTodas.body.acciones[0].rutinaIds, ['rutina-full-body', 'r2']);
+    const r = await pedir('POST', '/coach', json(pedido('sí, reemplazalas')));
+    assert.deepStrictEqual(r.body.acciones[0].rutinaIds, ['rutina-full-body', 'r2']);
+    assert.deepStrictEqual(r.body.descartados, []);
   });
 });
 

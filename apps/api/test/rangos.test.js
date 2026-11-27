@@ -126,7 +126,10 @@ test('POST /coach aplica los rangos con el objetivo del perfil', async () => {
           tipo: 'crear_rutina',
           nombre: 'Empuje',
           dia: 0,
-          ejercicios: [{ ejercicioId: 'press-banca-barra', series: 4 }],
+          ejercicios: ['press-banca-barra', 'press-militar-mancuernas', 'fondos-paralelas', 'triceps-polea'].map((ejercicioId) => ({
+            ejercicioId,
+            series: 4,
+          })),
         },
       ],
     },
@@ -154,7 +157,7 @@ test('POST /coach aplica los rangos con el objetivo del perfil', async () => {
       cuerpo: JSON.stringify(cuerpo),
     });
     assert.strictEqual(r.status, 200);
-    assert.deepStrictEqual(r.body.acciones[0].ejercicios, [ej('press-banca-barra', 4, 4, 6)]);
+    assert.deepStrictEqual(r.body.acciones[0].ejercicios[0], ej('press-banca-barra', 4, 4, 6));
   });
 });
 

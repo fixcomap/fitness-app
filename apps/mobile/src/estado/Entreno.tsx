@@ -63,6 +63,8 @@ export interface EntrenoValor {
   guardarRutina: (rutina: Rutina) => void;
   borrarRutina: (id: string) => void;
   asignarDia: (rutinaId: string, dia: DiaSemana) => void;
+  // Todas las rutinas de una vez (acciones del coach y su deshacer).
+  reemplazarRutinas: (rutinas: Rutina[]) => void;
   actualizar: (cambio: (sesion: SesionEnCurso) => SesionEnCurso) => void;
   // Guarda la sesión en el historial y devuelve lo guardado (null si no había sesión).
   terminar: () => SesionGuardada | null;
@@ -163,6 +165,8 @@ export function ProveedorEntreno({ children }: { children: ReactNode }) {
   const borrarRutina = useCallback((id: string) => setRutinas((r) => borrarDeLasRutinas(r, id)), []);
   const asignarDia = useCallback((id: string, dia: DiaSemana) => setRutinas((r) => asignarDiaA(r, id, dia)), []);
 
+  const reemplazarRutinas = useCallback((r: Rutina[]) => setRutinas(r), []);
+
   const actualizar = useCallback((cambio: (s: SesionEnCurso) => SesionEnCurso) => {
     setEnCurso((s) => (s ? cambio(s) : s));
   }, []);
@@ -198,6 +202,7 @@ export function ProveedorEntreno({ children }: { children: ReactNode }) {
       guardarRutina,
       borrarRutina,
       asignarDia,
+      reemplazarRutinas,
       actualizar,
       terminar,
       descartar,
@@ -217,6 +222,7 @@ export function ProveedorEntreno({ children }: { children: ReactNode }) {
       guardarRutina,
       borrarRutina,
       asignarDia,
+      reemplazarRutinas,
       actualizar,
       terminar,
       descartar,

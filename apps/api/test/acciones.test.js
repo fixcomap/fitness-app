@@ -76,6 +76,7 @@ test('crear_rutina: ejercicios del catálogo con el rango de la app y el día pe
         { ejercicioId: 'remo-barra', series: 4 },
         { ejercicioId: 'dominadas', series: 3 },
         { ejercicioId: 'curl-barra', series: 3 },
+        { ejercicioId: 'sentadilla-barra', series: 3 },
         { ejercicioId: 'jalon-inventado', series: 3 },
       ],
     },
@@ -90,6 +91,7 @@ test('crear_rutina: ejercicios del catálogo con el rango de la app y el día pe
         { ejercicioId: 'remo-barra', series: 4, rango: { min: 6, max: 10 } },
         { ejercicioId: 'dominadas', series: 3, rango: { min: 8, max: 15 } },
         { ejercicioId: 'curl-barra', series: 3, rango: { min: 10, max: 15 } },
+        { ejercicioId: 'sentadilla-barra', series: 3, rango: { min: 6, max: 10 } },
       ],
     },
   ]);
@@ -98,10 +100,33 @@ test('crear_rutina: ejercicios del catálogo con el rango de la app y el día pe
   ]);
 });
 
+// Un día válido: 4 ejercicios del catálogo de prueba.
+const cuatro = ['remo-barra', 'dominadas', 'curl-barra', 'sentadilla-barra'].map((ejercicioId) => ({ ejercicioId, series: 3 }));
+
+test('crear_rutina: un día con menos de 4 ejercicios válidos se descarta con motivo', () => {
+  const r = limpiar([
+    { tipo: 'crear_rutina', nombre: 'Brazos', dia: 0, ejercicios: cuatro.slice(0, 3) },
+    { tipo: 'crear_rutina', nombre: 'Tirón', dia: 1, ejercicios: [...cuatro.slice(0, 3), { ejercicioId: 'inventado', series: 3 }] },
+    { tipo: 'crear_rutina', nombre: 'Full body', dia: 2, ejercicios: cuatro },
+  ]);
+  assert.deepStrictEqual(
+    r.acciones.map((a) => [a.nombre, a.ejercicios.length]),
+    [['Full body', 4]],
+  );
+  assert.deepStrictEqual(r.descartados, [
+    { accion: 'crear_rutina', rutina: 'Brazos', motivo: 'pocos-ejercicios' },
+    { accion: 'crear_rutina', rutina: 'Tirón', ejercicioId: 'inventado', motivo: 'no-existe' },
+    { accion: 'crear_rutina', rutina: 'Tirón', motivo: 'pocos-ejercicios' },
+  ]);
+  // El día de una rutina descartada queda libre para otra.
+  const otra = limpiar([{ tipo: 'crear_rutina', nombre: 'Brazos', dia: 0, ejercicios: cuatro.slice(0, 3) }, { tipo: 'crear_rutina', nombre: 'X', dia: 0, ejercicios: cuatro }]);
+  assert.strictEqual(otra.acciones[0].dia, 0);
+});
+
 test('crear_rutina: dos rutinas de la misma respuesta no comparten día; sin ejercicios válidos se descarta', () => {
   const r = limpiar([
-    { tipo: 'crear_rutina', nombre: 'A', dia: 1, ejercicios: [{ ejercicioId: 'remo-barra', series: 3 }] },
-    { tipo: 'crear_rutina', nombre: 'B', dia: 1, ejercicios: [{ ejercicioId: 'dominadas', series: 3 }] },
+    { tipo: 'crear_rutina', nombre: 'A', dia: 1, ejercicios: cuatro },
+    { tipo: 'crear_rutina', nombre: 'B', dia: 1, ejercicios: cuatro },
     { tipo: 'crear_rutina', nombre: 'C', dia: null, ejercicios: [{ ejercicioId: 'inventado', series: 3 }] },
   ]);
   assert.deepStrictEqual(
@@ -364,13 +389,30 @@ test('acciones de distinto tipo en la misma respuesta, hasta 7; lo que no se ent
 
 test('con el catálogo real de la API (por defecto) y objetivo fuerza', () => {
   const r = limpiarAcciones(
-    [{ tipo: 'crear_rutina', nombre: 'Fuerza', dia: 0, ejercicios: [{ ejercicioId: 'press-banca-barra', series: 5 }] }],
+    [
+      {
+        tipo: 'crear_rutina',
+        nombre: 'Fuerza',
+        dia: 0,
+        ejercicios: ['press-banca-barra', 'remo-barra', 'sentadilla-barra', 'press-militar-mancuernas'].map((ejercicioId) => ({
+          ejercicioId,
+          series: 5,
+        })),
+      },
+    ],
     { ...contexto, perfil: { objetivo: 'fuerza' } },
   );
-  assert.deepStrictEqual(r.acciones[0].ejercicios, [
-    { ejercicioId: 'press-banca-barra', series: 5, rango: { min: 4, max: 6 } },
-  ]);
+  assert.deepStrictEqual(r.acciones[0].ejercicios[0], { ejercicioId: 'press-banca-barra', series: 5, rango: { min: 4, max: 6 } });
   assert.match(r.acciones[0].id, /^[0-9a-f-]{36}$/);
+});
+
+test('si la IA copia el resumen "[Propuse: …]" que agrega la app, se saca del texto', () => {
+  const r = leerRespuestaCoach(
+    { texto: 'Tocá Aplicar en las tarjetas de arriba.\n\n[Propuse: crear "Piernas" (lunes, 4 ejercicios, pendiente)]', acciones: [] },
+    contexto,
+    { catalogo },
+  );
+  assert.strictEqual(r.texto, 'Tocá Aplicar en las tarjetas de arriba.');
 });
 
 test('la respuesta del coach trae texto y acciones; sin texto es un error de formato', () => {
@@ -401,31 +443,17 @@ test('pideTodo: "todas", "todo", "todos" o "toda", sin importar tildes ni mayús
   }
 });
 
-test('borrar todas las rutinas sin que el usuario lo pida se descarta (ambiguo)', () => {
-  const borrar = (...rutinaIds) => ({ tipo: 'borrar_rutinas', rutinaIds });
-  const pasos = { tipo: 'cargar_pasos', dia: '2026-11-26', unidad: 'km', valor: 2 };
-  const con = (lista, ultimoMensaje) => limpiarAcciones(lista, contexto, { catalogo, crearId: ids(), ultimoMensaje });
-
-  // Las dos rutinas, en una acción o repartidas en dos: se descarta todo el borrado, el resto queda.
-  for (const lista of [
-    [borrar('r-empuje', 'r-piernas'), pasos],
-    [borrar('r-empuje'), borrar('r-piernas'), pasos],
-  ]) {
-    const r = con(lista, 'borrá la rutina');
-    assert.deepStrictEqual(
-      r.acciones.map((a) => a.tipo),
-      ['cargar_pasos'],
-    );
-    assert.deepStrictEqual(r.descartados, [{ accion: 'borrar_rutinas', motivo: 'ambiguo' }]);
-  }
-
-  // Si lo pidió, va.
-  assert.deepStrictEqual(con([borrar('r-empuje', 'r-piernas')], 'Borrá todas mis rutinas').acciones, [
-    { id: 'a1', tipo: 'borrar_rutinas', rutinaIds: ['r-empuje', 'r-piernas'] },
-  ]);
-  // Una sola de las dos: va.
-  assert.strictEqual(con([borrar('r-piernas')], 'borrá la de piernas').acciones.length, 1);
-  // Si tiene una sola rutina, borrarla no es ambiguo.
-  const una = limpiarAcciones([borrar('r-empuje')], { ...contexto, rutinas: [contexto.rutinas[0]] }, { catalogo });
-  assert.strictEqual(una.acciones.length, 1);
+test('reemplazar el plan: borrar todas las rutinas junto con las nuevas pasa entero (confirma la tarjeta)', () => {
+  const nueva = (nombre, dia) => ({ tipo: 'crear_rutina', nombre, dia, ejercicios: cuatro });
+  const r = limpiarAcciones(
+    [{ tipo: 'borrar_rutinas', rutinaIds: ['r-empuje', 'r-piernas'] }, nueva('Piernas', 0), nueva('Pecho', 1)],
+    contexto,
+    { catalogo, crearId: ids() },
+  );
+  assert.deepStrictEqual(
+    r.acciones.map((a) => a.tipo),
+    ['borrar_rutinas', 'crear_rutina', 'crear_rutina'],
+  );
+  assert.deepStrictEqual(r.acciones[0].rutinaIds, ['r-empuje', 'r-piernas']);
+  assert.deepStrictEqual(r.descartados, []);
 });

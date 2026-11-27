@@ -20,6 +20,7 @@ import {
   type SeccionDiario,
 } from '../lib/comida/diario';
 import { esAproximado } from '../lib/comida/alimentos';
+import { FUENTE_CORREGIDA } from '../lib/comida/aproximados';
 import { detalleCantidad } from '../lib/comida/porciones';
 import { kcalEntrenoDelDia } from '../lib/entreno/resumen';
 import { formatearNumero } from '../lib/formato';
@@ -45,7 +46,7 @@ export function ComidaScreen({ onBuscar, onEscanear }: ComidaScreenProps) {
   // Desplegadas a mano; si no, se despliegan las que tienen algo.
   const [desplegadas, setDesplegadas] = useState<Partial<Record<Comida, boolean>>>({});
 
-  const { registros, editar, borrar } = useComidas();
+  const { registros, editar, borrar, corregirValores } = useComidas();
   const { perfil, config, totalDelDia } = useDatosDelDia();
   const { historial } = useEntreno();
 
@@ -141,6 +142,12 @@ export function ComidaScreen({ onBuscar, onEscanear }: ComidaScreenProps) {
         onBorrar={() => {
           if (editando) borrar(editando.id);
           setEditando(null);
+        }}
+        onCorregirValores={(valores) => {
+          if (!editando) return;
+          corregirValores(editando.alimento.id, valores);
+          // La hoja sigue abierta con los valores nuevos.
+          setEditando({ ...editando, alimento: { ...editando.alimento, ...valores, fuente: FUENTE_CORREGIDA } });
         }}
         onCerrar={() => setEditando(null)}
       />

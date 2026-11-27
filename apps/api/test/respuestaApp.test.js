@@ -14,7 +14,7 @@ test('las acciones de la respuesta de ejemplo de la app son las que arma la API'
     accion.ejercicios ? { ...accion, ejercicios: accion.ejercicios.map(({ rango: _rango, ...e }) => e) } : accion,
   );
   const ids = respuesta.acciones.map((a) => a.id);
-  const r = limpiarAcciones(deLaIa, contexto, { crearId: () => ids.shift(), ultimoMensaje: '' });
+  const r = limpiarAcciones(deLaIa, contexto, { crearId: () => ids.shift() });
   assert.deepStrictEqual(r.descartados, []);
   assert.deepStrictEqual(r.acciones, respuesta.acciones);
 });

@@ -39,14 +39,23 @@ interface HojaPasosManualesProps {
   onCerrar: () => void;
   perfil: DatosPaso;
   cargasDeHoy: readonly CargaPasos[];
-  onAgregar: (tipo: TipoCarga, valor: number, franja: Franja) => Promise<CargaPasos>;
+  onAgregar: (tipo: TipoCarga, valor: number, franja: Franja) => Promise<CargaPasos | null>; // null: no se agregó
   conPodometro: boolean; // si se descuenta lo que el celu ya contó
   onBorrar: (id: string) => void;
   metaPasos: number;
   onAbrirPerfil: () => void; // la meta se cambia en el perfil
+  // Desde el coach: la caminata que propone, precargada. Al agregar, la hoja se cierra.
+  inicial?: { tipo: TipoCarga; valor: number; franja: Franja };
 }
 
 const UNIDAD: Record<TipoCarga, string> = { km: 'km', minutos: 'min', pasos: 'pasos' };
+const OPCION: Record<TipoCarga, string> = { km: 'Kilómetros', minutos: 'Minutos', pasos: 'Pasos' };
+const EJEMPLO: Record<TipoCarga, string> = { km: '2,5', minutos: '30', pasos: '3000' };
+const ETIQUETA_ENTRADA: Record<TipoCarga, string> = {
+  km: 'Kilómetros caminados',
+  minutos: 'Minutos caminados',
+  pasos: 'Pasos caminados',
+};
 
 type Extremo = 'inicio' | 'fin';
 
@@ -61,6 +70,7 @@ export function HojaPasosManuales({
   onBorrar,
   metaPasos,
   onAbrirPerfil,
+  inicial,
 }: HojaPasosManualesProps) {
   const insets = useSafeAreaInsets();
   const [tipo, setTipo] = useState<TipoCarga>('km');
@@ -81,7 +91,11 @@ export function HojaPasosManuales({
 
   // Cada vez que se abre, el horario vuelve a ser la última hora.
   const alAbrir = () => {
-    setFranja(franjaPorDefecto(new Date()));
+    if (inicial) {
+      setTipo(inicial.tipo);
+      setTexto(String(inicial.valor).replace('.', ','));
+    }
+    setFranja(inicial?.franja ?? franjaPorDefecto(new Date()));
     setResultado(null);
     setAvisoHora(null);
     setEditando(null);
@@ -125,6 +139,8 @@ export function HojaPasosManuales({
     setAgregando(true);
     try {
       const carga = await onAgregar(tipo, valor, franja);
+      if (!carga) return;
+      if (inicial) return onCerrar();
       const descuento = descontarRegistrado(carga.estimado ?? carga.pasos, carga.registrado ?? 0);
       setResultado(textoDescuento(descuento, conPodometro));
       setTexto('');
@@ -140,11 +156,11 @@ export function HojaPasosManuales({
         <View style={[styles.hoja, { paddingBottom: Math.max(insets.bottom, 16) }]}>
           <View style={styles.manija} />
           <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={styles.contenido}>
-            <Text style={styles.titulo}>¿Cuánto caminaste sin el celu?</Text>
+            <Text style={styles.titulo}>{inicial ? 'Revisá la caminata' : '¿Cuánto caminaste sin el celu?'}</Text>
 
-            {/* km o minutos */}
+            {/* km, minutos o pasos */}
             <View style={styles.selector}>
-              {(['km', 'minutos'] as const).map((t) => (
+              {(['km', 'minutos', 'pasos'] as const).map((t) => (
                 <Pressable
                   key={t}
                   onPress={() => setTipo(t)}
@@ -153,7 +169,7 @@ export function HojaPasosManuales({
                   accessibilityState={{ selected: tipo === t }}
                 >
                   <Text style={[styles.textoOpcion, tipo === t && styles.textoOpcionActiva]}>
-                    {t === 'km' ? 'Kilómetros' : 'Minutos'}
+                    {OPCION[t]}
                   </Text>
                 </Pressable>
               ))}
@@ -213,11 +229,11 @@ export function HojaPasosManuales({
                     setTexto(t);
                     setResultado(null);
                   }}
-                  placeholder={tipo === 'km' ? '2,5' : '30'}
+                  placeholder={EJEMPLO[tipo]}
                   placeholderTextColor="#5C5C5C"
-                  keyboardType="decimal-pad"
+                  keyboardType={tipo === 'pasos' ? 'number-pad' : 'decimal-pad'}
                   style={styles.input}
-                  accessibilityLabel={tipo === 'km' ? 'Kilómetros caminados' : 'Minutos caminados'}
+                  accessibilityLabel={ETIQUETA_ENTRADA[tipo]}
                   returnKeyType="done"
                   onSubmitEditing={agregar}
                 />
@@ -229,7 +245,7 @@ export function HojaPasosManuales({
                 style={({ pressed }) => [styles.botonAgregar, !puedeAgregar && styles.deshabilitado, pressed && styles.presionado]}
                 accessibilityRole="button"
               >
-                <Text style={styles.textoAgregar}>{agregando ? '…' : 'Agregar'}</Text>
+                <Text style={styles.textoAgregar}>{agregando ? '…' : inicial ? 'Aplicar' : 'Agregar'}</Text>
               </Pressable>
             </View>
 
@@ -242,14 +258,18 @@ export function HojaPasosManuales({
 
             <Text style={[styles.ayuda, marcarError && styles.textoError]}>
               {hayError
-                ? `Poné un número entre 0 y ${MAXIMO[tipo]} ${UNIDAD[tipo]}.`
+                ? tipo === 'pasos'
+                  ? `Poné un número entero de pasos, hasta ${formatearNumero(MAXIMO.pasos)}.`
+                  : `Poné un número entre 0 y ${MAXIMO[tipo]} ${UNIDAD[tipo]}.`
                 : errorFranja
                   ? errorFranja
                 : estimado
-                  ? `≈ ${formatearNumero(estimado.pasos)} pasos estimados${conPodometro ? ' · descontamos lo que el celu ya contó en ese horario' : ''}`
+                  ? `${tipo === 'pasos' ? '' : '≈ '}${formatearNumero(estimado.pasos)} pasos${tipo === 'pasos' ? '' : ' estimados'}${conPodometro ? ' · descontamos lo que el celu ya contó en ese horario' : ''}`
                   : tipo === 'km'
                     ? 'Calculamos los pasos con tu altura y los minutos a 5 km/h.'
-                    : 'Contamos 100 pasos por minuto.'}
+                    : tipo === 'pasos'
+                      ? 'Los pasos se suman tal cual; los minutos activos, a 100 pasos por minuto.'
+                      : 'Contamos 100 pasos por minuto.'}
             </Text>
 
             {/* Cargas de hoy */}

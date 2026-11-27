@@ -330,7 +330,7 @@ describe('describir', () => {
   test('rutinas con los nombres del catálogo y de las rutinas guardadas', () => {
     expect(de(accion('crear_rutina'))).toEqual({
       titulo: 'Crear rutina "Piernas"',
-      lineas: ['Los sábados', 'Sentadilla con barra · 4 × 6-10', 'Prensa · 3 × 6-10'],
+      lineas: ['Los sábados', 'Sentadilla con barra · 4 × 6-10', 'Prensa · 3 × 6-10', 'Hip thrust con barra · 3 × 6-10', 'Curl femoral sentado · 3 × 10-15'],
     });
     expect(de(accion('agregar_ejercicios'))).toEqual({
       titulo: 'Agregar a "Full body A"',
