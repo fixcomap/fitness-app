@@ -322,28 +322,36 @@ function TarjetaEjercicio({
               deshabilitado={rango.min <= REPS_MIN}
               onPress={() => onReps('min', -1)}
             />
-            <Text style={styles.valorCorto}>{rango.min}</Text>
+            <Text style={styles.valorCorto} accessibilityLabel={`de ${rango.min} a ${rango.max} repeticiones`}>
+              {rango.min}
+            </Text>
             <BotonPaso
               tipo="add"
               etiqueta="Subir las reps mínimas"
               deshabilitado={rango.min >= rango.max}
               onPress={() => onReps('min', 1)}
             />
-            <Text style={styles.guion}>–</Text>
+            <Text style={styles.separador} {...oculto}>
+              {'//'}
+            </Text>
             <BotonPaso
               tipo="remove"
               etiqueta="Bajar las reps máximas"
               deshabilitado={rango.max <= rango.min}
               onPress={() => onReps('max', -1)}
             />
-            <Text style={styles.valorCorto}>{rango.max}</Text>
+            <Text style={styles.valorCorto} {...oculto}>
+              {rango.max}
+            </Text>
             <BotonPaso
               tipo="add"
               etiqueta="Subir las reps máximas"
               deshabilitado={rango.max >= REPS_MAX}
               onPress={() => onReps('max', 1)}
             />
-            <Text style={styles.unidad}>reps</Text>
+            <Text style={styles.unidad} {...oculto}>
+              reps
+            </Text>
           </View>
         </View>
       </View>
@@ -407,6 +415,9 @@ function BotonPaso({
     </Pressable>
   );
 }
+
+// El rango se lee entero en el número mínimo ("de 6 a 10 repeticiones"); el resto no se anuncia.
+const oculto = { accessibilityElementsHidden: true, importantForAccessibility: 'no' } as const;
 
 const DIA = 46;
 const PASO = 32;
@@ -485,7 +496,7 @@ const styles = StyleSheet.create({
   valor: { color: c.blanco, fontSize: 15, fontWeight: '900', minWidth: 62, textAlign: 'center' },
   valorCorto: { color: c.blanco, fontSize: 15, fontWeight: '900', minWidth: 20, textAlign: 'center' },
   unidad: { color: c.blanco, fontSize: 14, fontWeight: '500' },
-  guion: { color: c.textoTenue, fontSize: 15, fontWeight: '800' },
+  separador: { color: c.rojo, fontSize: 15, fontWeight: '900' },
   botonAgregar: {
     height: 58,
     borderRadius: 18,
