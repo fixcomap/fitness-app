@@ -31,7 +31,9 @@
         "dia": 5,
         "ejercicios": [
           { "ejercicioId": "sentadilla-barra", "series": 4, "rango": { "min": 6, "max": 10 } },
-          { "ejercicioId": "prensa", "series": 3, "rango": { "min": 6, "max": 10 } }
+          { "ejercicioId": "prensa", "series": 3, "rango": { "min": 6, "max": 10 } },
+          { "ejercicioId": "hip-thrust-barra", "series": 3, "rango": { "min": 6, "max": 10 } },
+          { "ejercicioId": "curl-femoral-sentado", "series": 3, "rango": { "min": 10, "max": 15 } }
         ]
       },
       {

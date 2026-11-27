@@ -169,8 +169,17 @@ test('nombres largos se recortan en una palabra completa', () => {
 test('el prompt pide una rutina por día, nombres cortos y no repetir los días en el texto', () => {
   assert.match(SISTEMA_COACH, /Una rutina por cada día de entrenamiento/);
   assert.match(SISTEMA_COACH, /3 acciones crear_rutina/);
-  assert.match(SISTEMA_COACH, /"Empuje", "Tirón", "Piernas"/);
+  assert.match(SISTEMA_COACH, /"Pecho y tríceps" el lunes, "Espalda y bíceps" el miércoles/);
   assert.match(SISTEMA_COACH, /No repitas los días/);
+});
+
+test('el prompt: calidad de las rutinas (4 a 7 ejercicios, compuestos primero, nombre por grupos, split equilibrado)', () => {
+  assert.match(SISTEMA_COACH, /Cada día lleva entre 4 y 7 ejercicios, con los compuestos/);
+  assert.match(SISTEMA_COACH, /Nunca el nombre de un ejercicio/);
+  assert.match(SISTEMA_COACH, /unas 10 series semanales por músculo grande/);
+  assert.match(SISTEMA_COACH, /no repitas el mismo grupo muscular en días seguidos/);
+  assert.match(SISTEMA_COACH, /no armes días de un solo músculo chico/);
+  assert.match(SISTEMA_COACH, /Para 5 días usá un split equilibrado/);
 });
 
 test('el prompt: conceptos generales con libertad, sin inventar números y sin nombrar las guías siempre', () => {
@@ -276,9 +285,9 @@ test('responde el texto y las acciones validadas contra el catálogo y el contex
     coach: {
       texto: 'Te dejo empuje, tirón y piernas para que las apliques.',
       acciones: [
-        nueva('Empuje', 0, 'press-banca-barra'),
-        nueva('Tirón', 2, 'remo-barra', 'hip-thrust-inventado'),
-        nueva('Piernas', 4, 'sentadilla-barra'),
+        nueva('Empuje', 0, 'press-banca-barra', 'press-militar-mancuernas', 'fondos-paralelas', 'triceps-polea'),
+        nueva('Tirón', 2, 'remo-barra', 'jalon-al-pecho', 'face-pull', 'curl-barra', 'hip-thrust-inventado'),
+        nueva('Piernas', 4, 'sentadilla-barra', 'hip-thrust-barra', 'curl-femoral-sentado', 'gemelos-de-pie-maquina'),
         { tipo: 'borrar_rutinas', rutinaIds: ['rutina-full-body'] },
         { tipo: 'borrar_rutinas', rutinaIds: ['rutina-inventada'] },
       ],
@@ -292,9 +301,9 @@ test('responde el texto y las acciones validadas contra el catálogo y el contex
     assert.deepStrictEqual(
       r.body.acciones.map((a) => [a.tipo, a.nombre ?? a.rutinaIds, a.dia, a.ejercicios?.length]),
       [
-        ['crear_rutina', 'Empuje', 0, 1],
-        ['crear_rutina', 'Tirón', 2, 1],
-        ['crear_rutina', 'Piernas', 4, 1],
+        ['crear_rutina', 'Empuje', 0, 4],
+        ['crear_rutina', 'Tirón', 2, 4],
+        ['crear_rutina', 'Piernas', 4, 4],
         ['borrar_rutinas', ['rutina-full-body'], undefined, undefined],
       ],
     );

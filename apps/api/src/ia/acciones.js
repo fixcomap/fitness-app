@@ -18,6 +18,8 @@ const TIPOS_ACCION = [
   'cargar_pasos',
 ];
 const MAXIMO_ACCIONES = 7;
+// Un día de entreno del coach tiene al menos 4 ejercicios: con menos queda flojo (y el prompt pide de 4 a 7).
+const MINIMO_EJERCICIOS_DIA = 4;
 // Comidas y pasos: hoy y los 6 días anteriores, nunca días futuros.
 const DIAS_ATRAS = 6;
 // Mismos límites que la app.
@@ -113,6 +115,9 @@ function crearRutina(a, { diasOcupados, idsCatalogo, rangoPara }) {
   );
   const sueltos = descartados.map((d) => ({ accion: a.tipo, ...d }));
   if (!rutina) return { descartados: [...sueltos, { accion: a.tipo, motivo: 'sin-ejercicios' }] };
+  if (rutina.ejercicios.length < MINIMO_EJERCICIOS_DIA) {
+    return { descartados: [...sueltos, { accion: a.tipo, rutina: rutina.nombre, motivo: 'pocos-ejercicios' }] };
+  }
   for (const d of rutina.dias) diasOcupados.add(d);
   return {
     accion: { tipo: a.tipo, nombre: rutina.nombre, dia: rutina.dias[0] ?? null, ejercicios: rutina.ejercicios },
@@ -261,6 +266,7 @@ function leerRespuestaCoach(datos, contexto, opciones) {
 module.exports = {
   TIPOS_ACCION,
   MAXIMO_ACCIONES,
+  MINIMO_EJERCICIOS_DIA,
   MAXIMO_PASOS,
   restarDias,
   diaPermitido,

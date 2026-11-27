@@ -78,11 +78,11 @@ function respuestaCoach(mensajes, contexto) {
   }
   if (texto.includes('rutina')) {
     return {
-      texto: 'Te dejo empuje, tirón y piernas para que las apliques.',
+      texto: 'Te dejo pecho y tríceps, espalda y bíceps y piernas para que las apliques.',
       acciones: [
-        nueva('Empuje', 0, 'press-banca-barra', 'press-militar-mancuernas', 'extension-triceps-polea-cabeza'),
-        nueva('Tirón', 2, 'remo-barra', 'jalon-al-pecho', 'curl-barra'),
-        nueva('Piernas', 4, 'sentadilla-barra', 'peso-muerto-rumano-barra'),
+        nueva('Pecho y tríceps', 0, 'press-banca-barra', 'press-inclinado-mancuernas', 'fondos-paralelas', 'extension-triceps-polea-cabeza'),
+        nueva('Espalda y bíceps', 2, 'remo-barra', 'jalon-al-pecho', 'face-pull', 'curl-barra'),
+        nueva('Piernas', 4, 'sentadilla-barra', 'peso-muerto-rumano-mancuernas', 'curl-femoral-sentado', 'gemelos-de-pie-maquina'),
       ],
     };
   }
