@@ -4,6 +4,7 @@
 // Llama a la IA de verdad (y gasta): no es un test.
 //
 //   node scripts/probar-ia.mjs ~/fotos-platos --con gemini:gemini-3.8-flash --con claude:claude-haiku-5-5
+//   node scripts/probar-ia.mjs --con claude:claude-haiku-5-5 --solo consejo   (consejo del día, dias-consejo.json)
 //
 // Las claves salen del .env de la raíz (GEMINI_API_KEY, ANTHROPIC_API_KEY). Vertex usa las credenciales
 // de gcloud (gcloud auth application-default login) e IA_VERTEX_PROYECTO.
@@ -23,6 +24,7 @@ const { leerResultadoFoto } = require('../src/ia/foto');
 const { EXTENSIONES, esFoto, fotoAJpeg } = require('./fotos');
 const { leerRespuestaCoach } = require('../src/ia/acciones');
 const { CATALOGO } = require('../src/ia/catalogo');
+const { leerConsejo, datosDeHoy } = require('../src/ia/consejo');
 const {
   USO,
   leerArgumentos,
@@ -32,11 +34,13 @@ const {
   formatoTokens,
   resumir,
   lineasCoach,
+  contextoDeDiaConsejo,
 } = require('./comparacion');
 
 const MAXIMO_FOTO = 2 * 1024 * 1024;
 const precios = JSON.parse(fs.readFileSync(path.join(aqui, 'precios-ia.json'), 'utf8')).modelos;
 const ejemplo = JSON.parse(fs.readFileSync(path.join(aqui, 'preguntas-coach.json'), 'utf8'));
+const diasConsejo = JSON.parse(fs.readFileSync(path.join(aqui, 'dias-consejo.json'), 'utf8'));
 // El catálogo lo pone la API en el prompt (src/ia/catalogo.json); la app no lo manda.
 console.log(`Catálogo: ${CATALOGO.length} ejercicios de src/ia/catalogo.json`);
 const contexto = ejemplo.contexto;
@@ -117,7 +121,32 @@ async function probar({ proveedor, modelo }, fotos, solo) {
   const conCosto = (r) => (r.error ? r : { ...r, costo: costoEstimado(r.uso, precio) });
   console.log(`\n=== ${proveedor}:${modelo}${precio ? '' : ' (sin precio en precios-ia.json)'}`);
 
-  const resultados = { fotos: [], coach: [] };
+  const resultados = { fotos: [], coach: [], consejo: [] };
+  if (solo === 'consejo') {
+    // Los días en orden, como la app: cada uno con los consejos que ya recibió (los últimos 3).
+    const anteriores = [];
+    const corridos = [];
+    for (const escenario of diasConsejo.dias) {
+      const ctx = contextoDeDiaConsejo(contexto, diasConsejo.perfil, escenario, corridos);
+      const r = conCosto(
+        await medir(async () => {
+          // Como la app: solo los consejos de días anteriores.
+          const consejosAnteriores = anteriores.filter((c) => c.fecha < escenario.hoy).slice(-3);
+          const respuesta = await ia.darConsejo(ctx, { consejosAnteriores, hora: escenario.hora });
+          return { ...respuesta, salida: leerConsejo(respuesta.datos) };
+        }),
+      );
+      mostrar(escenario.titulo, r, ({ salida }) => [
+        `Datos: ${JSON.stringify(datosDeHoy(ctx, escenario.hora))}`,
+        `Consejo: ${salida.texto}`,
+        `Destino: ${salida.destino}`,
+      ]);
+      resultados.consejo.push(r);
+      corridos.push(escenario.dia);
+      if (!r.error) anteriores.push({ fecha: escenario.hoy, texto: r.salida.texto });
+    }
+    return resultados;
+  }
   if (solo !== 'coach') {
     for (const foto of fotos) {
       if (foto.error) {
@@ -154,14 +183,14 @@ async function probar({ proveedor, modelo }, fotos, solo) {
 
 const args = leerArgumentos(process.argv.slice(2));
 if (args.error) salir(args.error);
-const fotos = args.solo === 'coach' ? [] : await leerFotos(path.resolve(args.carpeta));
-if (args.solo !== 'coach' && fotos.length === 0) salir(`No hay fotos (${EXTENSIONES.join(', ')}) en la carpeta`);
+const fotos = args.solo === 'coach' || args.solo === 'consejo' ? [] : await leerFotos(path.resolve(args.carpeta));
+if ((args.solo === null || args.solo === 'fotos') && fotos.length === 0) salir(`No hay fotos (${EXTENSIONES.join(', ')}) en la carpeta`);
 
 const resumen = [];
 for (const candidato of args.candidatos) {
   const resultados = await probar(candidato, fotos, args.solo);
   if (!resultados) continue;
-  for (const tipo of ['fotos', 'coach']) {
+  for (const tipo of ['fotos', 'coach', 'consejo']) {
     if (resultados[tipo].length === 0) continue;
     const r = resumir(resultados[tipo]);
     resumen.push({
