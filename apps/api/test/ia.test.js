@@ -80,6 +80,52 @@ test('Vertex: sin claves, con proyecto obligatorio y región global por defecto'
   assert.strictEqual(c.clave, null);
 });
 
+test('producción: vertex-claude y vertex-gemini sí; claude, gemini y falso no', () => {
+  const prod = (env) => leerConfigIa({ IA_VERTEX_PROYECTO: 'fixcomap-core', ...env }, { esProduccion: true });
+  assert.strictEqual(prod({ IA_PROVEEDOR: 'vertex-claude' }).proveedor, 'vertex-claude');
+  assert.strictEqual(prod({ IA_PROVEEDOR: 'vertex-gemini' }).proveedor, 'vertex-gemini');
+  assert.throws(() => prod({ IA_PROVEEDOR: 'claude', ANTHROPIC_API_KEY: 'x' }), /solo para desarrollo/);
+  assert.throws(() => prod({ IA_PROVEEDOR: 'gemini', GEMINI_API_KEY: 'x' }), /solo para desarrollo/);
+  assert.throws(() => prod({ IA_PROVEEDOR: 'falso' }), /solo para desarrollo/);
+});
+
+test('vertex-claude: la configuración de producción, sin clave aunque haya ANTHROPIC_API_KEY', () => {
+  const env = { IA_PROVEEDOR: 'vertex-claude', IA_VERTEX_PROYECTO: 'fixcomap-core', ANTHROPIC_API_KEY: 'no-se-usa' };
+  const c = leerConfigIa(env, { esProduccion: true });
+  delete c.limitesDiarios;
+  assert.deepStrictEqual(c, {
+    proveedor: 'vertex-claude',
+    familia: 'claude',
+    modeloFoto: 'claude-haiku-5-5',
+    modeloCoach: 'claude-haiku-5-5',
+    clave: null,
+    vertex: { proyecto: 'fixcomap-core', region: 'global' },
+  });
+});
+
+test('Vertex: la región se puede elegir (global, us, eu); vacía queda global', () => {
+  const vertex = (proveedor, IA_VERTEX_REGION) =>
+    leerConfigIa({ IA_PROVEEDOR: proveedor, IA_VERTEX_PROYECTO: ' p ', IA_VERTEX_REGION }).vertex;
+  assert.deepStrictEqual(vertex('vertex-claude', ''), { proyecto: 'p', region: 'global' });
+  assert.deepStrictEqual(vertex('vertex-claude', ' eu '), { proyecto: 'p', region: 'eu' });
+  assert.deepStrictEqual(vertex('vertex-claude', 'us'), { proyecto: 'p', region: 'us' });
+  // Gemini sí acepta una región puntual.
+  assert.deepStrictEqual(vertex('vertex-gemini', 'europe-west1'), { proyecto: 'p', region: 'europe-west1' });
+});
+
+test('vertex-claude con una región puntual no arranca: Haiku 5.5 solo está en global, us o eu', () => {
+  const env = { IA_PROVEEDOR: 'vertex-claude', IA_VERTEX_PROYECTO: 'p', IA_VERTEX_REGION: 'europe-west1' };
+  assert.throws(() => leerConfigIa(env), /europe-west1 no sirve con vertex-claude.*usá eu/);
+});
+
+test('Vertex: región con formato inválido o proyecto en blanco no arrancan', () => {
+  for (const IA_VERTEX_REGION of ['Europe', 'europe west1', 'https://algo']) {
+    const env = { IA_PROVEEDOR: 'vertex-gemini', IA_VERTEX_PROYECTO: 'p', IA_VERTEX_REGION };
+    assert.throws(() => leerConfigIa(env), /IA_VERTEX_REGION inválida/);
+  }
+  assert.throws(() => leerConfigIa({ IA_PROVEEDOR: 'vertex-claude', IA_VERTEX_PROYECTO: '  ' }), /IA_VERTEX_PROYECTO/);
+});
+
 test('proveedor desconocido o límites inválidos: la API no arranca', () => {
   assert.throws(() => leerConfigIa({ IA_PROVEEDOR: 'otro' }));
   assert.throws(() => leerConfigIa({ IA_LIMITE_FOTOS_DIA: '0' }));
@@ -374,4 +420,103 @@ test('Claude: rechazo, respuesta cortada o sin JSON son ErrorIa', async () => {
     const ia = crearProveedorClaude({ clientePara, modeloFoto: 'm', modeloCoach: 'm' });
     await assert.rejects(ia.analizarFoto(imagen), (e) => e instanceof ErrorIa && e.tipo === tipo);
   }
+});
+
+// ── Claude en Vertex: el pedido que arma el SDK de verdad, con fetch y credenciales falsas ──
+
+// Como las credenciales de Application Default Credentials, pero sin red.
+const credencialesFalsas = {
+  projectId: null,
+  getRequestHeaders: async () => new Headers({ authorization: 'Bearer t' }),
+};
+
+// fetch falso: responde en orden con { estado, cuerpo } (repite el último) y guarda cada pedido.
+function fetchFalso(respuestas) {
+  const pedidos = [];
+  const fetch = async (url, init) => {
+    pedidos.push({ url: String(url), headers: new Headers(init.headers), cuerpo: JSON.parse(init.body) });
+    const { estado = 200, cuerpo } = respuestas[Math.min(pedidos.length, respuestas.length) - 1];
+    return new Response(JSON.stringify(cuerpo), {
+      status: estado,
+      headers: { 'content-type': 'application/json', 'retry-after-ms': '0' },
+    });
+  };
+  return { pedidos, fetch };
+}
+
+const mensajeClaude = (datos) => ({
+  id: 'msg_1',
+  type: 'message',
+  role: 'assistant',
+  model: 'claude-haiku-5-5',
+  content: [{ type: 'text', text: JSON.stringify(datos) }],
+  stop_reason: 'end_turn',
+  usage: { input_tokens: 50, cache_read_input_tokens: 4000, cache_creation_input_tokens: 0, output_tokens: 20 },
+});
+const saturado = { estado: 529, cuerpo: { type: 'error', error: { type: 'overloaded_error', message: 'x' } } };
+const coachBien = { cuerpo: mensajeClaude({ texto: 'Dale', acciones: [] }) };
+
+function claudeEnVertex(region, respuestas) {
+  const { pedidos, fetch } = fetchFalso(respuestas);
+  const env = { IA_PROVEEDOR: 'vertex-claude', IA_VERTEX_PROYECTO: 'fixcomap-core', IA_VERTEX_REGION: region };
+  const config = leerConfigIa(env, { esProduccion: true });
+  const clientePara = crearClientesClaude(config, { fetch, authClient: credencialesFalsas });
+  const ia = crearProveedorClaude({ clientePara, modeloFoto: config.modeloFoto, modeloCoach: config.modeloCoach });
+  return { ia, pedidos, cliente: clientePara(config.modeloCoach) };
+}
+
+test('Claude en Vertex: mismo límite de tiempo y un solo reintento que con clave', () => {
+  const { cliente } = claudeEnVertex('global', []);
+  assert.strictEqual(cliente.timeout, 60 * 1000);
+  assert.strictEqual(cliente.maxRetries, 1);
+  const conClave = crearClientesClaude({ clave: 'x', vertex: null })('m');
+  assert.strictEqual(conClave.timeout, cliente.timeout);
+  assert.strictEqual(conClave.maxRetries, cliente.maxRetries);
+});
+
+test('Claude en Vertex: va al endpoint de la región con Haiku 5.5 y el token de Google, sin clave', async () => {
+  const bases = {
+    global: 'https://aiplatform.googleapis.com/v1/projects/fixcomap-core/locations/global',
+    eu: 'https://aiplatform.eu.rep.googleapis.com/v1/projects/fixcomap-core/locations/eu',
+  };
+  for (const [region, base] of Object.entries(bases)) {
+    const { ia, pedidos } = claudeEnVertex(region, [coachBien]);
+    await ia.responderCoach(mensajes, contexto);
+    const [pedido] = pedidos;
+    assert.strictEqual(pedido.url, `${base}/publishers/anthropic/models/claude-haiku-5-5:rawPredict`);
+    assert.strictEqual(pedido.headers.get('authorization'), 'Bearer t');
+    assert.strictEqual(pedido.headers.get('x-api-key'), null);
+    // Vertex lleva el modelo en la URL y la versión de la API en el cuerpo.
+    assert.strictEqual(pedido.cuerpo.model, undefined);
+    assert.ok(pedido.cuerpo.anthropic_version);
+  }
+});
+
+test('Claude en Vertex: caché del prefijo fijo, salida estructurada y uso, como con clave', async () => {
+  const consejo = { texto: 'Hoy toca piernas', destino: 'entreno' };
+  const { ia, pedidos } = claudeEnVertex('global', [{ cuerpo: mensajeClaude(consejo) }]);
+  const ctx = { ...contexto, rutinas: [{ nombre: 'Piernas', dias: [1] }] };
+  const r = await ia.darConsejo(ctx, { consejosAnteriores: [], hora: 9 });
+
+  const { cuerpo } = pedidos[0];
+  assert.strictEqual(cuerpo.max_tokens, 16000);
+  assert.deepStrictEqual(cuerpo.system.slice(0, 3), [
+    { type: 'text', text: SISTEMA_COACH },
+    { type: 'text', text: MANUAL_COACH },
+    { type: 'text', text: TEXTO_CATALOGO, cache_control: { type: 'ephemeral' } },
+  ]);
+  assert.strictEqual(cuerpo.output_config.format.type, 'json_schema');
+  assert.strictEqual(cuerpo.output_config.format.schema.type, 'object');
+  assert.deepStrictEqual(r.datos, consejo);
+  assert.deepStrictEqual(r.uso, { entrada: 4050, cacheLectura: 4000, cacheEscritura: 0, salida: 20 });
+});
+
+test('Claude en Vertex: si está saturado reintenta una vez, y después devuelve el error', async () => {
+  const unaVez = claudeEnVertex('global', [saturado, coachBien]);
+  assert.strictEqual((await unaVez.ia.responderCoach(mensajes, contexto)).datos.texto, 'Dale');
+  assert.strictEqual(unaVez.pedidos.length, 2);
+
+  const siempre = claudeEnVertex('global', [saturado]);
+  await assert.rejects(siempre.ia.responderCoach(mensajes, contexto), (e) => e.status === 529);
+  assert.strictEqual(siempre.pedidos.length, 2);
 });
