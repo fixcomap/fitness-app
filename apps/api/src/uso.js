@@ -2,8 +2,8 @@
 const { z } = require('zod');
 
 // tipo de uso -> columna de uso_diario (nunca se arma SQL con texto que venga de afuera)
-const COLUMNAS = { fotos: 'fotos', mensajes: 'mensajes' };
-const NOMBRES = { fotos: ['foto', 'fotos'], mensajes: ['mensaje', 'mensajes'] };
+const COLUMNAS = { fotos: 'fotos', mensajes: 'mensajes', consejos: 'consejos' };
+const NOMBRES = { fotos: ['foto', 'fotos'], mensajes: ['mensaje', 'mensajes'], consejos: ['consejo', 'consejos'] };
 
 // El día cambia a la medianoche de Argentina.
 const HOY = `(now() AT TIME ZONE 'America/Argentina/Buenos_Aires')::date`;

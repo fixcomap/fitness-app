@@ -20,7 +20,8 @@ const MODELOS_POR_DEFECTO = {
   falso: 'falso',
 };
 
-const LIMITES_DIARIOS_POR_DEFECTO = { fotos: 10, mensajes: 30 };
+// consejos: el consejo del día de Inicio (la app lo pide una vez; el segundo es por si falla algo).
+const LIMITES_DIARIOS_POR_DEFECTO = { fotos: 10, mensajes: 30, consejos: 2 };
 
 function familia(proveedor) {
   if (proveedor === 'falso') return 'falso';
@@ -43,6 +44,11 @@ function leerConfigIa(env, { esProduccion = false } = {}) {
       env.IA_LIMITE_MENSAJES_DIA,
       LIMITES_DIARIOS_POR_DEFECTO.mensajes,
       'IA_LIMITE_MENSAJES_DIA',
+    ),
+    consejos: enteroPositivo(
+      env.IA_LIMITE_CONSEJOS_DIA,
+      LIMITES_DIARIOS_POR_DEFECTO.consejos,
+      'IA_LIMITE_CONSEJOS_DIA',
     ),
   };
   const proveedor = (env.IA_PROVEEDOR || '').trim();
