@@ -2,6 +2,7 @@ import caseras from '../../data/alimentosCaseros.json';
 import {
   ALIMENTOS_CASEROS,
   buscarCaseras,
+  esAproximado,
   leerAlimento,
   normalizar,
   subtituloAlimento,
@@ -98,9 +99,16 @@ test('subtítulo: origen y kcal cada 100 g', () => {
   expect(subtituloAlimento(milanesa)).toBe('Casera · 216 kcal / 100 g');
   expect(subtituloAlimento({ ...milanesa, origen: 'envasado', marca: 'Arcor' })).toBe('Arcor · 216 kcal / 100 g');
   expect(subtituloAlimento({ ...milanesa, origen: 'propio' })).toBe('Creado por vos · 216 kcal / 100 g');
+  expect(subtituloAlimento({ ...milanesa, origen: 'estimado' })).toBe('Aproximado · 216 kcal / 100 g');
   expect(subtituloAlimento({ ...milanesa, origen: 'propio', marca: 'Lay’s' })).toBe(
     'Lay’s · creado por vos · 216 kcal / 100 g',
   );
+});
+
+test('solo los estimados son aproximados', () => {
+  const [base] = ALIMENTOS_CASEROS;
+  expect(esAproximado({ ...base, origen: 'estimado' })).toBe(true);
+  for (const origen of ['casera', 'envasado', 'propio'] as const) expect(esAproximado({ ...base, origen })).toBe(false);
 });
 
 describe('leerAlimento', () => {
@@ -112,5 +120,10 @@ describe('leerAlimento', () => {
     expect(leerAlimento({ ...base, kcal: -1 })).toBeNull();
     expect(leerAlimento({ ...base, proteinas: 120 })).toBeNull();
     expect(leerAlimento({ ...base, porciones: [{ nombre: 'x', plural: 'xs', gramos: 0 }] })).toBeNull();
+  });
+
+  test('acepta los estimados por el coach', () => {
+    const estimado = { ...base, id: 'estimado:empanada de carne', origen: 'estimado' as const };
+    expect(leerAlimento(estimado)).toEqual(estimado);
   });
 });

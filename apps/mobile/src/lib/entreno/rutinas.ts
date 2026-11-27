@@ -109,14 +109,19 @@ export function nuevaRutina(id: string, dias: readonly DiaSemana[] = []): Rutina
   return { id, nombre: '', dias: [...dias].sort((a, b) => a - b), ejercicios: [] };
 }
 
-// Agrega al final los que no estén, con 3 series y el rango que se le pase.
-export function agregarEjercicios(rutina: Rutina, nuevos: readonly { ejercicioId: string; rango: Rango }[]): Rutina {
+// Agrega al final los que no estén, con el rango que se le pase y sus series (3 si no las trae,
+// por ejemplo los que se eligen del catálogo; las del coach vienen con las suyas).
+export function agregarEjercicios(
+  rutina: Rutina,
+  nuevos: readonly { ejercicioId: string; rango: Rango; series?: number }[],
+): Rutina {
   const ya = new Set(rutina.ejercicios.map((e) => e.ejercicioId));
   const agregados: EjercicioRutina[] = [];
-  for (const { ejercicioId, rango } of nuevos) {
+  for (const { ejercicioId, rango, series } of nuevos) {
     if (ya.has(ejercicioId)) continue;
     ya.add(ejercicioId);
-    agregados.push({ ejercicioId, rango, series: SERIES_POR_DEFECTO });
+    const conSeries = series === undefined ? SERIES_POR_DEFECTO : Math.min(SERIES_MAX, Math.max(SERIES_MIN, Math.round(series)));
+    agregados.push({ ejercicioId, rango, series: conSeries });
   }
   return agregados.length === 0 ? rutina : { ...rutina, ejercicios: [...rutina.ejercicios, ...agregados] };
 }

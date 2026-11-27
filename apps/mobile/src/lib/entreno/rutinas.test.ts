@@ -112,6 +112,17 @@ describe('editar', () => {
     expect(agregarEjercicios(empuje, [{ ejercicioId: 'press', rango: R(1, 2) }])).toBe(empuje);
   });
 
+  test('agregar respeta las series que trae cada ejercicio, dentro de 1 a 10', () => {
+    const r = agregarEjercicios(empuje, [
+      { ejercicioId: 'curl', rango: R(10, 15), series: 4 },
+      { ejercicioId: 'remo', rango: R(6, 10), series: 25 },
+    ]);
+    expect(r.ejercicios.slice(3).map((e) => [e.ejercicioId, e.series])).toEqual([
+      ['curl', 4],
+      ['remo', 10],
+    ]);
+  });
+
   test('quitar y mover sin salirse', () => {
     expect(quitarEjercicio(empuje, 1).ejercicios.map((e) => e.ejercicioId)).toEqual(['press', 'fondos']);
     expect(moverEjercicio(empuje, 2, -1).ejercicios.map((e) => e.ejercicioId)).toEqual(['press', 'fondos', 'vuelos']);

@@ -17,10 +17,12 @@ export interface Porcion {
   estimada: boolean; // true: estimación nuestra; false: la declara el fabricante
 }
 
-export type OrigenAlimento = 'casera' | 'envasado' | 'propio'; // propio: lo creó el usuario
+// propio: lo creó el usuario. estimado: lo estimó el coach porque no estaba en la base (valores aproximados).
+export type OrigenAlimento = 'casera' | 'envasado' | 'propio' | 'estimado';
+const ORIGENES: readonly OrigenAlimento[] = ['casera', 'envasado', 'propio', 'estimado'];
 
 export interface Alimento extends Nutrientes {
-  id: string; // "casera:milanesa-carne-horno", "off:7790040613607" o "propio:…"
+  id: string; // "casera:milanesa-carne-horno", "off:7790040613607", "propio:…" o "estimado:…"
   nombre: string;
   origen: OrigenAlimento;
   marca: string | null;
@@ -89,11 +91,18 @@ export function buscarCaseras(
     .map(({ a }) => a);
 }
 
-// "Casera · 245 kcal / 100 g" o "Arcor · 443 kcal / 100 g".
+// Sus valores son una estimación (del coach), no de una base: el diario lo marca "aproximado".
+export function esAproximado(a: Alimento): boolean {
+  return a.origen === 'estimado';
+}
+
+// "Casera · 245 kcal / 100 g", "Arcor · 443 kcal / 100 g" o "Aproximado · 300 kcal / 100 g".
 export function subtituloAlimento(a: Alimento): string {
   const origen =
     a.origen === 'casera'
       ? 'Casera'
+      : a.origen === 'estimado'
+        ? 'Aproximado'
       : a.origen === 'propio'
         ? a.marca
           ? `${a.marca} · creado por vos`
@@ -119,7 +128,7 @@ export function leerAlimento(x: unknown): Alimento | null {
   if (typeof x !== 'object' || x === null) return null;
   const a = x as Record<string, unknown>;
   if (!esTexto(a.id) || !esTexto(a.nombre) || !a.nombre.trim()) return null;
-  if (a.origen !== 'casera' && a.origen !== 'envasado' && a.origen !== 'propio') return null;
+  if (!ORIGENES.includes(a.origen as OrigenAlimento)) return null;
   if (!esNumero(a.kcal, 1000) || !esNumero(a.proteinas, 100) || !esNumero(a.carbos, 100) || !esNumero(a.grasas, 100)) {
     return null;
   }
@@ -128,7 +137,7 @@ export function leerAlimento(x: unknown): Alimento | null {
   return {
     id: a.id,
     nombre: a.nombre,
-    origen: a.origen,
+    origen: a.origen as OrigenAlimento,
     marca: esTexto(a.marca) ? a.marca : null,
     codigo: esTexto(a.codigo) ? a.codigo : null,
     imagen: esTexto(a.imagen) ? a.imagen : null,

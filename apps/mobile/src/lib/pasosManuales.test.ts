@@ -16,6 +16,7 @@ import {
   leerCargasGuardadas,
   leerValor,
   minutosDesdeKm,
+  minutosDesdePasos,
   pasosDesdeKm,
   pasosDesdeMinutos,
   podarCargasViejas,
@@ -30,7 +31,7 @@ const MUJER = { alturaCm: 165, sexo: 'mujer' as const };
 // Franja de una hora que termina en la fecha dada.
 const horaHasta = (fin: Date): Franja => ({ inicio: new Date(fin.getTime() - 3_600_000), fin });
 // Carga sin podómetro (nada registrado).
-const carga = (tipo: 'km' | 'minutos', valor: number, fin: Date, id: string) =>
+const carga = (tipo: 'km' | 'minutos' | 'pasos', valor: number, fin: Date, id: string) =>
   crearCarga({ tipo, valor, franja: horaHasta(fin), registrado: 0 }, HOMBRE, id);
 
 describe('largo de paso', () => {
@@ -60,6 +61,12 @@ test('pasosDesdeMinutos: 100 pasos por minuto', () => {
   expect(pasosDesdeMinutos(0)).toBe(0);
 });
 
+test('minutosDesdePasos: 100 pasos por minuto', () => {
+  expect(minutosDesdePasos(4000)).toBe(40);
+  expect(minutosDesdePasos(4049)).toBe(40);
+  expect(minutosDesdePasos(0)).toBe(0);
+});
+
 test('minutosDesdeKm: a 5 km/h', () => {
   expect(minutosDesdeKm(5)).toBe(60);
   expect(minutosDesdeKm(2)).toBe(24);
@@ -69,6 +76,10 @@ test('minutosDesdeKm: a 5 km/h', () => {
 describe('convertir', () => {
   test('en km estima los minutos a 5 km/h', () => {
     expect(convertir('km', 2, HOMBRE)).toEqual({ pasos: 2754, minutos: 24 });
+  });
+
+  test('en pasos se suman tal cual y los minutos son pasos ÷ 100', () => {
+    expect(convertir('pasos', 6500, HOMBRE)).toEqual({ pasos: 6500, minutos: 65 });
   });
 
   test('en minutos los minutos son los cargados', () => {
@@ -90,6 +101,11 @@ describe('leerValor', () => {
     expect(leerValor('-3', 'km')).toBeNull();
     expect(leerValor('51', 'km')).toBeNull();
     expect(leerValor('601', 'minutos')).toBeNull();
+    // Pasos: enteros hasta 60.000 (600 min × 100).
+    expect(leerValor('6500', 'pasos')).toBe(6500);
+    expect(leerValor('60000', 'pasos')).toBe(60000);
+    expect(leerValor('60001', 'pasos')).toBeNull();
+    expect(leerValor('6500,5', 'pasos')).toBeNull();
   });
 });
 
@@ -277,6 +293,12 @@ describe('leerCargasGuardadas', () => {
 
   test('acepta cargas guardadas antes de la carga inteligente (sin franja)', () => {
     expect(leerCargasGuardadas([vieja])).toEqual([vieja]);
+  });
+
+  test('acepta cargas en pasos', () => {
+    const enPasos = carga('pasos', 3000, new Date(2026, 10, 25, 8), 'p');
+    expect(enPasos).toMatchObject({ tipo: 'pasos', valor: 3000, pasos: 3000, minutos: 30 });
+    expect(leerCargasGuardadas([enPasos])).toEqual([enPasos]);
   });
 
   test('descarta datos corruptos', () => {

@@ -19,6 +19,7 @@ import {
   type RegistroComida,
   type SeccionDiario,
 } from '../lib/comida/diario';
+import { esAproximado } from '../lib/comida/alimentos';
 import { detalleCantidad } from '../lib/comida/porciones';
 import { kcalEntrenoDelDia } from '../lib/entreno/resumen';
 import { formatearNumero } from '../lib/formato';
@@ -240,7 +241,14 @@ function Seccion({
                 <Text style={styles.nombreItem} numberOfLines={1}>
                   {r.alimento.nombre}
                 </Text>
-                <Text style={styles.detalleItem}>{detalleCantidad(r.alimento, r.cantidad)}</Text>
+                <View style={styles.filaDetalle}>
+                  <Text style={styles.detalleItem}>{detalleCantidad(r.alimento, r.cantidad)}</Text>
+                  {esAproximado(r.alimento) && (
+                    <Text style={styles.sello} accessibilityLabel="Valores aproximados">
+                      aproximado
+                    </Text>
+                  )}
+                </View>
               </View>
               <Text style={styles.kcalItem}>{formatearNumero(nutrientesRegistro(r).kcal)}</Text>
             </Pressable>
@@ -308,6 +316,18 @@ const styles = StyleSheet.create({
     borderTopColor: colores.borde,
   },
   nombreItem: { color: colores.texto, fontSize: 16, fontWeight: '700' },
-  detalleItem: { color: colores.textoSecundario, fontSize: 13, marginTop: 3 },
+  detalleItem: { color: colores.textoSecundario, fontSize: 13 },
+  filaDetalle: { flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 3 },
+  sello: {
+    color: colores.oro,
+    backgroundColor: colores.oroFondo,
+    borderColor: colores.oroBorde,
+    borderWidth: 1,
+    borderRadius: radios.pill,
+    paddingHorizontal: 6,
+    fontSize: 11,
+    fontWeight: '700',
+    overflow: 'hidden',
+  },
   kcalItem: { color: colores.texto, fontSize: 16, fontWeight: '800' },
 });
