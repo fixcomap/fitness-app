@@ -18,7 +18,7 @@ import type { Objetivo, Sexo } from '../calorias';
 export const MAXIMO_MENSAJES_GUARDADOS = 40;
 export const MAXIMO_MENSAJES_API = 10;
 // Límites de la API (si se pasan, el pedido entero da 400).
-const MAXIMO_TEXTO_MENSAJE = 2000;
+export const MAXIMO_TEXTO_MENSAJE = 2000;
 const MAXIMO_COMIDAS_DIA = 40;
 const MAXIMO_TEXTO_COMIDA = 80;
 const MAXIMO_ENTRENOS_DIA = 5;

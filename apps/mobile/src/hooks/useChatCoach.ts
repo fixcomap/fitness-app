@@ -15,6 +15,7 @@ import {
   type MensajeGuardado,
 } from '../lib/coach/chat';
 import { armarPedido } from '../lib/coach/contexto';
+import { mensajesConPropuestas } from '../lib/coach/propuestas';
 
 const nuevoId = () => `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
 
@@ -74,7 +75,8 @@ export function useChatCoach(): ChatCoach {
   const pedir = useCallback(
     async (historial: MensajeGuardado[]) => {
       const ahora = new Date();
-      const pedido = armarPedido(historial, { ahora, ...datos.current });
+      // Los mensajes del coach van con el resumen de lo que propuso, para que no lo vuelva a armar.
+      const pedido = armarPedido(mensajesConPropuestas(historial, datos.current.rutinas), { ahora, ...datos.current });
       if (!pedido || ocupado.current) return;
       ocupado.current = true;
       setEnviando(true);
