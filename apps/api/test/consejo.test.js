@@ -9,7 +9,7 @@ const {
   comidasQueQuedan,
   momentoDelDia,
   HORA_TARDE,
-  PROTEINA_POR_COMIDA,
+  proteinaPorComida,
   datosDeHoy,
   contextoConsejo,
   leerConsejo,
@@ -88,6 +88,7 @@ const MANANA = {
   rutinasDeHoy: ['Piernas'],
   entrenoDeHoyHecho: false,
   objetivos: { proteinas: 160, kcal: 2600, pasos: 8000 },
+  proteinaPorComida: 32, // 80 kg × 0,4
   ayer: {
     fecha: '2026-11-25',
     proteinas: 140,
@@ -129,21 +130,25 @@ test('datosDeHoy a la tarde: lo que falta hoy y una meta realista para lo que qu
       promedioSemana: undefined,
       hoy: { proteinas: 90, kcal: 900, pasos: 3000, comidasRegistradas: 1, entrenos: [] },
       faltanHoy: { proteinas: 70, kcal: 1700, pasos: 5000 },
-      // A las 18 queda la cena: 40 g de proteína, no 70. Pasos: 4 horas hasta las 22 alcanzan.
-      paraLoQueQueda: { comidasQueQuedan: 1, proteinas: PROTEINA_POR_COMIDA, pasos: 5000 },
+      // A las 18 queda la cena: 32 g de proteína (80 kg × 0,4), no 70. Pasos: 4 horas hasta las 22 alcanzan.
+      paraLoQueQueda: { comidasQueQuedan: 1, proteinas: 32, pasos: 5000 },
     },
   );
   assert.deepStrictEqual(datosDeHoy(contexto(), 15).paraLoQueQueda, {
     comidasQueQuedan: 2,
-    proteinas: 70,
+    proteinas: 64,
     pasos: 5000,
   });
   assert.deepStrictEqual(datosDeHoy(contexto(), 21).paraLoQueQueda, {
     comidasQueQuedan: 1,
-    proteinas: 40,
+    proteinas: 32,
     pasos: 1500,
   });
   assert.deepStrictEqual(datosDeHoy(contexto(), 23).paraLoQueQueda, { comidasQueQuedan: 0, proteinas: 0, pasos: 0 });
+});
+
+test('proteinaPorComida: unos 0,4 g por kg (30-40 g para la mayoría)', () => {
+  assert.deepStrictEqual([60, 78, 100].map(proteinaPorComida), [24, 31, 40]);
 });
 
 test('comidasQueQuedan: merienda y cena, solo la cena o ninguna', () => {
@@ -186,6 +191,7 @@ test('datosDeHoy: sin objetivos ni datos no inventa nada', () => {
     rutinasDeHoy: [],
     entrenoDeHoyHecho: false,
     objetivos: {},
+    proteinaPorComida: 32,
     ayer: null,
     promedioSemana: { diasConComidas: 0, proteinas: null, kcal: null, pasos: null },
     entrenosUltimos7Dias: 0,
@@ -228,6 +234,7 @@ test('el prompt del consejo pide lo acordado', () => {
     /Nunca digas cuánto le falta hoy/,
     /paraLoQueQueda/,
     /nada de 100 g de proteína en una cena/,
+    /proteinaPorComida/,
   ]) {
     assert.match(SISTEMA_CONSEJO, regla);
   }

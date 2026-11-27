@@ -41,8 +41,11 @@ function rachaComidas(dias, hoy) {
 // La mañana (antes de las 14 h, o mientras no haya comidas cargadas hoy): el consejo se basa en ayer, la
 // semana y lo planeado hoy, nunca en "te faltan X hoy". Después, en lo del día con metas realistas.
 const HORA_TARDE = 14;
-// Lo que se puede sumar sin forzar en lo que queda del día.
-const PROTEINA_POR_COMIDA = 40; // g
+// Proteína por comida: unos 0,4 g por kg de peso (30-40 g para la mayoría). Es lo que conviene sumar en cada
+// comida y lo que se puede sumar sin forzar en las que quedan.
+const PROTEINA_G_POR_KG_COMIDA = 0.4;
+const proteinaPorComida = (pesoKg) => Math.round(pesoKg * PROTEINA_G_POR_KG_COMIDA);
+// Pasos que se pueden sumar sin forzar en lo que queda del día.
 const PASOS_POR_HORA = 1500;
 const HORA_FIN_DIA = 22;
 
@@ -102,6 +105,7 @@ function datosDeHoy(contexto, hora) {
   const objetivos = objetivosDe(contexto?.perfil ?? {});
   const conComidas = anteriores.filter(tieneComidas);
   const momento = momentoDelDia(hora, hoy);
+  const porComida = proteinaPorComida(contexto?.perfil?.pesoKg ?? 0);
 
   const datos = {
     momento,
@@ -109,6 +113,7 @@ function datosDeHoy(contexto, hora) {
     rutinasDeHoy: (contexto?.rutinas ?? []).filter((r) => r.dias.includes(indice)).map((r) => r.nombre),
     entrenoDeHoyHecho: (hoy?.entrenos?.length ?? 0) > 0,
     objetivos,
+    proteinaPorComida: porComida,
     ayer: ayer ? { fecha: ayer.fecha, ...resumenDia(ayer), faltaron: faltantes(objetivos, ayer) } : null,
     promedioSemana: {
       diasConComidas: conComidas.length,
@@ -130,9 +135,7 @@ function datosDeHoy(contexto, hora) {
     faltanHoy,
     paraLoQueQueda: {
       comidasQueQuedan: comidas,
-      ...(faltanHoy.proteinas !== undefined
-        ? { proteinas: Math.min(faltanHoy.proteinas, comidas * PROTEINA_POR_COMIDA) }
-        : {}),
+      ...(faltanHoy.proteinas !== undefined ? { proteinas: Math.min(faltanHoy.proteinas, comidas * porComida) } : {}),
       ...(faltanHoy.pasos !== undefined ? { pasos: Math.min(faltanHoy.pasos, horas * PASOS_POR_HORA) } : {}),
     },
   };
@@ -159,7 +162,8 @@ module.exports = {
   MAXIMO_TEXTO_CONSEJO,
   MARGEN_CUMPLIDO,
   HORA_TARDE,
-  PROTEINA_POR_COMIDA,
+  PROTEINA_G_POR_KG_COMIDA,
+  proteinaPorComida,
   PEDIDO_CONSEJO,
   indiceDia,
   rachaComidas,

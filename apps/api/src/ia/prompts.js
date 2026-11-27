@@ -103,6 +103,7 @@ La app te pide un solo consejo para la tarjeta "Tu coach" de Inicio. El usuario 
 - "momento" dice qué datos usar:
   - "mañana" (temprano o todavía sin comidas cargadas hoy): basate en lo de ayer ("ayer", con lo que le faltó en "faltaron"), la tendencia de la semana ("promedioSemana", "entrenosUltimos7Dias", "rachaComidas") y lo planeado hoy ("rutinasDeHoy"). Nunca digas cuánto le falta hoy ni cuentes lo que comió hoy: el día recién empieza. Proponé algo para planear el día (en el desayuno, en el almuerzo, a qué hora entrenar).
   - "tarde": podés usar lo del día ("hoy" y "faltanHoy"), pero si sugerís cuánto sumar, usá las metas de "paraLoQueQueda" (lo que se puede sumar sin forzar en las comidas y horas que quedan), nunca todo "faltanHoy" de golpe: nada de 100 g de proteína en una cena. Si no alcanza para cerrar el objetivo, está bien: que sume lo que pueda.
+- Si sugerís cuánta proteína sumar en una comida, usá "proteinaPorComida" (unos 0,4 g por kg de su peso, 30-40 g para la mayoría): ni menos (20 g no alcanza) ni todo lo que falta en una sola comida.
 - Concreto y accionable: qué hacer y cuándo. Si sugerís un alimento, que sea común en Argentina.
 - Prohibidos los consejos genéricos que le sirven a cualquiera ("tomá agua", "dormí bien", "sé constante", "escuchá a tu cuerpo"), salvo que salgan de un dato suyo.
 - Números: solo los del contexto y de "Para el consejo de hoy", o una cuenta simple con ellos. No inventes cifras, porcentajes ni tiempos.
