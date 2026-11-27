@@ -2,30 +2,65 @@ import { Ionicons } from '@expo/vector-icons';
 import { BlurView } from 'expo-blur';
 import { Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 
+import type { Consejo, DestinoConsejo } from '../../lib/coach/consejo';
 import { colores } from '../../theme/tema';
 
+export const TEXTO_PENSANDO = 'Pensando tu consejo de hoy…';
+
+// Para el lector de pantalla: a dónde lleva tocar el consejo.
+const NOMBRE_DESTINO: Record<Exclude<DestinoConsejo, 'coach'>, string> = {
+  entreno: 'Entreno',
+  comida: 'Comida',
+  actividad: 'Actividad',
+};
+
 interface TarjetaCoachProps {
-  esPremium: boolean;
-  consejo: string;
-  onResponder?: () => void;
-  onProbarGratis?: () => void;
+  habilitado: boolean; // premium o desbloqueo de desarrollo (ver coachHabilitado)
+  consejo: Consejo | null; // null mientras se piensa
+  consejoBloqueado: string; // el de ejemplo, borroso, para quien no tiene premium
+  onHablar: () => void;
+  onIrA: (destino: DestinoConsejo) => void;
+  onProbarGratis: () => void;
 }
 
-export function TarjetaCoach({ esPremium, consejo, onResponder, onProbarGratis }: TarjetaCoachProps) {
-  if (esPremium) {
+export function TarjetaCoach({
+  habilitado,
+  consejo,
+  consejoBloqueado,
+  onHablar,
+  onIrA,
+  onProbarGratis,
+}: TarjetaCoachProps) {
+  if (habilitado) {
+    const destino = consejo && consejo.destino !== 'coach' ? consejo.destino : null;
     return (
       <View style={[styles.tarjeta, styles.premium]}>
         <View style={[styles.avatar, styles.avatarIa]}>
           <Text style={styles.textoIa}>IA</Text>
         </View>
         <View style={styles.cuerpo}>
-          <View style={styles.cabecera}>
-            <Text style={[styles.titulo, styles.tituloPremium]}>Tu coach</Text>
-            <Pressable onPress={onResponder} accessibilityRole="button" hitSlop={8}>
-              <Text style={styles.responder}>Responder ›</Text>
+          <Text style={[styles.titulo, styles.tituloPremium]}>Tu coach</Text>
+          {consejo ? (
+            <Pressable
+              onPress={() => onIrA(consejo.destino)}
+              disabled={!destino}
+              accessibilityRole={destino ? 'button' : 'text'}
+              accessibilityHint={destino ? `Abre ${NOMBRE_DESTINO[destino]}` : undefined}
+            >
+              <Text style={styles.consejo}>{consejo.texto}</Text>
             </Pressable>
-          </View>
-          <Text style={styles.consejo}>{consejo}</Text>
+          ) : (
+            <Text style={[styles.consejo, styles.pensando]} accessibilityLiveRegion="polite">
+              {TEXTO_PENSANDO}
+            </Text>
+          )}
+          <Pressable
+            onPress={onHablar}
+            style={({ pressed }) => [styles.botonHablar, pressed && styles.presionado]}
+            accessibilityRole="button"
+          >
+            <Text style={styles.textoHablar}>Hablar con el coach</Text>
+          </Pressable>
         </View>
       </View>
     );
@@ -38,7 +73,7 @@ export function TarjetaCoach({ esPremium, consejo, onResponder, onProbarGratis }
       </View>
       <View style={styles.cuerpo}>
         <Text style={styles.titulo}>Tu coach</Text>
-        <ConsejoBorroso consejo={consejo} />
+        <ConsejoBorroso consejo={consejoBloqueado} />
       </View>
       <View style={styles.capaBoton} pointerEvents="box-none">
         <Pressable
@@ -91,11 +126,21 @@ const styles = StyleSheet.create({
   avatarCandado: { backgroundColor: colores.tarjetaElevada },
   textoIa: { color: colores.textoSobreAcento, fontWeight: '800', fontSize: 13 },
   cuerpo: { flex: 1, gap: 4 },
-  cabecera: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   titulo: { color: colores.textoSecundario, fontSize: 13, fontWeight: '700' },
   tituloPremium: { color: colores.oro },
-  responder: { color: '#D8D8D8', fontSize: 13, fontWeight: '700' },
   consejo: { color: colores.texto, fontSize: 15, lineHeight: 21 },
+  pensando: { color: colores.textoSecundario, fontStyle: 'italic' },
+  botonHablar: {
+    alignSelf: 'flex-start',
+    marginTop: 10,
+    height: 36,
+    paddingHorizontal: 14,
+    borderRadius: 18,
+    borderWidth: 1,
+    borderColor: colores.oroBorde,
+    justifyContent: 'center',
+  },
+  textoHablar: { color: colores.oro, fontSize: 14, fontWeight: '700' },
   consejoTenue: { color: '#BDBDBD' },
   capaBlur: { position: 'absolute', top: -4, right: -4, bottom: -4, left: -4 },
   lineas: { gap: 9, paddingTop: 6, paddingBottom: 4 },
