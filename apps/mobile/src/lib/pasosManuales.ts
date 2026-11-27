@@ -4,14 +4,14 @@ import type { Sexo } from './calorias';
 import { inicioDelDia, sumarMinutos } from './fechas';
 import { formatearNumero } from './formato';
 
-export type TipoCarga = 'km' | 'minutos';
+export type TipoCarga = 'km' | 'minutos' | 'pasos';
 
 export interface CargaPasos {
   id: string;
   dia: string; // 'AAAA-MM-DD' en hora local
   hora: string; // 'HH:MM' en hora local (fin de la caminata)
   tipo: TipoCarga;
-  valor: number; // km o minutos, según el tipo
+  valor: number; // km, minutos o pasos, según el tipo
   pasos: number; // los que se suman: estimado − lo que ya contó el celu
   minutos: number; // minutos activos que suma
   // Desde la carga inteligente (las cargas viejas no los tienen):
@@ -31,7 +31,8 @@ export const PASOS_POR_MINUTO = 100;
 // Velocidad para estimar los minutos cuando se carga en km (caminata a paso normal).
 export const VELOCIDAD_CAMINATA_KM_H = 5;
 
-export const MAXIMO: Record<TipoCarga, number> = { km: 50, minutos: 600 };
+// En pasos, lo mismo que 600 minutos a 100 pasos por minuto.
+export const MAXIMO: Record<TipoCarga, number> = { km: 50, minutos: 600, pasos: 600 * PASOS_POR_MINUTO };
 
 export function largoPasoCm(alturaCm: number, sexo: Sexo): number {
   return alturaCm * FACTOR_LARGO_PASO[sexo];
@@ -47,6 +48,10 @@ export function pasosDesdeMinutos(minutos: number): number {
   return minutos > 0 ? Math.round(minutos * PASOS_POR_MINUTO) : 0;
 }
 
+export function minutosDesdePasos(pasos: number): number {
+  return pasos > 0 ? Math.round(pasos / PASOS_POR_MINUTO) : 0;
+}
+
 export function minutosDesdeKm(km: number): number {
   return km > 0 ? Math.round((km / VELOCIDAD_CAMINATA_KM_H) * 60) : 0;
 }
@@ -57,6 +62,7 @@ export function leerValor(texto: string, tipo: TipoCarga): number | null {
   if (!/^\d+(\.\d+)?$/.test(normalizado)) return null;
   const valor = Number(normalizado);
   if (!(valor > 0) || valor > MAXIMO[tipo]) return null;
+  if (tipo === 'pasos' && !Number.isInteger(valor)) return null;
   return valor;
 }
 
@@ -70,6 +76,8 @@ export function convertir(tipo: TipoCarga, valor: number, perfil: DatosPaso): { 
   if (tipo === 'km') {
     return { pasos: pasosDesdeKm(valor, perfil.alturaCm, perfil.sexo), minutos: minutosDesdeKm(valor) };
   }
+  // Los pasos se cargan tal cual; los minutos salen de 100 pasos por minuto.
+  if (tipo === 'pasos') return { pasos: Math.round(valor), minutos: minutosDesdePasos(valor) };
   return { pasos: pasosDesdeMinutos(valor), minutos: Math.round(valor) };
 }
 
@@ -245,7 +253,7 @@ export function leerCargasGuardadas(datos: unknown): CargaPasos[] {
       typeof c.dia === 'string' &&
       /^\d{4}-\d{2}-\d{2}$/.test(c.dia) &&
       typeof c.hora === 'string' &&
-      (c.tipo === 'km' || c.tipo === 'minutos') &&
+      (c.tipo === 'km' || c.tipo === 'minutos' || c.tipo === 'pasos') &&
       Number.isFinite(c.valor) &&
       Number.isFinite(c.pasos) &&
       c.pasos >= 0 &&

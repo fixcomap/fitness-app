@@ -46,7 +46,7 @@ interface HojaPasosManualesProps {
   onAbrirPerfil: () => void; // la meta se cambia en el perfil
 }
 
-const UNIDAD: Record<TipoCarga, string> = { km: 'km', minutos: 'min' };
+const UNIDAD: Record<TipoCarga, string> = { km: 'km', minutos: 'min', pasos: 'pasos' };
 
 type Extremo = 'inicio' | 'fin';
 
