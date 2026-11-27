@@ -13,12 +13,13 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { AvisoDeshacer } from '../components/coach/AvisoDeshacer';
 import { TarjetaAccion } from '../components/coach/TarjetaAccion';
 import { useAccionesCoach, type AccionesCoach } from '../hooks/useAccionesCoach';
 import { useChatCoach } from '../hooks/useChatCoach';
 import { useCoachHabilitado } from '../hooks/useCoachHabilitado';
 import type { AccionGuardada, ErrorChat, MensajeGuardado } from '../lib/coach/chat';
-import { cambiarGramosPorUnidad, vistaTarjeta } from '../lib/coach/tarjeta';
+import { cambiarGramosPorUnidad, pideConfirmacion, vistaTarjeta } from '../lib/coach/tarjeta';
 import { colores, radios } from '../theme/tema';
 
 // Lo mismo que acepta la API por mensaje.
@@ -69,6 +70,15 @@ function Chat() {
           contentContainerStyle={styles.lista}
           keyboardShouldPersistTaps="handled"
           keyboardDismissMode="interactive"
+        />
+      )}
+
+      {acciones.pendiente && (
+        <AvisoDeshacer
+          key={acciones.pendiente.deshacer.accionId}
+          titulo={acciones.pendiente.titulo}
+          vence={acciones.pendiente.deshacer.vence}
+          onDeshacer={acciones.deshacer}
         />
       )}
 
@@ -126,7 +136,7 @@ function Tarjeta({ mensajeId, guardada, acciones }: { mensajeId: string; guardad
     setAplicando(true);
     setError(null);
     try {
-      const problema = await acciones.aplicar(mensajeId, guardada);
+      const problema = await acciones.aplicar(mensajeId, guardada, vista.titulo);
       if (problema) setError(problema.mensaje);
     } catch {
       setError('No se pudo aplicar. Probá de nuevo.');
@@ -137,11 +147,14 @@ function Tarjeta({ mensajeId, guardada, acciones }: { mensajeId: string; guardad
 
   return (
     <TarjetaAccion
+      // Al cambiar de estado (por ejemplo, deshacer) la tarjeta arranca de cero: sin el paso de confirmar.
+      key={estado}
       tipo={accion.tipo}
       vista={vista}
       estado={estado}
       aplicando={aplicando}
       error={error}
+      pideConfirmar={pideConfirmacion(vista)}
       onAplicar={aplicar}
       onCancelar={() => acciones.cancelar(mensajeId, accion.id)}
       onCambiarGramos={(indice, sentido) => acciones.editar(mensajeId, cambiarGramosPorUnidad(accion, indice, sentido))}

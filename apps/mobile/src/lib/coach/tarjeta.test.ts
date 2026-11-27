@@ -1,5 +1,5 @@
 import type { AccionCoach, AccionDe, EstadoApp, ItemComida } from './acciones';
-import { cambiarGramosPorUnidad, lineasComida, vistaTarjeta } from './tarjeta';
+import { cambiarGramosPorUnidad, lineasComida, pideConfirmacion, segundosRestantes, vistaTarjeta } from './tarjeta';
 
 const ahora = new Date(2026, 10, 26, 21, 30);
 const perfil = { alturaCm: 180, sexo: 'hombre' as const };
@@ -88,5 +88,24 @@ describe('cambiar gramos por unidad', () => {
   test('en gramos o fuera de rango no cambia', () => {
     expect(cambiarGramosPorUnidad(accion, 1, 1)).toBe(accion);
     expect(cambiarGramosPorUnidad(accion, 5, 1)).toBe(accion);
+  });
+});
+
+describe('borrar y deshacer', () => {
+  const rutina = { id: 'r1', nombre: 'Full body A', dias: [], ejercicios: [] };
+
+  test('borrar rutinas pide confirmación; lo demás no', () => {
+    const borrar: AccionCoach = { id: 'b', tipo: 'borrar_rutinas', rutinaIds: ['r1'] };
+    expect(pideConfirmacion(vistaTarjeta(borrar, { ...vacio, rutinas: [rutina] }, { ahora, perfil }, base))).toBe(true);
+    const pasos: AccionCoach = { id: 'p', tipo: 'cargar_pasos', dia: '2026-11-26', unidad: 'km', valor: 2 };
+    expect(pideConfirmacion(vistaTarjeta(pasos, vacio, { ahora, perfil }, base))).toBe(false);
+  });
+
+  test('cuenta regresiva de 6 s', () => {
+    const vence = ahora.getTime() + 6000;
+    expect(segundosRestantes(vence, ahora)).toBe(6);
+    expect(segundosRestantes(vence, new Date(ahora.getTime() + 5001))).toBe(1);
+    expect(segundosRestantes(vence, new Date(vence))).toBe(0);
+    expect(segundosRestantes(vence, new Date(vence + 1000))).toBe(0);
   });
 });

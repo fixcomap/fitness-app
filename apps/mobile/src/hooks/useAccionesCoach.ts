@@ -6,8 +6,10 @@ import { useEntreno } from '../estado/Entreno';
 import { leerPasos } from '../lib/actividad/consultas';
 import {
   aplicarAccion,
+  deshacerPendiente,
   franjaCaminata,
   type AccionCoach,
+  type ClaveEstado,
   type Deshacer,
   type EntornoAcciones,
   type EstadoApp,
@@ -25,11 +27,20 @@ export interface AccionesCoach {
   estado: EstadoApp; // rutinas, diario y cargas como están ahora
   base: BaseLocal; // dónde se buscan los alimentos de registrar_comida
   perfil: EntornoAcciones['perfil'];
-  pendiente: Deshacer | null; // lo último aplicado, para deshacer
+  // Lo último aplicado, mientras se puede deshacer (6 s): con el chat y el título de su tarjeta.
+  pendiente: Pendiente | null;
   // null si se aplicó; si no, por qué no.
-  aplicar: (mensajeId: string, guardada: AccionGuardada) => Promise<ProblemaAccion | null>;
+  aplicar: (mensajeId: string, guardada: AccionGuardada, titulo: string) => Promise<ProblemaAccion | null>;
   cancelar: (mensajeId: string, accionId: string) => void;
   editar: (mensajeId: string, accion: AccionCoach) => void;
+  // Vuelve atrás lo último aplicado. false si ya pasaron los 6 s.
+  deshacer: () => boolean;
+}
+
+export interface Pendiente {
+  deshacer: Deshacer;
+  mensajeId: string;
+  titulo: string;
 }
 
 // Aplica las acciones del coach sobre lo guardado en el celu y deja el estado de cada una en el chat.
@@ -37,7 +48,7 @@ export function useAccionesCoach(actualizarChat: ActualizarChat): AccionesCoach 
   const { perfil, cargas, reemplazarCargas, fuente, estadoFuente } = useDatosDelDia();
   const { rutinas, reemplazarRutinas } = useEntreno();
   const { registros, propios, reemplazarRegistros } = useComidas();
-  const [pendiente, setPendiente] = useState<Deshacer | null>(null);
+  const [pendiente, setPendiente] = useState<Pendiente | null>(null);
 
   const estado = useMemo<EstadoApp>(() => ({ rutinas, diario: registros, cargas }), [rutinas, registros, cargas]);
   const base = useMemo<BaseLocal>(() => ({ recientes: alimentosRecientes(registros), propios }), [registros, propios]);
@@ -50,8 +61,25 @@ export function useAccionesCoach(actualizarChat: ActualizarChat): AccionesCoach 
   }, [estado, base, pendiente]);
   const aplicando = useRef(new Set<string>());
 
+  // Escribe en el estado de la app solo la clave que tocó la acción.
+  const guardarClave = useCallback(
+    (clave: ClaveEstado, nuevo: EstadoApp) => {
+      if (clave === 'rutinas') reemplazarRutinas(nuevo.rutinas);
+      else if (clave === 'diario') reemplazarRegistros(nuevo.diario);
+      else reemplazarCargas(nuevo.cargas);
+    },
+    [reemplazarRutinas, reemplazarRegistros, reemplazarCargas],
+  );
+
+  // A los 6 s el deshacer vence y el aviso se va.
+  useEffect(() => {
+    if (!pendiente) return;
+    const espera = setTimeout(() => setPendiente((p) => (p === pendiente ? null : p)), Math.max(0, pendiente.deshacer.vence - Date.now()));
+    return () => clearTimeout(espera);
+  }, [pendiente]);
+
   const aplicar = useCallback(
-    async (mensajeId: string, { accion, estado: estadoAccion }: AccionGuardada) => {
+    async (mensajeId: string, { accion, estado: estadoAccion }: AccionGuardada, titulo: string) => {
       if (estadoAccion !== 'pendiente' || aplicando.current.has(accion.id)) return null;
       aplicando.current.add(accion.id);
       let aplicada = false;
@@ -63,7 +91,7 @@ export function useAccionesCoach(actualizarChat: ActualizarChat): AccionesCoach 
           registrado = (await leerPasos(fuente, franja.inicio, franja.fin)) ?? 0;
         }
         const { estado: ahoraEstado, base: ahoraBase, pendiente: anterior } = actual.current;
-        const r = aplicarAccion({ estado: ahoraEstado, pendiente: anterior }, accion, {
+        const r = aplicarAccion({ estado: ahoraEstado, pendiente: anterior?.deshacer ?? null }, accion, {
           ahora: new Date(),
           perfil,
           crearId: nuevoId,
@@ -72,18 +100,17 @@ export function useAccionesCoach(actualizarChat: ActualizarChat): AccionesCoach 
         });
         if (!r.ok) return r.problema;
         const { estado: nuevo, pendiente: deshacer } = r.siguiente;
-        if (deshacer?.clave === 'rutinas') reemplazarRutinas(nuevo.rutinas);
-        else if (deshacer?.clave === 'diario') reemplazarRegistros(nuevo.diario);
-        else if (deshacer?.clave === 'cargas') reemplazarCargas(nuevo.cargas);
+        if (!deshacer) return null;
+        guardarClave(deshacer.clave, nuevo);
         aplicada = true;
-        setPendiente(deshacer);
+        setPendiente({ deshacer, mensajeId, titulo });
         actualizarChat((h) => cambiarEstadoAccion(h, mensajeId, accion.id, 'aplicada') ?? h);
         return null;
       } finally {
         if (!aplicada) aplicando.current.delete(accion.id);
       }
     },
-    [estadoFuente, fuente, perfil, reemplazarRutinas, reemplazarRegistros, reemplazarCargas, actualizarChat],
+    [estadoFuente, fuente, perfil, guardarClave, actualizarChat],
   );
 
   const cancelar = useCallback(
@@ -96,5 +123,18 @@ export function useAccionesCoach(actualizarChat: ActualizarChat): AccionesCoach 
     [actualizarChat],
   );
 
-  return { estado, base, perfil, pendiente, aplicar, cancelar, editar };
+  const deshacer = useCallback(() => {
+    const { estado: ahoraEstado, pendiente: p } = actual.current;
+    if (!p) return false;
+    const r = deshacerPendiente({ estado: ahoraEstado, pendiente: p.deshacer }, new Date());
+    if (!r) return false;
+    guardarClave(p.deshacer.clave, r.estado);
+    setPendiente(null);
+    // La acción vuelve a quedar pendiente: se puede aplicar otra vez.
+    aplicando.current.delete(p.deshacer.accionId);
+    actualizarChat((h) => cambiarEstadoAccion(h, p.mensajeId, p.deshacer.accionId, 'pendiente') ?? h);
+    return true;
+  }, [guardarClave, actualizarChat]);
+
+  return { estado, base, perfil, pendiente, aplicar, cancelar, editar, deshacer };
 }

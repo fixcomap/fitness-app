@@ -1,5 +1,5 @@
 import { Ionicons } from '@expo/vector-icons';
-import type { ComponentProps } from 'react';
+import { useState, type ComponentProps } from 'react';
 import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
 
 import type { TipoAccion } from '../../lib/coach/acciones';
@@ -31,13 +31,25 @@ interface TarjetaAccionProps {
   estado: EstadoAccion;
   aplicando: boolean;
   error: string | null; // lo que falló al aplicar
+  pideConfirmar: boolean; // borrar: Aplicar pide un segundo paso
   onAplicar: () => void;
   onCancelar: () => void;
   onCambiarGramos: (indice: number, sentido: 1 | -1) => void;
 }
 
 // Una acción que propone el coach: qué hace, avisos, y Aplicar / Cancelar mientras está pendiente.
-export function TarjetaAccion({ tipo, vista, estado, aplicando, error, onAplicar, onCancelar, onCambiarGramos }: TarjetaAccionProps) {
+export function TarjetaAccion({
+  tipo,
+  vista,
+  estado,
+  aplicando,
+  error,
+  pideConfirmar,
+  onAplicar,
+  onCancelar,
+  onCambiarGramos,
+}: TarjetaAccionProps) {
+  const [confirmando, setConfirmando] = useState(false);
   const pendiente = estado === 'pendiente';
   // "Ya no aplica" solo importa mientras se puede decidir.
   const problema = pendiente ? vista.problema : null;
@@ -90,7 +102,34 @@ export function TarjetaAccion({ tipo, vista, estado, aplicando, error, onAplicar
         </View>
       )}
 
-      {pendiente ? (
+      {pendiente && confirmando && !problema ? (
+        <View style={styles.confirmar}>
+          <Text style={styles.textoConfirmar}>¿Seguro? Después vas a tener 6 segundos para deshacerlo.</Text>
+          <View style={styles.botones}>
+            <Pressable
+              onPress={() => setConfirmando(false)}
+              disabled={aplicando}
+              style={({ pressed }) => [styles.boton, styles.botonCancelar, pressed && styles.presionado]}
+              accessibilityRole="button"
+            >
+              <Text style={styles.textoCancelar}>Volver</Text>
+            </Pressable>
+            <Pressable
+              onPress={onAplicar}
+              disabled={aplicando}
+              style={({ pressed }) => [styles.boton, styles.botonAplicar, pressed && styles.presionado]}
+              accessibilityRole="button"
+              accessibilityState={{ busy: aplicando }}
+            >
+              {aplicando ? (
+                <ActivityIndicator size="small" color={colores.texto} />
+              ) : (
+                <Text style={styles.textoAplicar}>Sí, borrar</Text>
+              )}
+            </Pressable>
+          </View>
+        </View>
+      ) : pendiente ? (
         <View style={styles.botones}>
           <Pressable
             onPress={onCancelar}
@@ -101,7 +140,7 @@ export function TarjetaAccion({ tipo, vista, estado, aplicando, error, onAplicar
             <Text style={styles.textoCancelar}>Cancelar</Text>
           </Pressable>
           <Pressable
-            onPress={onAplicar}
+            onPress={pideConfirmar ? () => setConfirmando(true) : onAplicar}
             disabled={!puedeAplicar}
             style={({ pressed }) => [styles.boton, styles.botonAplicar, !puedeAplicar && styles.deshabilitado, pressed && styles.presionado]}
             accessibilityRole="button"
@@ -166,6 +205,8 @@ const styles = StyleSheet.create({
   textoAviso: { flex: 1, color: colores.oro, fontSize: 13, lineHeight: 18 },
   textoProblema: { flex: 1, color: colores.acentoSuave, fontSize: 13, lineHeight: 18 },
   botones: { flexDirection: 'row', gap: 10, marginTop: 2 },
+  confirmar: { gap: 8 },
+  textoConfirmar: { color: colores.texto, fontSize: 14, fontWeight: '700', lineHeight: 19 },
   boton: { flex: 1, height: 42, borderRadius: radios.pill, alignItems: 'center', justifyContent: 'center' },
   botonCancelar: { backgroundColor: colores.tarjetaElevada },
   botonAplicar: { backgroundColor: colores.acento },

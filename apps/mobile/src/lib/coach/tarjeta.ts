@@ -79,3 +79,13 @@ export function cambiarGramosPorUnidad(accion: AccionCoach, indice: number, sent
   const items = accion.items.map((it, i) => (i === indice ? { ...it, cantidad: { ...item.cantidad, gramosPorUnidad } } : it));
   return { ...accion, items };
 }
+
+// Borrar rutinas pide un segundo paso dentro de la tarjeta antes de aplicar.
+export function pideConfirmacion(vista: VistaTarjeta): boolean {
+  return vista.avisos.some((a) => a.tipo === 'borrado');
+}
+
+// La cuenta del aviso de Deshacer: 6, 5, … 1, y 0 cuando ya venció.
+export function segundosRestantes(vence: number, ahora: Date): number {
+  return Math.max(0, Math.ceil((vence - ahora.getTime()) / 1000));
+}
