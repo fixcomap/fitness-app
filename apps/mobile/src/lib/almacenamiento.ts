@@ -4,6 +4,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import { leerHistorialGuardado, type RegistroDia } from './actividad/historial';
 import { esIdDispositivo, nuevoIdDispositivo } from './api';
+import { leerChatGuardado, type MensajeGuardado } from './coach/chat';
 import type { Alimento } from './comida/alimentos';
 import { leerDiarioGuardado, type RegistroComida } from './comida/diario';
 import { leerProductosGuardados } from './comida/openFoodFacts';
@@ -29,6 +30,8 @@ const CLAVE_DIARIO_COMIDAS = 'diarioComidas:v1';
 const CLAVE_PRODUCTOS_OFF = 'productosOff:v1';
 const CLAVE_ALIMENTOS_PROPIOS = 'alimentosPropios:v1';
 const CLAVE_DISPOSITIVO = 'dispositivo:v1';
+const CLAVE_CHAT_COACH = 'chatCoach:v1';
+const CLAVE_DESBLOQUEO_DEV = 'coachDesbloqueoDev:v1';
 
 async function leerJson(clave: string): Promise<unknown> {
   try {
@@ -156,4 +159,22 @@ export function leerIdDispositivo(): Promise<string> {
     throw e;
   });
   return idDispositivo;
+}
+
+// La charla con el coach (los últimos 40 mensajes, con el estado de cada acción).
+export async function leerChatCoach(): Promise<MensajeGuardado[]> {
+  return leerChatGuardado(await leerJson(CLAVE_CHAT_COACH));
+}
+
+export async function guardarChatCoach(mensajes: readonly MensajeGuardado[]): Promise<void> {
+  await AsyncStorage.setItem(CLAVE_CHAT_COACH, JSON.stringify(mensajes));
+}
+
+// Solo en desarrollo: el coach desbloqueado sin premium para probarlo en Expo Go (ver coachHabilitado).
+export async function leerDesbloqueoDev(): Promise<boolean> {
+  return (await leerJson(CLAVE_DESBLOQUEO_DEV)) === true;
+}
+
+export async function guardarDesbloqueoDev(desbloqueado: boolean): Promise<void> {
+  await AsyncStorage.setItem(CLAVE_DESBLOQUEO_DEV, JSON.stringify(desbloqueado));
 }

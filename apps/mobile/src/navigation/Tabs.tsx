@@ -5,11 +5,11 @@ import { StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useEntreno } from '../estado/Entreno';
-import { usePerfilActual } from '../estado/Perfil';
+import { useCoachHabilitado } from '../hooks/useCoachHabilitado';
 import { ActividadScreen } from '../screens/ActividadScreen';
+import { CoachScreen } from '../screens/CoachScreen';
 import { ComidaScreen } from '../screens/ComidaScreen';
 import { InicioScreen } from '../screens/InicioScreen';
-import { PantallaTitulo } from '../screens/PantallaTitulo';
 import { colores } from '../theme/tema';
 import { EntrenoStack } from './EntrenoStack';
 import { useNavegacionRaiz } from './tiposRaiz';
@@ -67,8 +67,6 @@ function ComidaRuta() {
   );
 }
 
-const Coach = () => <PantallaTitulo titulo="Coach" />;
-
 function IconoTab({ nombre, color, bloqueado }: { nombre: NombreIcono; color: string; bloqueado: boolean }) {
   return (
     <View>
@@ -84,7 +82,7 @@ function IconoTab({ nombre, color, bloqueado }: { nombre: NombreIcono; color: st
 
 export function Tabs() {
   const insets = useSafeAreaInsets();
-  const perfil = usePerfilActual();
+  const { habilitado: coachHabilitado } = useCoachHabilitado();
   return (
     <Tab.Navigator
       initialRouteName="Inicio"
@@ -98,7 +96,7 @@ export function Tabs() {
         tabBarItemStyle: styles.item,
         tabBarLabelStyle: styles.etiqueta,
         tabBarIcon: ({ color }) => (
-          <IconoTab nombre={ICONOS[route.name]} color={color} bloqueado={route.name === 'Coach' && !perfil.esPremium} />
+          <IconoTab nombre={ICONOS[route.name]} color={color} bloqueado={route.name === 'Coach' && !coachHabilitado} />
         ),
       })}
     >
@@ -106,7 +104,7 @@ export function Tabs() {
       <Tab.Screen name="Entreno" component={EntrenoStack} />
       <Tab.Screen name="Comida" component={ComidaRuta} />
       <Tab.Screen name="Actividad" component={ActividadRuta} />
-      <Tab.Screen name="Coach" component={Coach} />
+      <Tab.Screen name="Coach" component={CoachScreen} />
     </Tab.Navigator>
   );
 }
