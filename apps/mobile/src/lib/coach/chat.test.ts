@@ -7,6 +7,7 @@ import {
   caducarViejas,
   cambiarEstadoAccion,
   coachHabilitado,
+  editarAccion,
   errorDeChat,
   leerChatGuardado,
   mensajeCoach,
@@ -84,6 +85,13 @@ describe('estado de cada acción', () => {
     const editada: AccionCoach = { ...pasos, id: 'otro', valor: 5 };
     const aplicado = cambiarEstadoAccion(historial, 'c1', 'p1', 'aplicada', editada)!;
     expect(aplicado[1].acciones[0].accion).toEqual({ ...pasos, valor: 5 });
+  });
+
+  test('editar cambia una pendiente y no una ya decidida', () => {
+    const editada: AccionCoach = { ...pasos, valor: 5 };
+    expect(editarAccion(historial, 'c1', editada)?.[1].acciones[0]).toEqual({ accion: editada, estado: 'pendiente' });
+    const aplicado = cambiarEstadoAccion(historial, 'c1', 'p1', 'aplicada')!;
+    expect(editarAccion(aplicado, 'c1', editada)).toBeNull();
   });
 
   test('null si no existe', () => {

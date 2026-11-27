@@ -33,6 +33,8 @@ export interface ComidasValor {
   borrar: (id: string) => void;
   recordar: (producto: Alimento) => void; // un envasado que se vio (escaneado o buscado)
   crearPropio: (alimento: Alimento) => void;
+  // Todo el diario de una vez (acciones del coach y su deshacer).
+  reemplazarRegistros: (registros: RegistroComida[]) => void;
 }
 
 const Contexto = createContext<ComidasValor | null>(null);
@@ -90,9 +92,11 @@ export function ProveedorComidas({ children }: { children: ReactNode }) {
 
   const borrar = useCallback((id: string) => setRegistros((r) => borrarRegistro(r, id)), []);
 
+  const reemplazarRegistros = useCallback((r: RegistroComida[]) => setRegistros(r), []);
+
   const valor = useMemo(
-    () => ({ listo, registros, productos, propios, agregar, editar, borrar, recordar, crearPropio }),
-    [listo, registros, productos, propios, agregar, editar, borrar, recordar, crearPropio],
+    () => ({ listo, registros, productos, propios, agregar, editar, borrar, recordar, crearPropio, reemplazarRegistros }),
+    [listo, registros, productos, propios, agregar, editar, borrar, recordar, crearPropio, reemplazarRegistros],
   );
   return <Contexto.Provider value={valor}>{children}</Contexto.Provider>;
 }

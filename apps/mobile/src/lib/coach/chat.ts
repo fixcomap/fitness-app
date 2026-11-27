@@ -96,6 +96,19 @@ export function cambiarEstadoAccion(
   );
 }
 
+// Cambia lo que propone una acción pendiente (editada en la tarjeta). null si no existe o ya se decidió.
+export function editarAccion(
+  historial: readonly MensajeGuardado[],
+  mensajeId: string,
+  accion: AccionCoach,
+): MensajeGuardado[] | null {
+  const actual = buscarAccion(historial, mensajeId, accion.id);
+  if (!actual || actual.estado !== 'pendiente') return null;
+  return historial.map((m) =>
+    m.id !== mensajeId ? m : { ...m, acciones: m.acciones.map((a) => (a.accion.id === accion.id ? { ...a, accion } : a)) },
+  );
+}
+
 // ── Errores ──
 
 export interface ErrorChat {

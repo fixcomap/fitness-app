@@ -13,9 +13,12 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { TarjetaAccion } from '../components/coach/TarjetaAccion';
+import { useAccionesCoach, type AccionesCoach } from '../hooks/useAccionesCoach';
 import { useChatCoach } from '../hooks/useChatCoach';
 import { useCoachHabilitado } from '../hooks/useCoachHabilitado';
-import type { ErrorChat, MensajeGuardado } from '../lib/coach/chat';
+import type { AccionGuardada, ErrorChat, MensajeGuardado } from '../lib/coach/chat';
+import { cambiarGramosPorUnidad, vistaTarjeta } from '../lib/coach/tarjeta';
 import { colores, radios } from '../theme/tema';
 
 // Lo mismo que acepta la API por mensaje.
@@ -36,7 +39,8 @@ export function CoachScreen() {
 }
 
 function Chat() {
-  const { listo, mensajes, enviando, error, enviar, reintentar } = useChatCoach();
+  const { listo, mensajes, enviando, error, enviar, reintentar, actualizar } = useChatCoach();
+  const acciones = useAccionesCoach(actualizar);
   const [texto, setTexto] = useState('');
   // La lista va dada vuelta: el más nuevo abajo, pegado al campo de texto.
   const alReves = useMemo(() => [...mensajes].reverse(), [mensajes]);
@@ -57,7 +61,9 @@ function Chat() {
           inverted
           data={alReves}
           keyExtractor={(m) => m.id}
-          renderItem={({ item }) => <Burbuja mensaje={item} />}
+          // Las tarjetas dependen de las rutinas, el diario y las cargas: se redibujan si cambian.
+          extraData={acciones}
+          renderItem={({ item }) => <Burbuja mensaje={item} acciones={acciones} />}
           // Con la lista dada vuelta, el encabezado queda abajo de todo: debajo del último mensaje.
           ListHeaderComponent={<Estado enviando={enviando} error={error} onReintentar={reintentar} />}
           contentContainerStyle={styles.lista}
@@ -92,16 +98,54 @@ function Chat() {
   );
 }
 
-function Burbuja({ mensaje }: { mensaje: MensajeGuardado }) {
+function Burbuja({ mensaje, acciones }: { mensaje: MensajeGuardado; acciones: AccionesCoach }) {
   const deUsuario = mensaje.rol === 'usuario';
   return (
-    <View style={[styles.fila, deUsuario && styles.filaUsuario]}>
-      <View style={[styles.burbuja, deUsuario ? styles.burbujaUsuario : styles.burbujaCoach]}>
-        <Text style={styles.texto} selectable>
-          {mensaje.texto}
-        </Text>
+    <View style={styles.mensaje}>
+      <View style={[styles.fila, deUsuario && styles.filaUsuario]}>
+        <View style={[styles.burbuja, deUsuario ? styles.burbujaUsuario : styles.burbujaCoach]}>
+          <Text style={styles.texto} selectable>
+            {mensaje.texto}
+          </Text>
+        </View>
       </View>
+      {mensaje.acciones.map((guardada) => (
+        <Tarjeta key={guardada.accion.id} mensajeId={mensaje.id} guardada={guardada} acciones={acciones} />
+      ))}
     </View>
+  );
+}
+
+function Tarjeta({ mensajeId, guardada, acciones }: { mensajeId: string; guardada: AccionGuardada; acciones: AccionesCoach }) {
+  const [aplicando, setAplicando] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const { accion, estado } = guardada;
+  const vista = vistaTarjeta(accion, acciones.estado, { ahora: new Date(), perfil: acciones.perfil }, acciones.base);
+
+  const aplicar = async () => {
+    setAplicando(true);
+    setError(null);
+    try {
+      const problema = await acciones.aplicar(mensajeId, guardada);
+      if (problema) setError(problema.mensaje);
+    } catch {
+      setError('No se pudo aplicar. Probá de nuevo.');
+    } finally {
+      setAplicando(false);
+    }
+  };
+
+  return (
+    <TarjetaAccion
+      tipo={accion.tipo}
+      vista={vista}
+      estado={estado}
+      aplicando={aplicando}
+      error={error}
+      onAplicar={aplicar}
+      onCancelar={() => acciones.cancelar(mensajeId, accion.id)}
+      onCambiarGramos={(indice, sentido) => acciones.editar(mensajeId, cambiarGramosPorUnidad(accion, indice, sentido))}
+    />
   );
 }
 
@@ -174,6 +218,7 @@ const styles = StyleSheet.create({
   encabezado: { paddingHorizontal: 16, paddingTop: 16, paddingBottom: 8 },
   titulo: { color: colores.texto, fontSize: 34, fontWeight: '800' },
   lista: { paddingHorizontal: 16, paddingVertical: 12, gap: 10 },
+  mensaje: { gap: 8 },
   fila: { flexDirection: 'row' },
   filaUsuario: { justifyContent: 'flex-end' },
   burbuja: { maxWidth: '85%', borderRadius: 20, paddingHorizontal: 14, paddingVertical: 10 },

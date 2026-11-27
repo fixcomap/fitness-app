@@ -24,7 +24,7 @@ const REFRESCO_MS = 60_000;
 type Configuracion = ReturnType<typeof useConfiguracion>;
 type PasosManuales = ReturnType<typeof usePasosManuales>;
 
-export interface DatosDelDiaValor extends Configuracion, Omit<PasosManuales, 'agregar' | 'listo'> {
+export interface DatosDelDiaValor extends Configuracion, Omit<PasosManuales, 'agregar' | 'listo' | 'reemplazar'> {
   perfil: PerfilUsuario;
   fuente: FuenteActividad;
   estadoFuente: EstadoFuente;
@@ -40,6 +40,8 @@ export interface DatosDelDiaValor extends Configuracion, Omit<PasosManuales, 'ag
   // Carga manual inteligente: le pregunta a la fuente cuántos pasos ya contó en
   // esa franja y suma sólo la diferencia.
   agregarCarga: (tipo: TipoCarga, valor: number, franja: Franja) => Promise<CargaPasos>;
+  // Todas las cargas de una vez (acciones del coach y su deshacer).
+  reemplazarCargas: (cargas: CargaPasos[]) => void;
 }
 
 const Contexto = createContext<DatosDelDiaValor | null>(null);
@@ -85,7 +87,7 @@ export function ProveedorDatosDelDia({ children }: { children: ReactNode }) {
     };
   }, [refrescarPasos]);
 
-  const { cargas, listo: manualesListos, cargasDeHoy, totalesDeHoy, borrar } = manuales;
+  const { cargas, listo: manualesListos, cargasDeHoy, totalesDeHoy, borrar, reemplazar: reemplazarCargas } = manuales;
   const actividadSensor = useActividadSensor(fuente, activa, pasosSensorHoy);
 
   // Totales en vivo de los últimos días. Hoy siempre usa los pasos de pasosSensorHoy.
@@ -118,6 +120,7 @@ export function ProveedorDatosDelDia({ children }: { children: ReactNode }) {
       totalesDeHoy,
       borrar,
       agregarCarga,
+      reemplazarCargas,
       perfil,
       fuente,
       estadoFuente,
@@ -135,6 +138,7 @@ export function ProveedorDatosDelDia({ children }: { children: ReactNode }) {
       totalesDeHoy,
       borrar,
       agregarCarga,
+      reemplazarCargas,
       perfil,
       fuente,
       estadoFuente,
