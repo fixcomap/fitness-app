@@ -207,6 +207,11 @@ test('el prompt: si el usuario duda o le pide que decida, elige una opción y la
   assert.match(SISTEMA_COACH, /preguntá uno solo/);
 });
 
+test('el prompt: ve lo que propuso antes y, si el usuario solo confirma, lo manda a las tarjetas', () => {
+  assert.match(SISTEMA_COACH, /pueden terminar con "\[Propuse: …\]"/);
+  assert.match(SISTEMA_COACH, /no armes otro plan ni repitas las acciones: decile que toque Aplicar en las tarjetas de arriba/);
+});
+
 test('el prompt de acciones: solo si pide un cambio, sin decir que ya lo hizo y preguntando si es ambiguo', () => {
   assert.match(SISTEMA_COACH, /Si solo pregunta algo, "acciones" va vacía/);
   assert.match(SISTEMA_COACH, /Nunca digas que ya lo hiciste ni que lo vas a hacer vos/);

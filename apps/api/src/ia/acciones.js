@@ -257,7 +257,8 @@ function limpiarAcciones(lista, contexto, { catalogo = CATALOGO, crearId = rando
 // La respuesta de la IA: { texto, acciones, descartados }. Tira ErrorIa si no vino el texto.
 // contexto: el del pedido (para validar las acciones). catalogo y crearId: los de la API salvo en los tests.
 function leerRespuestaCoach(datos, contexto, opciones) {
-  const textoIa = typeof datos?.texto === 'string' ? datos.texto.trim() : '';
+  // El resumen "[Propuse: …]" lo agrega la app a los mensajes del coach: si la IA lo copia, se saca.
+  const textoIa = typeof datos?.texto === 'string' ? datos.texto.replace(/\[Propuse:[^\]]*\]/g, '').trim() : '';
   if (!textoIa) throw new ErrorIa('formato', 'La IA no devolvió el texto');
   const { acciones, descartados } = limpiarAcciones(datos.acciones, contexto, opciones);
   return { texto: textoIa.slice(0, MAXIMO_TEXTO), acciones, descartados };

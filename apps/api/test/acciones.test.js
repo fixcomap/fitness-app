@@ -406,6 +406,15 @@ test('con el catálogo real de la API (por defecto) y objetivo fuerza', () => {
   assert.match(r.acciones[0].id, /^[0-9a-f-]{36}$/);
 });
 
+test('si la IA copia el resumen "[Propuse: …]" que agrega la app, se saca del texto', () => {
+  const r = leerRespuestaCoach(
+    { texto: 'Tocá Aplicar en las tarjetas de arriba.\n\n[Propuse: crear "Piernas" (lunes, 4 ejercicios, pendiente)]', acciones: [] },
+    contexto,
+    { catalogo },
+  );
+  assert.strictEqual(r.texto, 'Tocá Aplicar en las tarjetas de arriba.');
+});
+
 test('la respuesta del coach trae texto y acciones; sin texto es un error de formato', () => {
   const pasos = { tipo: 'cargar_pasos', dia: '2026-11-26', unidad: 'km', valor: 2 };
   assert.deepStrictEqual(
