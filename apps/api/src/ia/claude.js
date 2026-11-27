@@ -1,4 +1,5 @@
 // Claude, con clave de Anthropic o en Vertex AI (cuenta de servicio). Misma forma de pedido para los dos.
+const { AnthropicError, APIError } = require('@anthropic-ai/sdk');
 const { zodOutputFormat } = require('@anthropic-ai/sdk/helpers/zod');
 const { esquemaSalidaCoach, esquemaSalidaConsejo, esquemaSalidaFoto } = require('./esquemas');
 const { SISTEMA_COACH, SISTEMA_CONSEJO, SISTEMA_FOTO, MANUAL_COACH, contextoCoach, textoFoto } = require('./prompts');
@@ -11,8 +12,10 @@ const MAXIMO_TOKENS = 16000;
 
 // Devuelve una función modelo -> cliente (el mismo para todos los modelos).
 // Sin respaldo: si el modelo rechaza el pedido, se devuelve el error (no se reintenta con otro modelo).
-function crearClientesClaude({ clave, vertex }) {
-  const opciones = { timeout: ESPERA_MS, maxRetries: 1 };
+// Con vertex no hay clave: el SDK usa Application Default Credentials (google-auth-library).
+// El mismo límite de tiempo y reintento con o sin Vertex. extra: opciones del SDK para los tests (fetch, authClient).
+function crearClientesClaude({ clave, vertex }, extra = {}) {
+  const opciones = { ...extra, timeout: ESPERA_MS, maxRetries: 1 };
   let cliente;
   return () => {
     if (!cliente) {
@@ -26,6 +29,14 @@ function crearClientesClaude({ clave, vertex }) {
     }
     return cliente;
   };
+}
+
+function esErrorDeEsquema(error) {
+  return (
+    error instanceof AnthropicError &&
+    !(error instanceof APIError) &&
+    error.message.startsWith('Failed to parse structured output')
+  );
 }
 
 function leerRespuesta(respuesta) {
@@ -59,8 +70,9 @@ function crearProveedorClaude({ clientePara, modeloFoto, modeloCoach, nombre = '
         output_config: { format: zodOutputFormat(esquema) },
       });
     } catch (error) {
-      // El SDK valida el JSON contra el esquema: si no cierra, es un error de formato.
-      if (error instanceof SyntaxError || error?.name === 'ZodError') {
+      // El SDK valida el JSON contra el esquema: si no cierra, es un error de formato. Las versiones
+      // nuevas del SDK lo envuelven en un AnthropicError sin estado HTTP ("Failed to parse structured output").
+      if (error instanceof SyntaxError || error?.name === 'ZodError' || esErrorDeEsquema(error)) {
         throw new ErrorIa('formato', 'Claude no devolvió el JSON pedido');
       }
       throw error;

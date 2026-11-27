@@ -35,6 +35,33 @@ function enteroPositivo(texto, porDefecto, nombre) {
   return n;
 }
 
+// Vertex AI: IA_VERTEX_PROYECTO (obligatorio) e IA_VERTEX_REGION (vacía: global). Sin claves: se autentica
+// con Application Default Credentials (en Cloud Run, la cuenta de servicio; en local, gcloud auth
+// application-default login). La región es la del endpoint de Vertex, no la de Cloud Run:
+//   global        cualquier región con capacidad (recomendado, el más barato)
+//   us / eu       multi-región: los datos quedan en EE. UU. o en la UE (10 % más caro)
+//   europe-west1  región puntual (10 % más caro). Claude ahí solo sirve Sonnet 4.6 y anteriores: Haiku 5.5
+//                 y los modelos nuevos de Claude solo están en global, us y eu. Gemini sí la acepta.
+const MULTI_REGIONES = ['global', 'us', 'eu'];
+const FORMATO_REGION = /^[a-z]+-[a-z]+\d+$/;
+
+function leerVertex(env, proveedor) {
+  const proyecto = (env.IA_VERTEX_PROYECTO || '').trim();
+  const region = (env.IA_VERTEX_REGION || '').trim() || 'global';
+  if (!proyecto) throw new Error('Falta IA_VERTEX_PROYECTO para usar Vertex AI');
+  const esRegionPuntual = FORMATO_REGION.test(region);
+  if (!MULTI_REGIONES.includes(region) && !esRegionPuntual) {
+    throw new Error(`IA_VERTEX_REGION inválida: ${region} (global, us, eu o una región como europe-west1)`);
+  }
+  if (proveedor === 'vertex-claude' && esRegionPuntual) {
+    throw new Error(
+      `IA_VERTEX_REGION=${region} no sirve con vertex-claude: Haiku 5.5 y los modelos nuevos de Claude solo ` +
+        'están en global, us o eu (para que los datos queden en Europa, usá eu)',
+    );
+  }
+  return { proyecto, region };
+}
+
 // Devuelve { proveedor, familia, modeloFoto, modeloCoach, ... } o { proveedor: null, motivo } si la IA queda apagada.
 // Tira error si la configuración es inválida (la API no arranca).
 function leerConfigIa(env, { esProduccion = false } = {}) {
@@ -66,10 +93,7 @@ function leerConfigIa(env, { esProduccion = false } = {}) {
     return { proveedor: null, motivo: `falta ${variableClave}`, limitesDiarios };
   }
 
-  const vertex = proveedor.startsWith('vertex-')
-    ? { proyecto: env.IA_VERTEX_PROYECTO || '', region: env.IA_VERTEX_REGION || 'global' }
-    : null;
-  if (vertex && !vertex.proyecto) throw new Error('Falta IA_VERTEX_PROYECTO para usar Vertex AI');
+  const vertex = proveedor.startsWith('vertex-') ? leerVertex(env, proveedor) : null;
 
   const porDefecto = MODELOS_POR_DEFECTO[familia(proveedor)];
   return {

@@ -6,8 +6,10 @@
 //   node scripts/probar-ia.mjs ~/fotos-platos --con gemini:gemini-3.8-flash --con claude:claude-haiku-5-5
 //   node scripts/probar-ia.mjs --con claude:claude-haiku-5-5 --solo consejo   (consejo del día, dias-consejo.json)
 //
-// Las claves salen del .env de la raíz (GEMINI_API_KEY, ANTHROPIC_API_KEY). Vertex usa las credenciales
-// de gcloud (gcloud auth application-default login) e IA_VERTEX_PROYECTO.
+//   node scripts/probar-ia.mjs --con vertex-claude:claude-haiku-5-5 --solo coach
+//
+// Las claves salen del .env de la raíz (GEMINI_API_KEY, ANTHROPIC_API_KEY). Vertex no usa claves: toma las
+// credenciales de gcloud (gcloud auth application-default login), IA_VERTEX_PROYECTO e IA_VERTEX_REGION.
 import fs from 'node:fs';
 import path from 'node:path';
 import { createRequire } from 'node:module';
