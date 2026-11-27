@@ -3,7 +3,8 @@
 // validar contra lo que tenga guardado al aplicarlas.
 const { randomUUID } = require('crypto');
 const { z } = require('zod');
-const { MAXIMO_EJERCICIOS_RUTINA, SERIES, limpiarRutina } = require('./coach');
+const { MAXIMO_EJERCICIOS_RUTINA, MAXIMO_TEXTO, SERIES, limpiarRutina } = require('./coach');
+const { ErrorIa } = require('./proveedor');
 const { CATALOGO } = require('./catalogo');
 const { rangoDeLaApp } = require('./rangos');
 const { COMIDAS, MAXIMO_ITEMS } = require('./foto');
@@ -238,6 +239,15 @@ function limpiarAcciones(lista, contexto, { catalogo = CATALOGO, crearId = rando
   return { acciones, descartados };
 }
 
+// La respuesta de la IA: { texto, acciones, descartados }. Tira ErrorIa si no vino el texto.
+// contexto: el del pedido (para validar las acciones). catalogo y crearId: los de la API salvo en los tests.
+function leerRespuestaCoach(datos, contexto, opciones) {
+  const textoIa = typeof datos?.texto === 'string' ? datos.texto.trim() : '';
+  if (!textoIa) throw new ErrorIa('formato', 'La IA no devolvió el texto');
+  const { acciones, descartados } = limpiarAcciones(datos.acciones, contexto, opciones);
+  return { texto: textoIa.slice(0, MAXIMO_TEXTO), acciones, descartados };
+}
+
 module.exports = {
   TIPOS_ACCION,
   MAXIMO_ACCIONES,
@@ -245,4 +255,5 @@ module.exports = {
   restarDias,
   diaPermitido,
   limpiarAcciones,
+  leerRespuestaCoach,
 };

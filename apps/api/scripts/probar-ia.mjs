@@ -21,7 +21,7 @@ const { leerConfigIa } = require('../src/ia/config');
 const { crearProveedor } = require('../src/ia');
 const { leerResultadoFoto } = require('../src/ia/foto');
 const { EXTENSIONES, esFoto, fotoAJpeg } = require('./fotos');
-const { leerRespuestaCoach } = require('../src/ia/coach');
+const { leerRespuestaCoach } = require('../src/ia/acciones');
 const { CATALOGO } = require('../src/ia/catalogo');
 const {
   USO,
@@ -97,7 +97,7 @@ function detalleFoto({ salida }) {
   ];
 }
 
-const detalleCoach = ({ salida }) => lineasCoach(salida, CATALOGO);
+const detalleCoach = ({ salida }) => lineasCoach(salida, CATALOGO, contexto.rutinas);
 
 async function probar({ proveedor, modelo }, fotos, solo) {
   const env = { ...process.env, IA_PROVEEDOR: proveedor, IA_MODELO_FOTO: modelo, IA_MODELO_COACH: modelo };
@@ -141,7 +141,7 @@ async function probar({ proveedor, modelo }, fotos, solo) {
           const respuesta = await ia.responderCoach([{ rol: 'usuario', texto: pregunta }], contexto);
           return {
             ...respuesta,
-            salida: leerRespuestaCoach(respuesta.datos, { objetivo: contexto.perfil.objetivo }),
+            salida: leerRespuestaCoach(respuesta.datos, contexto),
           };
         }),
       );

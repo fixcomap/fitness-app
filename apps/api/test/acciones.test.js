@@ -1,7 +1,15 @@
 // Acciones del coach validadas contra el contexto del pedido y el catálogo.
 const test = require('node:test');
 const assert = require('node:assert');
-const { MAXIMO_ACCIONES, MAXIMO_PASOS, restarDias, diaPermitido, limpiarAcciones } = require('../src/ia/acciones');
+const {
+  MAXIMO_ACCIONES,
+  MAXIMO_PASOS,
+  restarDias,
+  diaPermitido,
+  limpiarAcciones,
+  leerRespuestaCoach,
+} = require('../src/ia/acciones');
+const { ErrorIa } = require('../src/ia/proveedor');
 
 const catalogo = [
   { id: 'press-banca-barra', nombre: 'Press de banca con barra', equipo: 'barra', tipo: 'compuesto' },
@@ -362,4 +370,23 @@ test('con el catálogo real de la API (por defecto) y objetivo fuerza', () => {
     { ejercicioId: 'press-banca-barra', series: 5, rango: { min: 4, max: 6 } },
   ]);
   assert.match(r.acciones[0].id, /^[0-9a-f-]{36}$/);
+});
+
+test('la respuesta del coach trae texto y acciones; sin texto es un error de formato', () => {
+  const pasos = { tipo: 'cargar_pasos', dia: '2026-11-26', unidad: 'km', valor: 2 };
+  assert.deepStrictEqual(
+    leerRespuestaCoach({ texto: ' Dale con todo ', acciones: [pasos] }, contexto, { catalogo, crearId: ids() }),
+    { texto: 'Dale con todo', acciones: [{ id: 'a1', ...pasos }], descartados: [] },
+  );
+  assert.deepStrictEqual(leerRespuestaCoach({ texto: 'Hola' }, contexto, { catalogo }), {
+    texto: 'Hola',
+    acciones: [],
+    descartados: [],
+  });
+  for (const datos of [null, {}, { texto: '' }, { texto: 3 }]) {
+    assert.throws(
+      () => leerRespuestaCoach(datos, contexto, { catalogo }),
+      (e) => e instanceof ErrorIa && e.tipo === 'formato',
+    );
+  }
 });

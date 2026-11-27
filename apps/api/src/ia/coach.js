@@ -1,16 +1,13 @@
-// Coach: validación del pedido de la app y de la respuesta de la IA. Funciones puras.
+// Coach: validación del pedido de la app y de las rutinas que arma la IA. Funciones puras.
 const { randomUUID } = require('crypto');
 const { z } = require('zod');
-const { ErrorIa, historialDesdeUsuario } = require('./proveedor');
-const { rangoDeLaApp } = require('./rangos');
-const { CATALOGO } = require('./catalogo');
+const { historialDesdeUsuario } = require('./proveedor');
 const { diaDeSemana } = require('./prompts');
 
 // Mismos rangos que la app (apps/mobile/src/lib/entreno/rutinas.ts y rangos.ts).
 const SERIES = { min: 1, max: 10 };
 const REPS = { min: 1, max: 30 };
 const MAXIMO_EJERCICIOS_RUTINA = 15;
-const MAXIMO_RUTINAS = 7; // una por día de la semana
 const MAXIMO_NOMBRE_RUTINA = 40;
 const NOMBRE_RUTINA_POR_DEFECTO = 'Rutina del coach';
 const MAXIMO_TEXTO = 4000;
@@ -151,36 +148,8 @@ function limpiarRutina(
   return { rutina: { id: crearId(), nombre, dias, ejercicios }, descartados };
 }
 
-// Las rutinas de la IA (una por día de entrenamiento). Un día queda en la primera rutina que lo pide.
-// { rutinas, descartados }
-function limpiarRutinas(lista, idsCatalogo, { crearId = randomUUID, rangoPara } = {}) {
-  const rutinas = [];
-  const descartados = [];
-  const diasOcupados = new Set();
-  for (const cruda of (Array.isArray(lista) ? lista : []).slice(0, MAXIMO_RUTINAS)) {
-    const r = limpiarRutina(cruda, idsCatalogo, { crearId, diasOcupados, rangoPara });
-    descartados.push(...r.descartados);
-    if (!r.rutina) continue;
-    for (const d of r.rutina.dias) diasOcupados.add(d);
-    rutinas.push(r.rutina);
-  }
-  return { rutinas, descartados };
-}
-
-// { texto, rutinas, descartados }. Tira ErrorIa si no vino el texto.
-// objetivo (hipertrofia o fuerza, del perfil): para los rangos de la app.
-// catalogo: el de la API salvo en los tests.
-function leerRespuestaCoach(datos, { objetivo, catalogo = CATALOGO, ...opciones } = {}) {
-  const textoIa = typeof datos?.texto === 'string' ? datos.texto.trim() : '';
-  if (!textoIa) throw new ErrorIa('formato', 'La IA no devolvió el texto');
-  const ids = new Set(catalogo.map((e) => e.id));
-  const porId = new Map(catalogo.map((e) => [e.id, e]));
-  const rangoPara = (id) => rangoDeLaApp(porId.get(id), objetivo);
-  const { rutinas, descartados } = limpiarRutinas(datos.rutinas, ids, { ...opciones, rangoPara });
-  return { texto: textoIa.slice(0, MAXIMO_TEXTO), rutinas, descartados };
-}
-
 module.exports = {
+  MAXIMO_TEXTO,
   MAXIMO_NOMBRE_RUTINA,
   MAXIMO_EJERCICIOS_RUTINA,
   SERIES,
@@ -190,6 +159,4 @@ module.exports = {
   erroresPedido,
   recortarNombre,
   limpiarRutina,
-  limpiarRutinas,
-  leerRespuestaCoach,
 };

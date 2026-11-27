@@ -81,26 +81,65 @@ function resumir(resultados) {
 
 const DIAS = ['lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado', 'domingo'];
 const MOTIVOS = {
+  invalida: 'acciones mal formadas',
+  'de-mas': 'sobraban',
   'no-existe': 'no existen en el catálogo',
-  'fuera-de-rango': 'series o repeticiones fuera de rango',
-  repetido: 'repetidos en la misma rutina',
-  'de-mas': 'sobraban (máximo por rutina)',
+  'fuera-de-rango': 'fuera de rango',
+  repetido: 'repetidos en la rutina',
+  'sin-ejercicios': 'sin ejercicios válidos',
+  'no-existe-rutina': 'rutinas que no existen',
+  'no-esta-en-la-rutina': 'no están en la rutina',
+  'rutina-vacia': 'dejaban la rutina vacía',
+  'fecha-no-permitida': 'fecha fuera de los últimos 7 días',
+  'item-invalido': 'alimentos mal formados',
 };
 
-// Lo que muestra el script de una respuesta del coach: texto, rutinas (con los nombres del catálogo)
-// y los ejercicios descartados, agrupados por motivo.
-function lineasCoach(salida, catalogo) {
-  const nombres = new Map(catalogo.map((e) => [e.id, e.nombre]));
+// "Pechuga a la plancha (cocido): 150 g" o "Empanada de carne (cocido, asumido): 2 × empanada ~90 g c/u",
+// más lo estimado por 100 g.
+function lineaAlimento(item) {
+  const estado = item.estado === 'no-aplica' ? '' : ` (${item.estado}${item.estadoAsumido ? ', asumido' : ''})`;
+  const c = item.cantidad;
+  const cantidad = 'gramos' in c ? `${c.gramos} g` : `${c.unidades} × ${c.porcion} ~${c.gramosPorUnidad} g c/u`;
+  const e = item.estimado;
+  return `  ${item.busqueda}${estado}: ${cantidad} · estimado c/100 g: ${e.kcal} kcal, P ${e.proteinas} C ${e.carbos} G ${e.grasas}`;
+}
+
+// Lo que muestra el script de una respuesta del coach: texto, acciones (con los nombres del catálogo y de las
+// rutinas del contexto) y lo descartado, agrupado por motivo.
+function lineasCoach(salida, catalogo, rutinas = []) {
+  const ejercicio = new Map(catalogo.map((e) => [e.id, e.nombre]));
+  const rutina = new Map(rutinas.map((r) => [r.id, r.nombre]));
+  const nombreRutina = (id) => (rutina.has(id) ? `"${rutina.get(id)}"` : id);
+  const lineaEjercicio = (e) =>
+    `  ${ejercicio.get(e.ejercicioId)} [${e.ejercicioId}]: ${e.series} × ${e.rango.min}-${e.rango.max}`;
   const lineas = salida.texto.split('\n').map((l) => `│ ${l}`);
-  for (const r of salida.rutinas) {
-    lineas.push(`Rutina "${r.nombre}" (${r.dias.map((d) => DIAS[d]).join(', ') || 'sin día'}):`);
-    for (const e of r.ejercicios) {
-      lineas.push(`  ${nombres.get(e.ejercicioId)} [${e.ejercicioId}]: ${e.series} × ${e.rango.min}-${e.rango.max}`);
+  for (const a of salida.acciones) {
+    if (a.tipo === 'crear_rutina') {
+      lineas.push(
+        `Crear rutina "${a.nombre}" (${a.dia === null ? 'sin día' : DIAS[a.dia]}):`,
+        ...a.ejercicios.map(lineaEjercicio),
+      );
+    } else if (a.tipo === 'agregar_ejercicios') {
+      lineas.push(`Agregar a ${nombreRutina(a.rutinaId)}:`, ...a.ejercicios.map(lineaEjercicio));
+    } else if (a.tipo === 'quitar_ejercicios') {
+      lineas.push(
+        `Quitar de ${nombreRutina(a.rutinaId)}: ${a.ejercicioIds.map((id) => ejercicio.get(id) ?? id).join(', ')}`,
+      );
+    } else if (a.tipo === 'borrar_rutinas') {
+      lineas.push(`Borrar rutinas: ${a.rutinaIds.map(nombreRutina).join(', ')}`);
+    } else if (a.tipo === 'registrar_comida') {
+      lineas.push(`Registrar ${a.comida} del ${a.dia}:`, ...a.items.map(lineaAlimento));
+    } else if (a.tipo === 'cargar_pasos') {
+      lineas.push(`Cargar pasos del ${a.dia}: ${a.valor} ${a.unidad}${a.hora ? ` (${a.hora})` : ''}`);
     }
   }
   for (const [motivo, texto] of Object.entries(MOTIVOS)) {
-    const ids = salida.descartados.filter((d) => d.motivo === motivo).map((d) => `${d.ejercicioId} (${d.rutina})`);
-    if (ids.length) lineas.push(`Descartados, ${texto}: ${ids.join(', ')}`);
+    const de = salida.descartados.filter((d) => d.motivo === motivo);
+    const detalle = (d) => {
+      const que = d.ejercicioId ?? d.busqueda ?? d.rutinaId ?? d.dia;
+      return que ? `${que} (${d.rutina ?? d.accion})` : d.accion;
+    };
+    if (de.length) lineas.push(`Descartados, ${texto}: ${de.map(detalle).join(', ')}`);
   }
   return lineas;
 }
