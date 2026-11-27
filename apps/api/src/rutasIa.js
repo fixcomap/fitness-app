@@ -110,7 +110,7 @@ function crearRutasIa({ ia, uso, limitesDiarios, limites }) {
         'mensajes',
         async () => {
           const { datos } = await ia.responderCoach(mensajesParaIa(mensajes), contexto);
-          return leerRespuestaCoach(datos, contexto);
+          return leerRespuestaCoach(datos, contexto, { ultimoMensaje: mensajes.at(-1).texto });
         },
         { rechazo: MENSAJES_ERROR.rechazoCoach, otro: MENSAJES_ERROR.coach },
       );

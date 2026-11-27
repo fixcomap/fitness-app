@@ -6,6 +6,7 @@ const {
   MAXIMO_PASOS,
   restarDias,
   diaPermitido,
+  pideTodo,
   limpiarAcciones,
   leerRespuestaCoach,
 } = require('../src/ia/acciones');
@@ -389,4 +390,42 @@ test('la respuesta del coach trae texto y acciones; sin texto es un error de for
       (e) => e instanceof ErrorIa && e.tipo === 'formato',
     );
   }
+});
+
+test('pideTodo: "todas", "todo", "todos" o "toda", sin importar tildes ni mayúsculas', () => {
+  for (const texto of ['Borrá todas', 'borra TODO', 'sacá todas las rutinas', 'Tódas', 'borrá todos.']) {
+    assert.strictEqual(pideTodo(texto), true, texto);
+  }
+  for (const texto of ['borrá la rutina', 'todavía no', 'método', '', undefined]) {
+    assert.strictEqual(pideTodo(texto), false, String(texto));
+  }
+});
+
+test('borrar todas las rutinas sin que el usuario lo pida se descarta (ambiguo)', () => {
+  const borrar = (...rutinaIds) => ({ tipo: 'borrar_rutinas', rutinaIds });
+  const pasos = { tipo: 'cargar_pasos', dia: '2026-11-26', unidad: 'km', valor: 2 };
+  const con = (lista, ultimoMensaje) => limpiarAcciones(lista, contexto, { catalogo, crearId: ids(), ultimoMensaje });
+
+  // Las dos rutinas, en una acción o repartidas en dos: se descarta todo el borrado, el resto queda.
+  for (const lista of [
+    [borrar('r-empuje', 'r-piernas'), pasos],
+    [borrar('r-empuje'), borrar('r-piernas'), pasos],
+  ]) {
+    const r = con(lista, 'borrá la rutina');
+    assert.deepStrictEqual(
+      r.acciones.map((a) => a.tipo),
+      ['cargar_pasos'],
+    );
+    assert.deepStrictEqual(r.descartados, [{ accion: 'borrar_rutinas', motivo: 'ambiguo' }]);
+  }
+
+  // Si lo pidió, va.
+  assert.deepStrictEqual(con([borrar('r-empuje', 'r-piernas')], 'Borrá todas mis rutinas').acciones, [
+    { id: 'a1', tipo: 'borrar_rutinas', rutinaIds: ['r-empuje', 'r-piernas'] },
+  ]);
+  // Una sola de las dos: va.
+  assert.strictEqual(con([borrar('r-piernas')], 'borrá la de piernas').acciones.length, 1);
+  // Si tiene una sola rutina, borrarla no es ambiguo.
+  const una = limpiarAcciones([borrar('r-empuje')], { ...contexto, rutinas: [contexto.rutinas[0]] }, { catalogo });
+  assert.strictEqual(una.acciones.length, 1);
 });

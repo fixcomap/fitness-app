@@ -206,10 +206,34 @@ const LIMPIAR = {
   cargar_pasos: cargarPasos,
 };
 
+// "todas", "todo", "todos" o "toda" en lo que escribió el usuario (sin importar tildes ni mayúsculas).
+function pideTodo(texto) {
+  const limpio = (texto ?? '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase();
+  return /(^|[^a-z])tod[oa]s?($|[^a-z])/.test(limpio);
+}
+
+// Red de seguridad: si entre todas las borrar_rutinas de la respuesta se borrarían todas las rutinas
+// (y tiene más de una), el usuario lo tuvo que pedir con "todas" o "todo". Si no, se descartan.
+function sinBorrarTodo(acciones, contexto, ultimoMensaje) {
+  const rutinas = contexto.rutinas ?? [];
+  const borradas = new Set(acciones.filter((a) => a.tipo === 'borrar_rutinas').flatMap((a) => a.rutinaIds));
+  if (rutinas.length < 2 || borradas.size < rutinas.length || pideTodo(ultimoMensaje)) {
+    return { acciones, descartados: [] };
+  }
+  return {
+    acciones: acciones.filter((a) => a.tipo !== 'borrar_rutinas'),
+    descartados: [{ accion: 'borrar_rutinas', motivo: 'ambiguo' }],
+  };
+}
+
 // Las acciones de la IA validadas contra el contexto del pedido. Cada una sale con un id nuevo.
+// ultimoMensaje: lo último que escribió el usuario (para no borrar todas las rutinas si no lo pidió).
 // contexto: { hoy, perfil: { objetivo }, rutinas: [{ id, ejercicios }] } (ya validado por esquemaPedidoCoach).
 // { acciones, descartados }
-function limpiarAcciones(lista, contexto, { catalogo = CATALOGO, crearId = randomUUID } = {}) {
+function limpiarAcciones(lista, contexto, { catalogo = CATALOGO, crearId = randomUUID, ultimoMensaje = '' } = {}) {
   const porId = new Map(catalogo.map((e) => [e.id, e]));
   const entorno = {
     hoy: contexto.hoy,
@@ -236,7 +260,8 @@ function limpiarAcciones(lista, contexto, { catalogo = CATALOGO, crearId = rando
     descartados.push(...limpia.descartados);
     if (limpia.accion) acciones.push({ id: crearId(), ...limpia.accion });
   }
-  return { acciones, descartados };
+  const seguras = sinBorrarTodo(acciones, contexto, ultimoMensaje);
+  return { acciones: seguras.acciones, descartados: [...descartados, ...seguras.descartados] };
 }
 
 // La respuesta de la IA: { texto, acciones, descartados }. Tira ErrorIa si no vino el texto.
@@ -254,6 +279,7 @@ module.exports = {
   MAXIMO_PASOS,
   restarDias,
   diaPermitido,
+  pideTodo,
   limpiarAcciones,
   leerRespuestaCoach,
 };

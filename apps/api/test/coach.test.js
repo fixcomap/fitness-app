@@ -299,6 +299,29 @@ test('POST /coach acepta 40 mensajes pero a la IA le pasa los últimos 10, empez
   });
 });
 
+test('POST /coach no deja borrar todas las rutinas si el último mensaje no lo pide', async () => {
+  const ia = iaFalsa({
+    coach: {
+      texto: 'Te dejo el borrado',
+      acciones: [{ tipo: 'borrar_rutinas', rutinaIds: ['rutina-full-body', 'r2'] }],
+    },
+  });
+  const pedido = (texto) => {
+    const p = pedidoValido();
+    p.contexto.rutinas.push({ ...p.contexto.rutinas[0], id: 'r2', nombre: 'Otra', dias: [4] });
+    p.mensajes[1].texto = texto;
+    return p;
+  };
+  await conApp({ ia, uso: usoEnMemoria() }, async (pedir) => {
+    const ambiguo = await pedir('POST', '/coach', json(pedido('borrá la rutina')));
+    assert.deepStrictEqual(ambiguo.body.acciones, []);
+    assert.deepStrictEqual(ambiguo.body.descartados, [{ accion: 'borrar_rutinas', motivo: 'ambiguo' }]);
+
+    const pedidoTodas = await pedir('POST', '/coach', json(pedido('borrá todas las rutinas')));
+    assert.deepStrictEqual(pedidoTodas.body.acciones[0].rutinaIds, ['rutina-full-body', 'r2']);
+  });
+});
+
 test('pedido inválido: 400 con detalles y sin llamar a la IA', async () => {
   const ia = iaFalsa({ coach: { texto: 'hola', acciones: [] } });
   await conApp({ ia, uso: usoEnMemoria() }, async (pedir) => {
