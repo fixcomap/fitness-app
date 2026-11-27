@@ -32,9 +32,30 @@ test('lee la carpeta, los candidatos y --solo', () => {
         { proveedor: 'claude', modelo: 'claude-opus-5-5' },
       ],
       solo: 'fotos',
+      preguntas: [],
+      perfil: {},
     },
   );
   assert.strictEqual(leerArgumentos(['--con', 'gemini:x', '--solo', 'coach']).carpeta, null);
+});
+
+test('lee las preguntas, el nivel y el lugar para el coach', () => {
+  const r = leerArgumentos([
+    '--con',
+    'claude:claude-haiku-5-5',
+    '--solo',
+    'coach',
+    '--pregunta',
+    'armame una rutina de 3 días',
+    '--pregunta',
+    ' ¿y cuánta proteína? ',
+    '--nivel',
+    'principiante',
+    '--lugar',
+    'casa-mancuernas',
+  ]);
+  assert.deepStrictEqual(r.preguntas, ['armame una rutina de 3 días', '¿y cuánta proteína?']);
+  assert.deepStrictEqual(r.perfil, { nivel: 'principiante', lugar: 'casa-mancuernas' });
 });
 
 test('argumentos inválidos dan un error', () => {
@@ -47,6 +68,10 @@ test('argumentos inválidos dan un error', () => {
     ['/fotos', '--con', 'gemini:m', '--solo', 'todo'],
     ['/fotos', '/otra', '--con', 'gemini:m'],
     ['/fotos', '--con', 'gemini:m', '--rapido'],
+    ['/fotos', '--con', 'gemini:m', '--pregunta'],
+    ['/fotos', '--con', 'gemini:m', '--pregunta', '  '],
+    ['/fotos', '--con', 'gemini:m', '--nivel', 'experto'],
+    ['/fotos', '--con', 'gemini:m', '--lugar', 'parque'],
   ];
   for (const argv of casos) assert.ok(leerArgumentos(argv).error, argv.join(' '));
 });
@@ -162,6 +187,7 @@ test('el script muestra las acciones con los nombres del catálogo y de las ruti
     descartados: [
       { accion: 'crear_rutina', rutina: 'Tirón', ejercicioId: 'jalon-inventado', motivo: 'no-existe' },
       { accion: 'crear_rutina', rutina: 'Empuje', ejercicioId: 'fondos-inventado', motivo: 'no-existe' },
+      { accion: 'crear_rutina', rutina: 'Empuje', ejercicioId: 'press-banca-barra', motivo: 'sin-equipo' },
       { accion: 'borrar_rutinas', rutinaId: 'r7', motivo: 'no-existe-rutina' },
       { accion: 'registrar_comida', dia: '2026-11-27', motivo: 'fecha-no-permitida' },
       { accion: 'mandar_mail', motivo: 'invalida' },
@@ -183,6 +209,7 @@ test('el script muestra las acciones con los nombres del catálogo y de las ruti
     'Crear rutina "Tirón" (sin día):',
     'Descartados, acciones mal formadas: mandar_mail',
     'Descartados, no existen en el catálogo: jalon-inventado (Tirón), fondos-inventado (Empuje)',
+    'Descartados, sin el equipo de donde entrena: press-banca-barra (Empuje)',
     'Descartados, rutinas que no existen: r7 (borrar_rutinas)',
     'Descartados, fecha fuera de los últimos 7 días: 2026-11-27 (registrar_comida)',
   ]);

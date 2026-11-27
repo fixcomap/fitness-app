@@ -32,9 +32,17 @@
       [
         "expo-camera",
         {
-          "cameraPermission": "Usamos la cámara para leer el código de barras de los alimentos. Las imágenes no se guardan.",
+          "cameraPermission": "Usamos la cámara para leer el código de barras de los alimentos y para sacarle fotos a tus platos.",
           "microphonePermission": false,
           "recordAudioAndroid": false
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Usamos tus fotos para que elijas la de tu plato y estimar qué comiste.",
+          "cameraPermission": "Usamos la cámara para leer el código de barras de los alimentos y para sacarle fotos a tus platos.",
+          "microphonePermission": false
         }
       ]
     ]

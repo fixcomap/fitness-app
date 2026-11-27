@@ -43,7 +43,12 @@ const ejemplo = JSON.parse(fs.readFileSync(path.join(aqui, 'preguntas-coach.json
 const diasConsejo = JSON.parse(fs.readFileSync(path.join(aqui, 'dias-consejo.json'), 'utf8'));
 // El catálogo lo pone la API en el prompt (src/ia/catalogo.json); la app no lo manda.
 console.log(`Catálogo: ${CATALOGO.length} ejercicios de src/ia/catalogo.json`);
-const contexto = ejemplo.contexto;
+const args = leerArgumentos(process.argv.slice(2));
+if (args.error) salir(args.error);
+// --nivel y --lugar cambian el perfil del ejemplo; --pregunta, las preguntas.
+const contexto = { ...ejemplo.contexto, perfil: { ...ejemplo.contexto.perfil, ...args.perfil } };
+const preguntas = args.preguntas.length ? args.preguntas : ejemplo.preguntas;
+if (Object.keys(args.perfil).length) console.log(`Perfil: ${JSON.stringify(contexto.perfil)}`);
 
 function salir(mensaje) {
   console.error(`${mensaje}\n\n${USO}`);
@@ -164,7 +169,7 @@ async function probar({ proveedor, modelo }, fotos, solo) {
     }
   }
   if (solo !== 'fotos') {
-    for (const pregunta of ejemplo.preguntas) {
+    for (const pregunta of preguntas) {
       const r = conCosto(
         await medir(async () => {
           const respuesta = await ia.responderCoach([{ rol: 'usuario', texto: pregunta }], contexto);
@@ -181,10 +186,10 @@ async function probar({ proveedor, modelo }, fotos, solo) {
   return resultados;
 }
 
-const args = leerArgumentos(process.argv.slice(2));
-if (args.error) salir(args.error);
 const fotos = args.solo === 'coach' || args.solo === 'consejo' ? [] : await leerFotos(path.resolve(args.carpeta));
-if ((args.solo === null || args.solo === 'fotos') && fotos.length === 0) salir(`No hay fotos (${EXTENSIONES.join(', ')}) en la carpeta`);
+if ((args.solo === null || args.solo === 'fotos') && fotos.length === 0) {
+  salir(`No hay fotos (${EXTENSIONES.join(', ')}) en la carpeta`);
+}
 
 const resumen = [];
 for (const candidato of args.candidatos) {

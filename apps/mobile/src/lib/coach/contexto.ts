@@ -11,7 +11,7 @@ import type { Rutina } from '../entreno/rutinas';
 import type { SesionGuardada } from '../entreno/tipos';
 import { sumarDias } from '../fechas';
 import { claveDia } from '../pasosManuales';
-import { metasNutricion, type ObjetivoEntreno, type PerfilUsuario } from '../perfil';
+import { metasNutricion, type Lugar, type Nivel, type ObjetivoEntreno, type PerfilUsuario } from '../perfil';
 import type { Objetivo, Sexo } from '../calorias';
 
 // El chat guarda 40 mensajes en el celular; a la API van solo los últimos 10.
@@ -59,6 +59,9 @@ export interface ContextoCoach {
     objetivoPeso: Objetivo;
     objetivo: ObjetivoEntreno;
     diasEntrenoPorSemana: number;
+    // Solo si los eligió: sin ellos, el coach asume intermedio y gym, y los pregunta si arma una rutina.
+    nivel?: Nivel;
+    lugar?: Lugar;
     kcalObjetivo: number;
     proteinasObjetivo: number; // g por día, el mismo objetivo que muestra la app
     metaPasos: number;
@@ -136,6 +139,8 @@ export function armarContexto(d: DatosCoach): ContextoCoach {
       objetivoPeso: perfil.objetivoPeso,
       objetivo: perfil.objetivo,
       diasEntrenoPorSemana: perfil.diasEntrenoPorSemana,
+      ...(perfil.nivel ? { nivel: perfil.nivel } : {}),
+      ...(perfil.lugar ? { lugar: perfil.lugar } : {}),
       kcalObjetivo: metas.kcal,
       proteinasObjetivo: metas.proteinas,
       metaPasos: Math.min(redondear(d.metaPasos), MAXIMO_META_PASOS),

@@ -9,6 +9,7 @@ import { BarraProgreso } from '../components/progreso/Barras';
 import { useComidas } from '../estado/Comidas';
 import { useDatosDelDia } from '../estado/DatosDelDia';
 import { useEntreno } from '../estado/Entreno';
+import { useCoachHabilitado } from '../hooks/useCoachHabilitado';
 import {
   diaComidas,
   etiquetaDia,
@@ -35,10 +36,11 @@ const COLOR_MACRO = { proteinas: '#F2F2F2', carbos: '#BDBDBD', grasas: '#8A8A8A'
 interface ComidaScreenProps {
   onBuscar: (dia: string, comida: Comida) => void;
   onEscanear: (dia: string, comida: Comida) => void;
+  onFoto: (dia: string, comida: Comida) => void;
 }
 
 // Diario del día: lo comido contra el objetivo (+ la actividad de ese día) y las 5 comidas.
-export function ComidaScreen({ onBuscar, onEscanear }: ComidaScreenProps) {
+export function ComidaScreen({ onBuscar, onEscanear, onFoto }: ComidaScreenProps) {
   const hoy = claveDia(new Date());
   const [dia, setDia] = useState(hoy);
   const [menu, setMenu] = useState<Comida | null>(null);
@@ -49,6 +51,8 @@ export function ComidaScreen({ onBuscar, onEscanear }: ComidaScreenProps) {
   const { registros, editar, borrar, corregirValores } = useComidas();
   const { perfil, config, totalDelDia } = useDatosDelDia();
   const { historial } = useEntreno();
+  // La foto con IA es premium, con el mismo desbloqueo de desarrollo que el coach.
+  const { habilitado: fotoHabilitada, desbloquearDev } = useCoachHabilitado();
 
   const delDia = useMemo(() => diaComidas(registros, dia), [registros, dia]);
   const { kcal, macros } = useMemo(
@@ -129,6 +133,9 @@ export function ComidaScreen({ onBuscar, onEscanear }: ComidaScreenProps) {
         comida={menu}
         onBuscar={(c) => onBuscar(dia, c)}
         onEscanear={(c) => onEscanear(dia, c)}
+        onFoto={(c) => onFoto(dia, c)}
+        fotoHabilitada={fotoHabilitada}
+        onDesbloquearDev={desbloquearDev}
         onCerrar={() => setMenu(null)}
       />
 

@@ -10,6 +10,8 @@
       "objetivoPeso": "bajar",
       "objetivo": "hipertrofia",
       "diasEntrenoPorSemana": 3,
+      "nivel": "principiante",
+      "lugar": "casa-mancuernas",
       "kcalObjetivo": 1800,
       "proteinasObjetivo": 140,
       "metaPasos": 8000

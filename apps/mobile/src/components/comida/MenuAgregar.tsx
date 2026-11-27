@@ -10,11 +10,23 @@ interface MenuAgregarProps {
   comida: Comida | null; // null = cerrado
   onBuscar: (comida: Comida) => void;
   onEscanear: (comida: Comida) => void;
+  onFoto: (comida: Comida) => void;
+  // Foto con IA: premium, con el mismo desbloqueo de desarrollo que el coach (useCoachHabilitado).
+  fotoHabilitada: boolean;
+  onDesbloquearDev: (() => void) | null; // solo en desarrollo
   onCerrar: () => void;
 }
 
-// El "+" de cada comida: buscar, escanear o foto (premium, todavía sin funcionalidad).
-export function MenuAgregar({ comida, onBuscar, onEscanear, onCerrar }: MenuAgregarProps) {
+// El "+" de cada comida: buscar, escanear o foto con IA (premium).
+export function MenuAgregar({
+  comida,
+  onBuscar,
+  onEscanear,
+  onFoto,
+  fotoHabilitada,
+  onDesbloquearDev,
+  onCerrar,
+}: MenuAgregarProps) {
   const insets = useSafeAreaInsets();
   const elegir = (accion: (c: Comida) => void) => () => {
     if (!comida) return;
@@ -34,7 +46,22 @@ export function MenuAgregar({ comida, onBuscar, onEscanear, onCerrar }: MenuAgre
           detalle="Código de barras del envase"
           onPress={elegir(onEscanear)}
         />
-        <Opcion icono="camera-outline" titulo="Foto" detalle="Muy pronto, con Premium" bloqueada />
+        {fotoHabilitada ? (
+          <Opcion
+            icono="camera-outline"
+            titulo="Foto con IA"
+            detalle="Sacale una foto al plato"
+            onPress={elegir(onFoto)}
+          />
+        ) : (
+          <Opcion
+            icono="camera-outline"
+            titulo="Foto con IA"
+            detalle={onDesbloquearDev ? 'Con Premium · tocá para desbloquear (solo desarrollo)' : 'Con Premium'}
+            bloqueada
+            onPress={onDesbloquearDev ?? undefined}
+          />
+        )}
       </View>
     </Modal>
   );
@@ -56,10 +83,11 @@ function Opcion({
   return (
     <Pressable
       onPress={onPress}
-      disabled={bloqueada}
+      // Bloqueada se puede tocar solo si hay algo que hacer (el desbloqueo de desarrollo).
+      disabled={!onPress}
       style={({ pressed }) => [styles.opcion, pressed && styles.presionado]}
       accessibilityRole="button"
-      accessibilityState={{ disabled: bloqueada }}
+      accessibilityState={{ disabled: !onPress }}
     >
       <View style={[styles.icono, bloqueada && styles.iconoBloqueado]}>
         <Ionicons name={icono} size={22} color={bloqueada ? colores.textoSecundario : colores.texto} />
