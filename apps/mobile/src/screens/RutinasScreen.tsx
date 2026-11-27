@@ -29,6 +29,7 @@ interface RutinasScreenProps {
   onEditar: (rutina: Rutina) => void;
   onNueva: (dia?: DiaSemana) => void;
   onVerHistorial: () => void;
+  onAbrirEjercicio: (ejercicioId: string) => void; // el detalle, con el video y el mapa muscular
 }
 
 const mayuscula = (texto: string) => texto.charAt(0).toUpperCase() + texto.slice(1);
@@ -42,6 +43,7 @@ export function RutinasScreen({
   onEditar,
   onNueva,
   onVerHistorial,
+  onAbrirEjercicio,
 }: RutinasScreenProps) {
   const insets = useSafeAreaInsets();
   const { rutinas, enCurso, asignarDia } = useEntreno();
@@ -115,8 +117,17 @@ export function RutinasScreen({
               <View style={styles.lista}>
                 {rutina.ejercicios.map((e, i) => {
                   const datos = buscarEjercicioPorId(e.ejercicioId);
+                  // Sin datos (un ejercicio que ya no está en el catálogo) no hay detalle para abrir.
                   return (
-                    <View key={e.ejercicioId} style={[styles.filaEjercicio, i > 0 && styles.separador]}>
+                    <Pressable
+                      key={e.ejercicioId}
+                      onPress={datos ? () => onAbrirEjercicio(e.ejercicioId) : undefined}
+                      disabled={!datos}
+                      style={({ pressed }) => [styles.filaEjercicio, i > 0 && styles.separador, pressed && styles.filaPresionada]}
+                      accessibilityRole="button"
+                      accessibilityLabel={datos ? `Ver ${datos.nombre}` : 'Ejercicio'}
+                      accessibilityHint={datos ? 'Abre el video y los músculos que trabaja' : undefined}
+                    >
                       {datos && <Miniatura ejercicio={datos} tamano={46} radio={12} />}
                       <Text style={styles.nombreEjercicio} numberOfLines={2}>
                         {datos?.nombre ?? 'Ejercicio'}
@@ -124,7 +135,8 @@ export function RutinasScreen({
                       <Text style={styles.objetivo}>
                         {e.series}×{textoRango(e.rango)}
                       </Text>
-                    </View>
+                      {datos && <Ionicons name="chevron-forward" size={16} color={c.textoTenue} />}
+                    </Pressable>
                   );
                 })}
               </View>
@@ -295,6 +307,7 @@ const styles = StyleSheet.create({
   nombreRutina: { color: c.blanco, fontSize: 24, fontWeight: '900', letterSpacing: -0.3, marginTop: 2 },
   lista: { marginTop: 10 },
   filaEjercicio: { flexDirection: 'row', alignItems: 'center', gap: 14, paddingVertical: 11 },
+  filaPresionada: { opacity: 0.6 },
   separador: { borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: c.pistaAnillo },
   nombreEjercicio: { flex: 1, color: c.blanco, fontSize: 16, fontWeight: '800' },
   objetivo: { color: c.blanco, fontSize: 16, fontWeight: '900' },
