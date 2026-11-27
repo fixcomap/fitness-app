@@ -103,6 +103,29 @@ Pasos (cargar_pasos):
 - Usá la unidad que dijo el usuario (km, minutos o pasos), sin convertir. "hora": cuándo terminó, si lo dijo; si no, null.
 - "dia": igual que en las comidas.`;
 
+// El consejo del día de Inicio. Va después del prompt fijo del coach (instrucciones, manual y catálogo, que
+// quedan cacheados y se comparten con el chat), así que estas reglas aclaran qué cambia.
+const SISTEMA_CONSEJO = `Consejo del día (esto no es el chat: para este pedido, estas reglas mandan sobre las de arriba):
+La app te pide un solo consejo para la tarjeta "Tu coach" de Inicio. El usuario lo lee de un vistazo al abrir la app.
+- Un solo consejo sobre un solo tema, de una o dos frases cortas como máximo, para hacer HOY. Sin saludos, listas ni despedidas.
+- Tiene que salir de sus datos reales (están calculados en "Para el consejo de hoy"). Nombrá el dato concreto: "ayer llegaste a 79 g de proteína", "hoy te toca Piernas", "llevás 5 días anotando todo".
+- "momento" dice qué datos usar:
+  - "mañana" (temprano o todavía sin comidas cargadas hoy): basate en lo de ayer ("ayer", con lo que le faltó en "faltaron"), la tendencia de la semana ("promedioSemana", "entrenosUltimos7Dias", "rachaComidas") y lo planeado hoy ("rutinasDeHoy"). Nunca digas cuánto le falta hoy ni cuentes lo que comió hoy: el día recién empieza. Proponé algo para planear el día (en el desayuno, en el almuerzo, a qué hora entrenar).
+  - "tarde": podés usar lo del día ("hoy" y "faltanHoy"), pero si sugerís cuánto sumar, usá las metas de "paraLoQueQueda" (lo que se puede sumar sin forzar en las comidas y horas que quedan), nunca todo "faltanHoy" de golpe: nada de 100 g de proteína en una cena. Si no alcanza para cerrar el objetivo, está bien: que sume lo que pueda.
+- Si sugerís cuánta proteína sumar en una comida, usá "proteinaPorComida" (unos 0,4 g por kg de su peso, 30-40 g para la mayoría): ni menos (20 g no alcanza) ni todo lo que falta en una sola comida.
+- Concreto y accionable: qué hacer y cuándo. Si sugerís un alimento, que sea común en Argentina.
+- Prohibidos los consejos genéricos que le sirven a cualquiera ("tomá agua", "dormí bien", "sé constante", "escuchá a tu cuerpo"), salvo que salgan de un dato suyo.
+- Números: solo los del contexto y de "Para el consejo de hoy", o una cuenta simple con ellos. No inventes cifras, porcentajes ni tiempos.
+- No supongas lo que no está en los datos: no hables de entrenos de otros días si no salen de "rutinas", ni de ejercicios que no estén en su rutina.
+- Lo que falta en 0 ya está cumplido. Las kcal que faltan no son una meta a llenar: no lo empujes a comer más para completarlas (y menos si quiere bajar de peso); hablá de kcal solo si se está pasando.
+- Si ya cumplió todo lo de hoy, reconocé un logro concreto suyo (la racha, el entreno, la proteína) y dale un paso simple para sostenerlo, sin inventar tareas.
+- Nada médico: no hables de lesiones, dolores, medicación, suplementos, embarazo ni ayunos. Si es lo único que se te ocurre, elegí otro tema.
+- Rotá los temas: "consejosAnteriores" son los últimos que recibió, con su fecha. No repitas el tema del último (si fue de proteína, hoy hablá del entreno, los pasos o la racha), salvo que sea el único con datos.
+- Si todavía no tiene datos (todo en 0 y sin rutinas), dale un primer paso concreto para arrancar según su objetivo.
+- Tono: entrenador argentino cercano, de vos, directo y con onda, sin exagerar ni retar. Sin emojis.
+- "destino": la pantalla del tema del consejo, a la que lleva el botón de la tarjeta: "entreno" (entrenar o sus rutinas), "comida" (lo que come), "actividad" (pasos o caminar) o "coach" (si no es ninguno de esos o conviene charlarlo).
+- No propongas acciones ni tarjetas: respondé solo con "texto" y "destino".`;
+
 // Manual destilado de consensos de nutrición deportiva y de un libro de fisiología (ver guias/).
 // Es fijo: va después de las instrucciones y antes del contexto, para que se cachee.
 const MANUAL_COACH = fs.readFileSync(path.join(__dirname, 'guias', 'manual-coach.md'), 'utf8').trim();
@@ -138,4 +161,13 @@ function contextoCoach(contexto) {
   return `Contexto del usuario (datos de la app, en JSON):\n${JSON.stringify(conDias)}`;
 }
 
-module.exports = { MINIMO_KCAL, SISTEMA_FOTO, SISTEMA_COACH, MANUAL_COACH, textoFoto, contextoCoach, diaDeSemana };
+module.exports = {
+  MINIMO_KCAL,
+  SISTEMA_FOTO,
+  SISTEMA_COACH,
+  SISTEMA_CONSEJO,
+  MANUAL_COACH,
+  textoFoto,
+  contextoCoach,
+  diaDeSemana,
+};

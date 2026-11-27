@@ -1,0 +1,72 @@
+{
+  "_nota": "Días de prueba del consejo del día para probar-ia.mjs --solo consejo. Usan el contexto de preguntas-coach.json (perfil y semana) con los objetivos que manda la app (proteína = 1,8 g por kg; meta de pasos por defecto). Cada día lleva la hora local del celular (0-23). Se corren en orden: cada día suma el anterior a la semana y le pasa a la IA los consejos ya dados.",
+  "perfil": {
+    "proteinasObjetivo": 140,
+    "metaPasos": 10000
+  },
+  "dias": [
+    {
+      "titulo": "Mañana (jueves 8 h, sin comidas, ayer con 79 g de proteína)",
+      "hoy": "2026-11-26",
+      "hora": 8,
+      "dia": {
+        "fecha": "2026-11-26",
+        "kcal": 0,
+        "proteinas": 0,
+        "carbos": 0,
+        "grasas": 0,
+        "comidas": [],
+        "pasos": 900
+      }
+    },
+    {
+      "titulo": "Proteína baja (jueves 21 h, sin rutina)",
+      "hoy": "2026-11-26",
+      "hora": 21,
+      "dia": {
+        "fecha": "2026-11-26",
+        "kcal": 1250,
+        "proteinas": 38,
+        "carbos": 190,
+        "grasas": 40,
+        "comidas": ["Mate con galletitas", "Ñoquis con salsa", "Alfajor"],
+        "pasos": 6100
+      }
+    },
+    {
+      "titulo": "Entreno pendiente (viernes 17 h, le toca Full body A)",
+      "hoy": "2026-11-27",
+      "hora": 17,
+      "dia": {
+        "fecha": "2026-11-27",
+        "kcal": 950,
+        "proteinas": 72,
+        "carbos": 95,
+        "grasas": 30,
+        "comidas": ["Huevos revueltos con tostadas", "Ensalada con pollo"],
+        "pasos": 4300
+      }
+    },
+    {
+      "titulo": "Día bien cumplido (sábado 21 h, ya entrenó y llegó a todo)",
+      "hoy": "2026-11-28",
+      "hora": 21,
+      "dia": {
+        "fecha": "2026-11-28",
+        "kcal": 1720,
+        "proteinas": 146,
+        "carbos": 170,
+        "grasas": 52,
+        "comidas": ["Yogur con avena", "Pollo con arroz", "Atún con huevo y ensalada", "Queso y fruta"],
+        "entrenos": [
+          {
+            "nombre": "Full body B",
+            "ejercicios": 7,
+            "duracionMin": 75
+          }
+        ],
+        "pasos": 11200
+      }
+    }
+  ]
+}

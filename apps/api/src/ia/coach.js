@@ -27,6 +27,66 @@ const ejercicioRutina = z.object({
   rango: z.object({ min: entero(REPS.min, REPS.max), max: entero(REPS.min, REPS.max) }),
 });
 
+// Los datos del celu que van con cada pedido del coach (y del consejo del día).
+const esquemaContexto = z.object({
+  // La fecha del celular ("AAAA-MM-DD"): así no depende de la zona horaria del servidor.
+  hoy: fechaReal,
+  perfil: z.object({
+    nombre: texto(30).optional(),
+    sexo: z.enum(['hombre', 'mujer']),
+    edad: entero(14, 100),
+    alturaCm: z.number().min(120).max(230),
+    pesoKg: z.number().min(30).max(300),
+    objetivoPeso: z.enum(['bajar', 'mantener', 'subir']),
+    objetivo: z.enum(['hipertrofia', 'fuerza']),
+    diasEntrenoPorSemana: entero(0, 7),
+    // Opcionales: los perfiles de antes no los tienen (y las apps viejas no los mandan).
+    nivel: z.enum(NIVELES).optional(),
+    lugar: z.enum(LUGARES).optional(),
+    kcalObjetivo: z.number().min(0).max(10000).optional(),
+    // Opcionales (las apps viejas no los mandan): para hablar de lo que le falta con números reales.
+    proteinasObjetivo: z.number().min(0).max(1000).optional(),
+    metaPasos: entero(0, 100000).optional(),
+  }),
+  ultimos7Dias: z
+    .array(
+      z.object({
+        fecha,
+        kcal: z.number().min(0).max(20000),
+        proteinas: z.number().min(0).max(2000).optional(),
+        carbos: z.number().min(0).max(2000).optional(),
+        grasas: z.number().min(0).max(2000).optional(),
+        comidas: z.array(texto(80)).max(40).optional(),
+        entrenos: z
+          .array(
+            z.object({
+              nombre: texto(60),
+              ejercicios: entero(0, 100).optional(),
+              duracionMin: z.number().min(0).max(600).optional(),
+            }),
+          )
+          .max(5)
+          .optional(),
+        pasos: entero(0, 200000).optional(),
+        kcalActividad: z.number().min(0).max(10000).optional(),
+      }),
+    )
+    .max(7),
+  rutinas: z
+    .array(
+      z.object({
+        // Para que el coach pueda nombrar una rutina en sus acciones.
+        id: texto(80).min(1),
+        nombre: texto(MAXIMO_NOMBRE_RUTINA),
+        dias: z.array(dia).max(7),
+        ejercicios: z.array(ejercicioRutina).max(30),
+      }),
+    )
+    .max(14)
+    .refine((rutinas) => new Set(rutinas.map((r) => r.id)).size === rutinas.length, 'Hay rutinas con el mismo id'),
+  // El catálogo de ejercicios no lo manda la app: lo tiene la API (src/ia/catalogo.json).
+});
+
 // Lo que manda la app.
 const esquemaPedidoCoach = z.object({
   mensajes: z
@@ -34,61 +94,19 @@ const esquemaPedidoCoach = z.object({
     .min(1)
     .max(40)
     .refine((mensajes) => mensajes.at(-1)?.rol === 'usuario', 'El último mensaje tiene que ser del usuario'),
-  contexto: z.object({
-    // La fecha del celular ("AAAA-MM-DD"): así no depende de la zona horaria del servidor.
-    hoy: fechaReal,
-    perfil: z.object({
-      nombre: texto(30).optional(),
-      sexo: z.enum(['hombre', 'mujer']),
-      edad: entero(14, 100),
-      alturaCm: z.number().min(120).max(230),
-      pesoKg: z.number().min(30).max(300),
-      objetivoPeso: z.enum(['bajar', 'mantener', 'subir']),
-      objetivo: z.enum(['hipertrofia', 'fuerza']),
-      diasEntrenoPorSemana: entero(0, 7),
-      // Opcionales: los perfiles de antes no los tienen (y las apps viejas no los mandan).
-      nivel: z.enum(NIVELES).optional(),
-      lugar: z.enum(LUGARES).optional(),
-      kcalObjetivo: z.number().min(0).max(10000).optional(),
-    }),
-    ultimos7Dias: z
-      .array(
-        z.object({
-          fecha,
-          kcal: z.number().min(0).max(20000),
-          proteinas: z.number().min(0).max(2000).optional(),
-          carbos: z.number().min(0).max(2000).optional(),
-          grasas: z.number().min(0).max(2000).optional(),
-          comidas: z.array(texto(80)).max(40).optional(),
-          entrenos: z
-            .array(
-              z.object({
-                nombre: texto(60),
-                ejercicios: entero(0, 100).optional(),
-                duracionMin: z.number().min(0).max(600).optional(),
-              }),
-            )
-            .max(5)
-            .optional(),
-          pasos: entero(0, 200000).optional(),
-          kcalActividad: z.number().min(0).max(10000).optional(),
-        }),
-      )
-      .max(7),
-    rutinas: z
-      .array(
-        z.object({
-          // Para que el coach pueda nombrar una rutina en sus acciones.
-          id: texto(80).min(1),
-          nombre: texto(MAXIMO_NOMBRE_RUTINA),
-          dias: z.array(dia).max(7),
-          ejercicios: z.array(ejercicioRutina).max(30),
-        }),
-      )
-      .max(14)
-      .refine((rutinas) => new Set(rutinas.map((r) => r.id)).size === rutinas.length, 'Hay rutinas con el mismo id'),
-    // El catálogo de ejercicios no lo manda la app: lo tiene la API (src/ia/catalogo.json).
-  }),
+  contexto: esquemaContexto,
+});
+
+// El consejo del día de Inicio: el mismo contexto y los últimos consejos que ya recibió (para no repetir tema).
+const MAXIMO_CONSEJOS_ANTERIORES = 3;
+const esquemaPedidoConsejo = z.object({
+  contexto: esquemaContexto,
+  // La hora local del celular (0-23): a la mañana el consejo no habla de lo que falta hoy.
+  hora: entero(0, 23),
+  consejosAnteriores: z
+    .array(z.object({ fecha, texto: texto(400).min(1) }))
+    .max(MAXIMO_CONSEJOS_ANTERIORES)
+    .default([]),
 });
 
 // Los últimos mensajes de la charla, los que van a la IA. Si al recortar queda primero uno del coach,
@@ -162,6 +180,8 @@ module.exports = {
   MAXIMO_MENSAJES_IA,
   mensajesParaIa,
   esquemaPedidoCoach,
+  esquemaPedidoConsejo,
+  MAXIMO_CONSEJOS_ANTERIORES,
   erroresPedido,
   recortarNombre,
   limpiarRutina,

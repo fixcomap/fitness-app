@@ -1,0 +1,136 @@
+{
+  "contexto": {
+    "hoy": "2026-11-26",
+    "perfil": {
+      "nombre": "Juan",
+      "sexo": "hombre",
+      "edad": 24,
+      "alturaCm": 180,
+      "pesoKg": 78,
+      "objetivoPeso": "bajar",
+      "objetivo": "hipertrofia",
+      "diasEntrenoPorSemana": 3,
+      "nivel": "principiante",
+      "lugar": "casa-mancuernas",
+      "kcalObjetivo": 1800,
+      "proteinasObjetivo": 140,
+      "metaPasos": 8000
+    },
+    "ultimos7Dias": [
+      {
+        "fecha": "2026-11-20",
+        "kcal": 0,
+        "proteinas": 0,
+        "carbos": 0,
+        "grasas": 0,
+        "comidas": [],
+        "entrenos": [],
+        "pasos": 0,
+        "kcalActividad": 0
+      },
+      {
+        "fecha": "2026-11-21",
+        "kcal": 0,
+        "proteinas": 0,
+        "carbos": 0,
+        "grasas": 0,
+        "comidas": [],
+        "entrenos": [],
+        "pasos": 0,
+        "kcalActividad": 0
+      },
+      {
+        "fecha": "2026-11-22",
+        "kcal": 0,
+        "proteinas": 0,
+        "carbos": 0,
+        "grasas": 0,
+        "comidas": [],
+        "entrenos": [],
+        "pasos": 0,
+        "kcalActividad": 0
+      },
+      {
+        "fecha": "2026-11-23",
+        "kcal": 0,
+        "proteinas": 0,
+        "carbos": 0,
+        "grasas": 0,
+        "comidas": [],
+        "entrenos": [],
+        "pasos": 0,
+        "kcalActividad": 0
+      },
+      {
+        "fecha": "2026-11-24",
+        "kcal": 0,
+        "proteinas": 0,
+        "carbos": 0,
+        "grasas": 0,
+        "comidas": [],
+        "entrenos": [],
+        "pasos": 0,
+        "kcalActividad": 0
+      },
+      {
+        "fecha": "2026-11-25",
+        "kcal": 500,
+        "proteinas": 18,
+        "carbos": 41,
+        "grasas": 29,
+        "comidas": [
+          "Empanada de carne (150 g)"
+        ],
+        "entrenos": [
+          {
+            "nombre": "Full body A",
+            "ejercicios": 2,
+            "duracionMin": 70
+          }
+        ],
+        "pasos": 6000,
+        "kcalActividad": 585
+      },
+      {
+        "fecha": "2026-11-26",
+        "kcal": 599,
+        "proteinas": 22,
+        "carbos": 50,
+        "grasas": 35,
+        "comidas": [
+          "Empanada de carne (2 empanadas)"
+        ],
+        "entrenos": [],
+        "pasos": 3000,
+        "kcalActividad": 87
+      }
+    ],
+    "rutinas": [
+      {
+        "id": "rutina-1",
+        "nombre": "Full body A",
+        "dias": [
+          2,
+          4
+        ],
+        "ejercicios": [
+          {
+            "ejercicioId": "sentadilla-barra",
+            "series": 4,
+            "rango": {
+              "min": 6,
+              "max": 10
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "hora": 21,
+  "consejosAnteriores": [
+    {
+      "fecha": "2026-11-25",
+      "texto": "Ayer te faltaron 40 g de proteína: sumá un yogur griego en la merienda."
+    }
+  ]
+}

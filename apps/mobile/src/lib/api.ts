@@ -5,6 +5,7 @@
 import { randomUUID } from 'expo-crypto';
 
 import { leerRespuestaCoach, type RespuestaCoach } from './coach/acciones';
+import { leerRespuestaConsejo, type Consejo, type PedidoConsejo } from './coach/consejo';
 import type { PedidoCoach } from './coach/contexto';
 import type { Comida } from './comida/diario';
 import { leerResultadoFoto, type ItemFoto } from './comida/respuestaFoto';
@@ -92,6 +93,7 @@ export interface ClienteApi {
   // La foto ya en JPEG. comida: una pista para la IA (de qué comida del día es). Una lista vacía es que
   // no encontró comida en la foto.
   fotoComida: (foto: Blob, comida: Comida | null, senal?: AbortSignal) => Promise<ItemFoto[]>;
+  consejo: (pedido: PedidoConsejo, senal?: AbortSignal) => Promise<Consejo>;
 }
 
 // Lo que se manda: JSON (el coach) o la foto tal cual (image/jpeg).
@@ -146,6 +148,11 @@ export function crearClienteApi({ url = URL_API, fetch: pedir = fetch, dispositi
       const items = leerResultadoFoto(await post(ruta, { jpeg: foto }, senal));
       if (!items) throw new ErrorApi('respuesta', MENSAJES.respuesta, 200);
       return items;
+    },
+    async consejo(pedido, senal) {
+      const consejo = leerRespuestaConsejo(await post('/coach/consejo', { json: pedido }, senal));
+      if (!consejo) throw new ErrorApi('respuesta', MENSAJES.respuesta, 200);
+      return consejo;
     },
   };
 }

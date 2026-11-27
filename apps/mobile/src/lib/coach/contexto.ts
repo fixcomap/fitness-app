@@ -28,6 +28,7 @@ const MAXIMO_EJERCICIOS_RUTINA = 30;
 const MAXIMO_NOMBRE_RUTINA = 40;
 const MAXIMO_PASOS_DIA = 200_000;
 const MAXIMO_DURACION_MIN = 600;
+const MAXIMO_META_PASOS = 100_000;
 const DIAS_RESUMEN = 7;
 
 export interface MensajeChat {
@@ -62,6 +63,8 @@ export interface ContextoCoach {
     nivel?: Nivel;
     lugar?: Lugar;
     kcalObjetivo: number;
+    proteinasObjetivo: number; // g por día, el mismo objetivo que muestra la app
+    metaPasos: number;
   };
   ultimos7Dias: DiaResumen[]; // hoy y los 6 días anteriores, del más viejo al más nuevo
   rutinas: Rutina[];
@@ -79,6 +82,7 @@ export interface DatosCoach {
   sesiones: readonly SesionGuardada[];
   rutinas: readonly Rutina[];
   totalDelDia: TotalDelDia; // pasos del día (historial + sensor + cargas manuales)
+  metaPasos: number; // de la configuración
 }
 
 const recortar = (texto: string, maximo: number) => texto.trim().slice(0, maximo);
@@ -122,6 +126,7 @@ function resumenDia(fecha: string, d: DatosCoach): DiaResumen {
 
 export function armarContexto(d: DatosCoach): ContextoCoach {
   const { perfil } = d;
+  const metas = metasNutricion(perfil);
   const dias = Array.from({ length: DIAS_RESUMEN }, (_, i) => claveDia(sumarDias(d.ahora, i - (DIAS_RESUMEN - 1))));
   return {
     hoy: claveDia(d.ahora),
@@ -136,7 +141,9 @@ export function armarContexto(d: DatosCoach): ContextoCoach {
       diasEntrenoPorSemana: perfil.diasEntrenoPorSemana,
       ...(perfil.nivel ? { nivel: perfil.nivel } : {}),
       ...(perfil.lugar ? { lugar: perfil.lugar } : {}),
-      kcalObjetivo: metasNutricion(perfil).kcal,
+      kcalObjetivo: metas.kcal,
+      proteinasObjetivo: metas.proteinas,
+      metaPasos: Math.min(redondear(d.metaPasos), MAXIMO_META_PASOS),
     },
     ultimos7Dias: dias.map((fecha) => resumenDia(fecha, d)),
     rutinas: d.rutinas.slice(0, MAXIMO_RUTINAS).map((r) => ({

@@ -4,10 +4,11 @@
 //   nombre: string
 //   analizarFoto(imagen: Buffer, contexto: { comida: string | null }): Promise<Respuesta>
 //   responderCoach(mensajes: { rol: 'usuario' | 'coach', texto: string }[], contexto: object): Promise<Respuesta>
+//   darConsejo(contexto: object, opciones: { consejosAnteriores: { fecha, texto }[], hora: number }): Promise<Respuesta>
 // }
 // Respuesta { datos: unknown, uso: { entrada: number, salida: number }, modelo: string }
 //
-// `datos` es el JSON que devolvió el modelo, todavía sin validar: lo validan foto.js y coach.js.
+// `datos` es el JSON que devolvió el modelo, todavía sin validar: lo validan foto.js, acciones.js y consejo.js.
 // `uso` son los tokens de entrada y de salida (con los de razonamiento), para estimar el costo.
 
 // Errores de la IA que no son de red: el modelo no quiso responder o respondió algo inválido.

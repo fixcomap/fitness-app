@@ -6,7 +6,8 @@ const { crearLimitador } = require('./limites');
 const { exigirDispositivo, respuestaLimiteDiario } = require('./uso');
 const { COMIDAS, leerResultadoFoto } = require('./ia/foto');
 const { ErrorImagen, prepararJpeg, tipoImagen } = require('./imagen');
-const { esquemaPedidoCoach, erroresPedido, mensajesParaIa } = require('./ia/coach');
+const { esquemaPedidoCoach, esquemaPedidoConsejo, erroresPedido, mensajesParaIa } = require('./ia/coach');
+const { leerConsejo } = require('./ia/consejo');
 const { leerRespuestaCoach } = require('./ia/acciones');
 const { ErrorIa } = require('./ia/proveedor');
 
@@ -21,6 +22,7 @@ const MENSAJES_ERROR = {
   rechazoFoto: 'No pudimos analizar esta foto. Probá con otra',
   coach: 'El coach no pudo responder, probá de nuevo en un momento',
   rechazoCoach: 'El coach no puede responder eso. Probá preguntarlo de otra forma',
+  consejo: 'No pudimos armar el consejo de hoy, probá de nuevo en un momento',
 };
 
 function crearRutasIa({ ia, uso, limitesDiarios, limites }) {
@@ -113,6 +115,31 @@ function crearRutasIa({ ia, uso, limitesDiarios, limites }) {
           return leerRespuestaCoach(datos, contexto);
         },
         { rechazo: MENSAJES_ERROR.rechazoCoach, otro: MENSAJES_ERROR.coach },
+      );
+    },
+  );
+
+  // El consejo del día de Inicio: mismo contexto que /coach y los últimos consejos (para rotar el tema).
+  // Tiene su propio límite diario: no descuenta de los mensajes del chat.
+  router.post(
+    '/coach/consejo',
+    limitadorIa,
+    exigirDispositivo,
+    iaDisponible,
+    express.json({ limit: MAXIMO_COACH }),
+    async (req, res) => {
+      const pedido = esquemaPedidoConsejo.safeParse(req.body);
+      if (!pedido.success) {
+        return res.status(400).json({ error: 'Pedido inválido', detalles: erroresPedido(pedido.error) });
+      }
+      const { contexto, consejosAnteriores, hora } = pedido.data;
+
+      await conUsoDiario(
+        req,
+        res,
+        'consejos',
+        async () => leerConsejo((await ia.darConsejo(contexto, { consejosAnteriores, hora })).datos),
+        { rechazo: MENSAJES_ERROR.consejo, otro: MENSAJES_ERROR.consejo },
       );
     },
   );

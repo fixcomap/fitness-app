@@ -15,6 +15,11 @@ const MILANESA = {
 const EMPANADA = { gramos: 90, kcal: 333, proteinas: 12.1, carbos: 27.5, grasas: 19.2 };
 
 const USO = { entrada: 0, cacheLectura: 0, cacheEscritura: 0, salida: 0 };
+// El consejo del día de prueba: siempre el mismo.
+const CONSEJO = {
+  texto: 'Consejo de prueba (IA_PROVEEDOR=falso): sumá una porción de proteína en tu próxima comida.',
+  destino: 'comida',
+};
 const AYUDA =
   'Soy el coach de prueba (IA_PROVEEDOR=falso). Probá con: "armame una rutina", "agregá curl a mi rutina", ' +
   '"sacá un ejercicio", "borrá la rutina", "comí 2 empanadas" o "caminé 3 km".';
@@ -127,7 +132,10 @@ function crearProveedorFalso() {
     async responderCoach(mensajes, contexto) {
       return { datos: respuestaCoach(mensajes, contexto), uso: USO, modelo: 'falso' };
     },
+    async darConsejo() {
+      return { datos: CONSEJO, uso: USO, modelo: 'falso' };
+    },
   };
 }
 
-module.exports = { crearProveedorFalso, respuestaCoach };
+module.exports = { CONSEJO, crearProveedorFalso, respuestaCoach };

@@ -10,6 +10,8 @@ const {
   formatoTokens,
   resumir,
   lineasCoach,
+  restarDias,
+  contextoDeDiaConsejo,
 } = require('../scripts/comparacion');
 
 test('lee la carpeta, los candidatos y --solo', () => {
@@ -211,4 +213,42 @@ test('el script muestra las acciones con los nombres del catálogo y de las ruti
     'Descartados, rutinas que no existen: r7 (borrar_rutinas)',
     'Descartados, fecha fuera de los últimos 7 días: 2026-11-27 (registrar_comida)',
   ]);
+});
+
+test('--solo consejo no pide carpeta de fotos', () => {
+  assert.strictEqual(leerArgumentos(['--con', 'claude:m', '--solo', 'consejo']).solo, 'consejo');
+});
+
+test('restarDias cruza meses', () => {
+  assert.strictEqual(restarDias('2026-12-02', 6), '2026-11-26');
+});
+
+test('contextoDeDiaConsejo: semana que termina en el día de prueba, con los días ya corridos', () => {
+  const base = {
+    hoy: '2026-11-26',
+    perfil: { pesoKg: 78 },
+    ultimos7Dias: ['20', '21', '22', '23', '24', '25', '26'].map((d) => ({ fecha: `2026-11-${d}`, kcal: 1 })),
+    rutinas: [],
+  };
+  const corrido = { fecha: '2026-11-26', kcal: 2 };
+  const c = contextoDeDiaConsejo(
+    base,
+    { metaPasos: 10000 },
+    { hoy: '2026-11-27', dia: { fecha: '2026-11-27', kcal: 3 } },
+    [corrido],
+  );
+  assert.strictEqual(c.hoy, '2026-11-27');
+  assert.deepStrictEqual(c.perfil, { pesoKg: 78, metaPasos: 10000 });
+  assert.deepStrictEqual(
+    c.ultimos7Dias.map((d) => [d.fecha.slice(8), d.kcal]),
+    [
+      ['21', 1],
+      ['22', 1],
+      ['23', 1],
+      ['24', 1],
+      ['25', 1],
+      ['26', 2],
+      ['27', 3],
+    ],
+  );
 });

@@ -31,7 +31,7 @@ const mensajes = [
 test('sin IA_PROVEEDOR la IA queda apagada, con los límites diarios por defecto', () => {
   const c = leerConfigIa({});
   assert.strictEqual(c.proveedor, null);
-  assert.deepStrictEqual(c.limitesDiarios, { fotos: 10, mensajes: 30 });
+  assert.deepStrictEqual(c.limitesDiarios, { fotos: 10, mensajes: 30, consejos: 2 });
 });
 
 test('gemini con clave usa los modelos por defecto o los de las variables', () => {
@@ -84,7 +84,13 @@ test('proveedor desconocido o límites inválidos: la API no arranca', () => {
   assert.throws(() => leerConfigIa({ IA_PROVEEDOR: 'otro' }));
   assert.throws(() => leerConfigIa({ IA_LIMITE_FOTOS_DIA: '0' }));
   assert.throws(() => leerConfigIa({ IA_LIMITE_MENSAJES_DIA: 'muchos' }));
-  assert.deepStrictEqual(leerConfigIa({ IA_LIMITE_FOTOS_DIA: '3' }).limitesDiarios, { fotos: 3, mensajes: 30 });
+  assert.deepStrictEqual(leerConfigIa({ IA_LIMITE_FOTOS_DIA: '3' }).limitesDiarios, {
+    fotos: 3,
+    mensajes: 30,
+    consejos: 2,
+  });
+  assert.strictEqual(leerConfigIa({ IA_LIMITE_CONSEJOS_DIA: '5' }).limitesDiarios.consejos, 5);
+  assert.throws(() => leerConfigIa({ IA_LIMITE_CONSEJOS_DIA: '0' }), /IA_LIMITE_CONSEJOS_DIA/);
 });
 
 test('crearProveedor: null si está apagada; arma el pedido sin conectarse', () => {

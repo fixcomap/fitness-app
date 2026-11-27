@@ -59,6 +59,13 @@ test('devolver resta uno sin bajar de cero', async () => {
   assert.match(pool.consultas[0].sql, /SET mensajes = mensajes - 1 .* AND mensajes > 0/);
 });
 
+test('los consejos del día tienen su propia columna (no descuentan de los mensajes)', async () => {
+  const pool = poolFalso([{ usados: 1 }]);
+  assert.deepStrictEqual(await crearUsoDiario(pool).consumir(ID, 'consejos', 2), { permitido: true, usados: 1 });
+  assert.match(pool.consultas[1].sql, /SET consejos = uso_diario\.consejos \+ 1\s+WHERE uso_diario\.consejos < \$2/);
+  assert.doesNotMatch(pool.consultas[1].sql, /mensajes/);
+});
+
 test('un tipo de uso desconocido no llega al SQL', async () => {
   const pool = poolFalso([]);
   await assert.rejects(crearUsoDiario(pool).consumir(ID, 'fotos = 0; --', 10));

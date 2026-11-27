@@ -14,6 +14,9 @@ import { colores } from '../theme/tema';
 import { EntrenoStack } from './EntrenoStack';
 import { useNavegacionRaiz } from './tiposRaiz';
 
+// La pestaña a la que lleva el consejo del día de Inicio.
+const TAB_DE_DESTINO = { entreno: 'Entreno', comida: 'Comida', actividad: 'Actividad', coach: 'Coach' } as const;
+
 export type TabsParamList = {
   Inicio: undefined;
   Entreno: undefined;
@@ -47,6 +50,7 @@ function InicioRuta({ navigation }: BottomTabScreenProps<TabsParamList, 'Inicio'
       }}
       onArmarSesion={() => navigation.navigate('Entreno')}
       onAbrirCoach={() => navigation.navigate('Coach')}
+      onIrA={(destino) => navigation.navigate(TAB_DE_DESTINO[destino])}
       onAbrirPerfil={() => raiz.navigate('Perfil')}
     />
   );

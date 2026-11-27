@@ -7,6 +7,9 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { AvisoFuenteActividad } from '../components/actividad/AvisoFuenteActividad';
 import { HojaPasosManuales } from '../components/inicio/HojaPasosManuales';
 import { TarjetaCoach } from '../components/inicio/TarjetaCoach';
+import { useCoachHabilitado } from '../hooks/useCoachHabilitado';
+import { useConsejoDelDia } from '../hooks/useConsejoDelDia';
+import type { DestinoConsejo } from '../lib/coach/consejo';
 import { AnilloProgreso } from '../components/progreso/AnilloProgreso';
 import { BarraProgreso, BarraSegmentada } from '../components/progreso/Barras';
 import { formatearFechaCorta, formatearNumero, inicial } from '../lib/formato';
@@ -30,6 +33,7 @@ import {
 import { colores } from '../theme/tema';
 
 // Consejo de ejemplo hasta que el coach genere los suyos.
+// El que se ve borroso sin premium.
 const CONSEJO_EJEMPLO = 'Ayer te faltaron 40 g de proteína. Sumá un yogur griego en la merienda y llegás.';
 
 // En el diseño cada macro tiene su gris: de más claro a más oscuro.
@@ -40,10 +44,19 @@ interface InicioScreenProps {
   onArmarSesion: () => void; // lleva a Entreno para elegir ejercicios
   onAbrirCoach: () => void;
   onAbrirPerfil: () => void;
+  onIrA: (destino: DestinoConsejo) => void; // a donde lleva el consejo del día
 }
 
-export function InicioScreen({ onEmpezarEntreno, onArmarSesion, onAbrirCoach, onAbrirPerfil }: InicioScreenProps) {
+export function InicioScreen({
+  onEmpezarEntreno,
+  onArmarSesion,
+  onAbrirCoach,
+  onAbrirPerfil,
+  onIrA,
+}: InicioScreenProps) {
   const hoy = new Date();
+  const { habilitado: coachHabilitado } = useCoachHabilitado();
+  const { consejo } = useConsejoDelDia(coachHabilitado);
   const {
     perfil,
     config,
@@ -184,10 +197,13 @@ export function InicioScreen({ onEmpezarEntreno, onArmarSesion, onAbrirCoach, on
 
         {/* Coach */}
         <TarjetaCoach
-          esPremium={perfil.esPremium}
-          consejo={CONSEJO_EJEMPLO}
-          onResponder={onAbrirCoach}
-          onProbarGratis={() => {}}
+          habilitado={coachHabilitado}
+          consejo={consejo}
+          consejoBloqueado={CONSEJO_EJEMPLO}
+          onHablar={onAbrirCoach}
+          onIrA={onIrA}
+          // TODO(RevenueCat): abrir la compra de la prueba gratis. Por ahora lleva al coach (ahí se ve el premium).
+          onProbarGratis={onAbrirCoach}
         />
       </ScrollView>
 

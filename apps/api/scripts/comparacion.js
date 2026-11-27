@@ -2,13 +2,14 @@
 const path = require('path');
 const { LUGARES, NIVELES } = require('../src/ia/nivelLugar');
 
-const USO = `Uso: node scripts/probar-ia.mjs <carpeta-de-fotos> --con <proveedor>:<modelo> [--con ...] [--solo fotos|coach]
+const USO = `Uso: node scripts/probar-ia.mjs <carpeta-de-fotos> --con <proveedor>:<modelo> [--con ...] [--solo fotos|coach|consejo]
        [--pregunta "<texto>" ...] [--nivel <nivel>] [--lugar <lugar>]
 
   <carpeta-de-fotos>  carpeta con fotos .jpg, .jpeg, .png o .heic (fuera del repo)
   --con               proveedor y modelo a probar; se puede repetir. Proveedores: gemini, claude,
                       vertex-gemini, vertex-claude. Ej.: --con gemini:gemini-3.8-flash --con claude:claude-haiku-5-5
-  --solo              probar solo las fotos o solo el coach
+  --solo              probar solo las fotos, solo el coach o solo el consejo del día (los días de
+                      dias-consejo.json)
   --pregunta          pregunta para el coach en vez de las de preguntas-coach.json; se puede repetir
   --nivel             nivel del perfil del ejemplo: ${NIVELES.join(', ')}
   --lugar             dónde entrena el perfil del ejemplo: ${LUGARES.join(', ')}`;
@@ -31,7 +32,7 @@ function leerArgumentos(argv) {
       candidatos.push({ proveedor: valor.slice(0, separador), modelo: valor.slice(separador + 1) });
     } else if (arg === '--solo') {
       solo = argv[++i];
-      if (!['fotos', 'coach'].includes(solo)) return { error: '--solo espera fotos o coach' };
+      if (!['fotos', 'coach', 'consejo'].includes(solo)) return { error: '--solo espera fotos, coach o consejo' };
     } else if (arg === '--pregunta') {
       const pregunta = (argv[++i] ?? '').trim();
       if (!pregunta) return { error: '--pregunta espera un texto' };
@@ -50,7 +51,7 @@ function leerArgumentos(argv) {
       carpeta = arg;
     }
   }
-  if (!carpeta && solo !== 'coach') return { error: 'Falta la carpeta de fotos' };
+  if (!carpeta && (solo === null || solo === 'fotos')) return { error: 'Falta la carpeta de fotos' };
   if (candidatos.length === 0) return { error: 'Falta al menos un --con proveedor:modelo' };
   return { carpeta, candidatos, solo, preguntas, perfil };
 }
@@ -164,4 +165,32 @@ function lineasCoach(salida, catalogo, rutinas = []) {
   return lineas;
 }
 
-module.exports = { USO, leerArgumentos, estaDentro, costoEstimado, formatoCosto, formatoTokens, resumir, lineasCoach };
+// 'AAAA-MM-DD' menos n días.
+function restarDias(fecha, n) {
+  const [a, m, d] = fecha.split('-').map(Number);
+  return new Date(Date.UTC(a, m - 1, d - n)).toISOString().slice(0, 10);
+}
+
+// El contexto de un día de prueba del consejo: el perfil con los objetivos que manda la app, los 6 días
+// anteriores (de la semana de ejemplo y de los días de prueba ya corridos, que pisan a los de ejemplo) y el día.
+function contextoDeDiaConsejo(base, extrasPerfil, { hoy, dia }, diasCorridos = []) {
+  const desde = restarDias(hoy, 6);
+  const porFecha = new Map(
+    [...base.ultimos7Dias, ...diasCorridos].filter((d) => d.fecha >= desde && d.fecha < hoy).map((d) => [d.fecha, d]),
+  );
+  const anteriores = [...porFecha.values()].sort((a, b) => a.fecha.localeCompare(b.fecha));
+  return { ...base, hoy, perfil: { ...base.perfil, ...extrasPerfil }, ultimos7Dias: [...anteriores, dia] };
+}
+
+module.exports = {
+  USO,
+  leerArgumentos,
+  estaDentro,
+  costoEstimado,
+  formatoCosto,
+  formatoTokens,
+  resumir,
+  lineasCoach,
+  restarDias,
+  contextoDeDiaConsejo,
+};
