@@ -175,7 +175,12 @@ test('el prompt pide una rutina por día, nombres cortos y no repetir los días 
 
 test('el prompt de acciones: solo si pide un cambio, sin decir que ya lo hizo y preguntando si es ambiguo', () => {
   assert.match(SISTEMA_COACH, /Si solo pregunta algo, "acciones" va vacía/);
-  assert.match(SISTEMA_COACH, /Nunca digas que ya lo hiciste/);
+  assert.match(SISTEMA_COACH, /Nunca digas que ya lo hiciste ni que lo vas a hacer vos/);
+  assert.match(SISTEMA_COACH, /"Te dejo la propuesta abajo, tocá Aplicar para guardarla"/);
+  assert.match(
+    SISTEMA_COACH,
+    /Así no: "Listo", "Listo para borrar", "Anotado", "Sumé los 40 minutos", "Ya lo cargué", "Decime cuál y lo registro", "Decime cuál y la borro"/,
+  );
   assert.match(SISTEMA_COACH, /preguntá y dejá "acciones" vacía/);
   assert.match(SISTEMA_COACH, /"borrá la rutina" cuando tiene 3/);
   assert.match(SISTEMA_COACH, /Nunca propongas borrar o quitar algo que el usuario no nombró/);
