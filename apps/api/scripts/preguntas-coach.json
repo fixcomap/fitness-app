@@ -23,7 +23,18 @@
     "necesito comprar proteína?",
     "cuánto tiempo debería entrenar por semana si quiero algo desafiante?",
     "está bien ir corriendo al gym?",
-    "qué pasa si no llego a los pasos de la OMS?"
+    "qué pasa si no llego a los pasos de la OMS?",
+    "borrá la rutina",
+    "borrá todas mis rutinas",
+    "sacá las sentadillas",
+    "sacá el press de banca de la rutina del viernes",
+    "agregale dominadas a la rutina del miércoles",
+    "armame una rutina de piernas para el sábado",
+    "comí 2 empanadas de carne en el almuerzo",
+    "almorcé 150 g de arroz y una pechuga a la plancha",
+    "ayer a la tarde caminé 5 km",
+    "hoy caminé 40 minutos y de merienda comí una manzana",
+    "anotame que el jueves pasado cené 3 porciones de pizza"
   ],
   "contexto": {
     "hoy": "2026-11-26",
@@ -105,6 +116,45 @@
         "pasos": 8700
       }
     ],
-    "rutinas": []
+    "rutinas": [
+      {
+        "id": "rutina-full-body-a",
+        "nombre": "Full body A",
+        "dias": [2, 4],
+        "ejercicios": [
+          { "ejercicioId": "sentadilla-barra", "series": 4, "rango": { "min": 6, "max": 10 } },
+          { "ejercicioId": "press-banca-barra", "series": 4, "rango": { "min": 6, "max": 10 } },
+          { "ejercicioId": "remo-barra", "series": 3, "rango": { "min": 6, "max": 10 } },
+          { "ejercicioId": "press-militar-mancuernas", "series": 3, "rango": { "min": 6, "max": 10 } },
+          { "ejercicioId": "elevaciones-laterales", "series": 3, "rango": { "min": 10, "max": 15 } },
+          { "ejercicioId": "curl-barra", "series": 3, "rango": { "min": 10, "max": 15 } },
+          { "ejercicioId": "extension-triceps-polea-cabeza", "series": 3, "rango": { "min": 10, "max": 15 } }
+        ]
+      },
+      {
+        "id": "rutina-full-body-b",
+        "nombre": "Full body B",
+        "dias": [0],
+        "ejercicios": [
+          { "ejercicioId": "sentadilla-barra", "series": 4, "rango": { "min": 6, "max": 10 } },
+          { "ejercicioId": "peso-muerto-rumano-barra", "series": 4, "rango": { "min": 6, "max": 10 } },
+          { "ejercicioId": "press-inclinado-mancuernas", "series": 3, "rango": { "min": 6, "max": 10 } },
+          { "ejercicioId": "jalon-al-pecho", "series": 3, "rango": { "min": 6, "max": 10 } },
+          { "ejercicioId": "hip-thrust-barra", "series": 3, "rango": { "min": 6, "max": 10 } },
+          { "ejercicioId": "curl-martillo", "series": 3, "rango": { "min": 10, "max": 15 } },
+          { "ejercicioId": "face-pull", "series": 3, "rango": { "min": 10, "max": 15 } }
+        ]
+      },
+      {
+        "id": "rutina-core",
+        "nombre": "Core",
+        "dias": [],
+        "ejercicios": [
+          { "ejercicioId": "plancha", "series": 3, "rango": { "min": 8, "max": 15 } },
+          { "ejercicioId": "crunch", "series": 3, "rango": { "min": 8, "max": 15 } },
+          { "ejercicioId": "elevacion-piernas-colgado", "series": 3, "rango": { "min": 8, "max": 15 } }
+        ]
+      }
+    ]
   }
 }
