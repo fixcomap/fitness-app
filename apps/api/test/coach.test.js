@@ -181,6 +181,12 @@ test('el prompt: conceptos generales con libertad, sin inventar números y sin n
   assert.doesNotMatch(SISTEMA_COACH, /decí que tus guías no lo tienen/);
 });
 
+test('el prompt: plan nuevo sobre días ocupados pregunta una vez si reemplaza o suma; si reemplaza, borra las viejas', () => {
+  assert.match(SISTEMA_COACH, /si no dijo si reemplaza las que tiene o suma las nuevas, preguntáselo una sola vez/);
+  assert.match(SISTEMA_COACH, /un borrar_rutinas con los ids de las rutinas viejas que se reemplazan/);
+  assert.match(SISTEMA_COACH, /Si suma, mandá solo las crear_rutina/);
+});
+
 test('el prompt de acciones: solo si pide un cambio, sin decir que ya lo hizo y preguntando si es ambiguo', () => {
   assert.match(SISTEMA_COACH, /Si solo pregunta algo, "acciones" va vacía/);
   assert.match(SISTEMA_COACH, /Nunca digas que ya lo hiciste ni que lo vas a hacer vos/);
@@ -312,7 +318,7 @@ test('POST /coach acepta 40 mensajes pero a la IA le pasa los últimos 10, empez
   });
 });
 
-test('POST /coach no deja borrar todas las rutinas si el último mensaje no lo pide', async () => {
+test('POST /coach deja borrar todas las rutinas aunque el mensaje no diga "todas" (confirma la tarjeta)', async () => {
   const ia = iaFalsa({
     coach: {
       texto: 'Te dejo el borrado',
@@ -326,12 +332,9 @@ test('POST /coach no deja borrar todas las rutinas si el último mensaje no lo p
     return p;
   };
   await conApp({ ia, uso: usoEnMemoria() }, async (pedir) => {
-    const ambiguo = await pedir('POST', '/coach', json(pedido('borrá la rutina')));
-    assert.deepStrictEqual(ambiguo.body.acciones, []);
-    assert.deepStrictEqual(ambiguo.body.descartados, [{ accion: 'borrar_rutinas', motivo: 'ambiguo' }]);
-
-    const pedidoTodas = await pedir('POST', '/coach', json(pedido('borrá todas las rutinas')));
-    assert.deepStrictEqual(pedidoTodas.body.acciones[0].rutinaIds, ['rutina-full-body', 'r2']);
+    const r = await pedir('POST', '/coach', json(pedido('sí, reemplazalas')));
+    assert.deepStrictEqual(r.body.acciones[0].rutinaIds, ['rutina-full-body', 'r2']);
+    assert.deepStrictEqual(r.body.descartados, []);
   });
 });
 

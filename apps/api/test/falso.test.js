@@ -73,7 +73,7 @@ test('cada pedido de prueba da acciones que pasan la validación sin descartes',
     ['hola', []],
   ];
   for (const [texto, tipos] of casos) {
-    const r = leerRespuestaCoach(pedir(texto), contexto, { ultimoMensaje: texto });
+    const r = leerRespuestaCoach(pedir(texto), contexto);
     assert.deepStrictEqual(
       r.acciones.map((a) => a.tipo),
       tipos,

@@ -141,7 +141,7 @@ async function probar({ proveedor, modelo }, fotos, solo) {
           const respuesta = await ia.responderCoach([{ rol: 'usuario', texto: pregunta }], contexto);
           return {
             ...respuesta,
-            salida: leerRespuestaCoach(respuesta.datos, contexto, { ultimoMensaje: pregunta }),
+            salida: leerRespuestaCoach(respuesta.datos, contexto),
           };
         }),
       );

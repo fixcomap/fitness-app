@@ -401,31 +401,17 @@ test('pideTodo: "todas", "todo", "todos" o "toda", sin importar tildes ni mayús
   }
 });
 
-test('borrar todas las rutinas sin que el usuario lo pida se descarta (ambiguo)', () => {
-  const borrar = (...rutinaIds) => ({ tipo: 'borrar_rutinas', rutinaIds });
-  const pasos = { tipo: 'cargar_pasos', dia: '2026-11-26', unidad: 'km', valor: 2 };
-  const con = (lista, ultimoMensaje) => limpiarAcciones(lista, contexto, { catalogo, crearId: ids(), ultimoMensaje });
-
-  // Las dos rutinas, en una acción o repartidas en dos: se descarta todo el borrado, el resto queda.
-  for (const lista of [
-    [borrar('r-empuje', 'r-piernas'), pasos],
-    [borrar('r-empuje'), borrar('r-piernas'), pasos],
-  ]) {
-    const r = con(lista, 'borrá la rutina');
-    assert.deepStrictEqual(
-      r.acciones.map((a) => a.tipo),
-      ['cargar_pasos'],
-    );
-    assert.deepStrictEqual(r.descartados, [{ accion: 'borrar_rutinas', motivo: 'ambiguo' }]);
-  }
-
-  // Si lo pidió, va.
-  assert.deepStrictEqual(con([borrar('r-empuje', 'r-piernas')], 'Borrá todas mis rutinas').acciones, [
-    { id: 'a1', tipo: 'borrar_rutinas', rutinaIds: ['r-empuje', 'r-piernas'] },
-  ]);
-  // Una sola de las dos: va.
-  assert.strictEqual(con([borrar('r-piernas')], 'borrá la de piernas').acciones.length, 1);
-  // Si tiene una sola rutina, borrarla no es ambiguo.
-  const una = limpiarAcciones([borrar('r-empuje')], { ...contexto, rutinas: [contexto.rutinas[0]] }, { catalogo });
-  assert.strictEqual(una.acciones.length, 1);
+test('reemplazar el plan: borrar todas las rutinas junto con las nuevas pasa entero (confirma la tarjeta)', () => {
+  const nueva = (nombre, dia) => ({ tipo: 'crear_rutina', nombre, dia, ejercicios: [{ ejercicioId: 'sentadilla-barra', series: 3 }] });
+  const r = limpiarAcciones(
+    [{ tipo: 'borrar_rutinas', rutinaIds: ['r-empuje', 'r-piernas'] }, nueva('Piernas', 0), nueva('Pecho', 1)],
+    contexto,
+    { catalogo, crearId: ids() },
+  );
+  assert.deepStrictEqual(
+    r.acciones.map((a) => a.tipo),
+    ['borrar_rutinas', 'crear_rutina', 'crear_rutina'],
+  );
+  assert.deepStrictEqual(r.acciones[0].rutinaIds, ['r-empuje', 'r-piernas']);
+  assert.deepStrictEqual(r.descartados, []);
 });
