@@ -3,6 +3,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import { leerHistorialGuardado, type RegistroDia } from './actividad/historial';
+import { esIdDispositivo, nuevoIdDispositivo } from './api';
 import type { Alimento } from './comida/alimentos';
 import { leerDiarioGuardado, type RegistroComida } from './comida/diario';
 import { leerProductosGuardados } from './comida/openFoodFacts';
@@ -27,6 +28,7 @@ const CLAVE_PERFIL = 'perfil:v1';
 const CLAVE_DIARIO_COMIDAS = 'diarioComidas:v1';
 const CLAVE_PRODUCTOS_OFF = 'productosOff:v1';
 const CLAVE_ALIMENTOS_PROPIOS = 'alimentosPropios:v1';
+const CLAVE_DISPOSITIVO = 'dispositivo:v1';
 
 async function leerJson(clave: string): Promise<unknown> {
   try {
@@ -136,4 +138,22 @@ export async function leerAlimentosPropios(): Promise<Alimento[]> {
 
 export async function guardarAlimentosPropios(propios: readonly Alimento[]): Promise<void> {
   await AsyncStorage.setItem(CLAVE_ALIMENTOS_PROPIOS, JSON.stringify(propios));
+}
+
+// ID de dispositivo para la API (X-Dispositivo): se crea la primera vez y queda guardado.
+// Se recuerda la promesa para que dos pedidos a la vez no creen dos IDs distintos.
+let idDispositivo: Promise<string> | null = null;
+
+export function leerIdDispositivo(): Promise<string> {
+  idDispositivo ??= (async () => {
+    const guardado = await leerJson(CLAVE_DISPOSITIVO);
+    if (esIdDispositivo(guardado)) return guardado;
+    const nuevo = nuevoIdDispositivo();
+    await AsyncStorage.setItem(CLAVE_DISPOSITIVO, JSON.stringify(nuevo));
+    return nuevo;
+  })().catch((e) => {
+    idDispositivo = null; // que el próximo pedido lo vuelva a intentar
+    throw e;
+  });
+  return idDispositivo;
 }
