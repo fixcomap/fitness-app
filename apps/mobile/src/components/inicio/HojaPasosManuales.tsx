@@ -39,11 +39,13 @@ interface HojaPasosManualesProps {
   onCerrar: () => void;
   perfil: DatosPaso;
   cargasDeHoy: readonly CargaPasos[];
-  onAgregar: (tipo: TipoCarga, valor: number, franja: Franja) => Promise<CargaPasos>;
+  onAgregar: (tipo: TipoCarga, valor: number, franja: Franja) => Promise<CargaPasos | null>; // null: no se agregó
   conPodometro: boolean; // si se descuenta lo que el celu ya contó
   onBorrar: (id: string) => void;
   metaPasos: number;
   onAbrirPerfil: () => void; // la meta se cambia en el perfil
+  // Desde el coach: la caminata que propone, precargada. Al agregar, la hoja se cierra.
+  inicial?: { tipo: TipoCarga; valor: number; franja: Franja };
 }
 
 const UNIDAD: Record<TipoCarga, string> = { km: 'km', minutos: 'min', pasos: 'pasos' };
@@ -61,6 +63,7 @@ export function HojaPasosManuales({
   onBorrar,
   metaPasos,
   onAbrirPerfil,
+  inicial,
 }: HojaPasosManualesProps) {
   const insets = useSafeAreaInsets();
   const [tipo, setTipo] = useState<TipoCarga>('km');
@@ -81,7 +84,11 @@ export function HojaPasosManuales({
 
   // Cada vez que se abre, el horario vuelve a ser la última hora.
   const alAbrir = () => {
-    setFranja(franjaPorDefecto(new Date()));
+    if (inicial) {
+      setTipo(inicial.tipo);
+      setTexto(String(inicial.valor).replace('.', ','));
+    }
+    setFranja(inicial?.franja ?? franjaPorDefecto(new Date()));
     setResultado(null);
     setAvisoHora(null);
     setEditando(null);
@@ -125,6 +132,8 @@ export function HojaPasosManuales({
     setAgregando(true);
     try {
       const carga = await onAgregar(tipo, valor, franja);
+      if (!carga) return;
+      if (inicial) return onCerrar();
       const descuento = descontarRegistrado(carga.estimado ?? carga.pasos, carga.registrado ?? 0);
       setResultado(textoDescuento(descuento, conPodometro));
       setTexto('');
@@ -140,7 +149,7 @@ export function HojaPasosManuales({
         <View style={[styles.hoja, { paddingBottom: Math.max(insets.bottom, 16) }]}>
           <View style={styles.manija} />
           <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={styles.contenido}>
-            <Text style={styles.titulo}>¿Cuánto caminaste sin el celu?</Text>
+            <Text style={styles.titulo}>{inicial ? 'Revisá la caminata' : '¿Cuánto caminaste sin el celu?'}</Text>
 
             {/* km o minutos */}
             <View style={styles.selector}>
@@ -229,7 +238,7 @@ export function HojaPasosManuales({
                 style={({ pressed }) => [styles.botonAgregar, !puedeAgregar && styles.deshabilitado, pressed && styles.presionado]}
                 accessibilityRole="button"
               >
-                <Text style={styles.textoAgregar}>{agregando ? '…' : 'Agregar'}</Text>
+                <Text style={styles.textoAgregar}>{agregando ? '…' : inicial ? 'Aplicar' : 'Agregar'}</Text>
               </Pressable>
             </View>
 

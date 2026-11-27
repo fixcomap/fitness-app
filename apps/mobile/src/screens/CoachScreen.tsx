@@ -14,11 +14,13 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { AvisoDeshacer } from '../components/coach/AvisoDeshacer';
+import { EditorAccion, prepararEdicion, type Edicion } from '../components/coach/EditorAccion';
 import { TarjetaAccion } from '../components/coach/TarjetaAccion';
 import { useAccionesCoach, type AccionesCoach } from '../hooks/useAccionesCoach';
 import { useChatCoach } from '../hooks/useChatCoach';
 import { useCoachHabilitado } from '../hooks/useCoachHabilitado';
 import type { AccionGuardada, ErrorChat, MensajeGuardado } from '../lib/coach/chat';
+import { editorDe } from '../lib/coach/editar';
 import { cambiarGramosPorUnidad, pideConfirmacion, vistaTarjeta } from '../lib/coach/tarjeta';
 import { colores, radios } from '../theme/tema';
 
@@ -42,6 +44,7 @@ export function CoachScreen() {
 function Chat() {
   const { listo, mensajes, enviando, error, enviar, reintentar, actualizar } = useChatCoach();
   const acciones = useAccionesCoach(actualizar);
+  const [edicion, setEdicion] = useState<Edicion | null>(null);
   const [texto, setTexto] = useState('');
   // La lista va dada vuelta: el más nuevo abajo, pegado al campo de texto.
   const alReves = useMemo(() => [...mensajes].reverse(), [mensajes]);
@@ -64,7 +67,7 @@ function Chat() {
           keyExtractor={(m) => m.id}
           // Las tarjetas dependen de las rutinas, el diario y las cargas: se redibujan si cambian.
           extraData={acciones}
-          renderItem={({ item }) => <Burbuja mensaje={item} acciones={acciones} />}
+          renderItem={({ item }) => <Burbuja mensaje={item} acciones={acciones} onEditar={setEdicion} />}
           // Con la lista dada vuelta, el encabezado queda abajo de todo: debajo del último mensaje.
           ListHeaderComponent={<Estado enviando={enviando} error={error} onReintentar={reintentar} />}
           contentContainerStyle={styles.lista}
@@ -81,6 +84,8 @@ function Chat() {
           onDeshacer={acciones.deshacer}
         />
       )}
+
+      <EditorAccion edicion={edicion} acciones={acciones} onCerrar={() => setEdicion(null)} />
 
       <View style={styles.barra}>
         <TextInput
@@ -108,7 +113,13 @@ function Chat() {
   );
 }
 
-function Burbuja({ mensaje, acciones }: { mensaje: MensajeGuardado; acciones: AccionesCoach }) {
+interface PropsBurbuja {
+  mensaje: MensajeGuardado;
+  acciones: AccionesCoach;
+  onEditar: (edicion: Edicion) => void;
+}
+
+function Burbuja({ mensaje, acciones, onEditar }: PropsBurbuja) {
   const deUsuario = mensaje.rol === 'usuario';
   return (
     <View style={styles.mensaje}>
@@ -120,17 +131,36 @@ function Burbuja({ mensaje, acciones }: { mensaje: MensajeGuardado; acciones: Ac
         </View>
       </View>
       {mensaje.acciones.map((guardada) => (
-        <Tarjeta key={guardada.accion.id} mensajeId={mensaje.id} guardada={guardada} acciones={acciones} />
+        <Tarjeta key={guardada.accion.id} mensajeId={mensaje.id} guardada={guardada} acciones={acciones} onEditar={onEditar} />
       ))}
     </View>
   );
 }
 
-function Tarjeta({ mensajeId, guardada, acciones }: { mensajeId: string; guardada: AccionGuardada; acciones: AccionesCoach }) {
+function Tarjeta({
+  mensajeId,
+  guardada,
+  acciones,
+  onEditar,
+}: {
+  mensajeId: string;
+  guardada: AccionGuardada;
+  acciones: AccionesCoach;
+  onEditar: (edicion: Edicion) => void;
+}) {
   const [aplicando, setAplicando] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { accion, estado } = guardada;
-  const vista = vistaTarjeta(accion, acciones.estado, { ahora: new Date(), perfil: acciones.perfil }, acciones.base);
+  const ahora = new Date();
+  const vista = vistaTarjeta(accion, acciones.estado, { ahora, perfil: acciones.perfil }, acciones.base);
+  const editor = editorDe(accion, ahora);
+
+  const editar = () => {
+    if (!editor) return;
+    const edicion = prepararEdicion(mensajeId, guardada, vista.titulo, editor, acciones);
+    if (edicion) onEditar(edicion);
+    else setError('Ya no se puede editar: cambió lo que tenías guardado.');
+  };
 
   const aplicar = async () => {
     setAplicando(true);
@@ -157,6 +187,7 @@ function Tarjeta({ mensajeId, guardada, acciones }: { mensajeId: string; guardad
       pideConfirmar={pideConfirmacion(vista)}
       onAplicar={aplicar}
       onCancelar={() => acciones.cancelar(mensajeId, accion.id)}
+      onEditar={editor ? editar : null}
       onCambiarGramos={(indice, sentido) => acciones.editar(mensajeId, cambiarGramosPorUnidad(accion, indice, sentido))}
     />
   );

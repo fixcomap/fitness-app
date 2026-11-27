@@ -34,6 +34,7 @@ interface TarjetaAccionProps {
   pideConfirmar: boolean; // borrar: Aplicar pide un segundo paso
   onAplicar: () => void;
   onCancelar: () => void;
+  onEditar: (() => void) | null; // null: esa acción no se edita en otra pantalla
   onCambiarGramos: (indice: number, sentido: 1 | -1) => void;
 }
 
@@ -47,6 +48,7 @@ export function TarjetaAccion({
   pideConfirmar,
   onAplicar,
   onCancelar,
+  onEditar,
   onCambiarGramos,
 }: TarjetaAccionProps) {
   const [confirmando, setConfirmando] = useState(false);
@@ -139,6 +141,16 @@ export function TarjetaAccion({
           >
             <Text style={styles.textoCancelar}>Cancelar</Text>
           </Pressable>
+          {onEditar && !problema && (
+            <Pressable
+              onPress={onEditar}
+              disabled={aplicando}
+              style={({ pressed }) => [styles.boton, styles.botonCancelar, pressed && styles.presionado]}
+              accessibilityRole="button"
+            >
+              <Text style={styles.textoCancelar}>Editar</Text>
+            </Pressable>
+          )}
           <Pressable
             onPress={pideConfirmar ? () => setConfirmando(true) : onAplicar}
             disabled={!puedeAplicar}
