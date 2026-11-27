@@ -125,6 +125,36 @@ describe('cliente', () => {
     expect(e).toMatchObject({ tipo: 'tiempo' });
   });
 
+  test('POST /comida/foto con el JPEG tal cual, la comida como pista y X-Dispositivo; devuelve los alimentos', async () => {
+    const item = { nombre: 'Milanesa', gramos: 150, kcal: 357, proteinas: 41, carbos: 15, grasas: 14, confianza: 0.9 };
+    const { falso, pedidos } = fetchFalso(200, { items: [item, { nombre: 'roto' }], total: {} });
+    const foto = { tipo: 'blob-falso' } as unknown as Blob;
+    expect(await cliente(falso).fotoComida(foto, 'almuerzo')).toEqual([item]);
+    expect(pedidos[0].url).toBe('http://192.168.0.10:3000/comida/foto?comida=almuerzo');
+    expect(pedidos[0].init.headers).toEqual({ 'Content-Type': 'image/jpeg', 'X-Dispositivo': ID });
+    expect(pedidos[0].init.body).toBe(foto);
+    // Sin comida, sin pista.
+    const otro = fetchFalso(200, { items: [] });
+    expect(await cliente(otro.falso).fotoComida(foto, null)).toEqual([]);
+    expect(otro.pedidos[0].url).toBe('http://192.168.0.10:3000/comida/foto');
+  });
+
+  test('foto: 429 con el mensaje de la API, 422 y una respuesta sin lista', async () => {
+    const foto = {} as Blob;
+    const limite = { error: 'Llegaste al límite de 10 fotos por hoy. Mañana tenés 10 fotos de nuevo.' };
+    expect(await errorDe(cliente(fetchFalso(429, limite).falso).fotoComida(foto, null))).toMatchObject({
+      tipo: 'limite',
+      message: limite.error,
+    });
+    expect(await errorDe(cliente(fetchFalso(422, { error: 'x' }).falso).fotoComida(foto, null))).toMatchObject({
+      tipo: 'pedido',
+      status: 422,
+    });
+    expect(await errorDe(cliente(fetchFalso(200, { total: {} }).falso).fotoComida(foto, null))).toMatchObject({
+      tipo: 'respuesta',
+    });
+  });
+
   test('si lo cancela quien pidió, no lo convierte en un error para mostrar', async () => {
     const lento = ((_url: string, init: RequestInit) =>
       new Promise((_resolver, rechazar) => {

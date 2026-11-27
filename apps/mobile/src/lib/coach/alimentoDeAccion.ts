@@ -70,9 +70,11 @@ function nombreEstimado(item: ItemComida): string {
   return nombre.slice(0, LIMITES_ALIMENTO.nombre);
 }
 
+export const FUENTE_ESTIMADO_COACH = 'Estimación del coach: valores aproximados.';
+
 // Un alimento nuevo con los valores por 100 g del coach. Si vino en unidades, su porción es la que dijo
-// el usuario con los gramos por unidad que estimó el coach.
-export function alimentoEstimado(item: ItemComida): Alimento {
+// el usuario con los gramos por unidad que estimó el coach. `fuente`: de dónde salió la estimación.
+export function alimentoEstimado(item: ItemComida, fuente: string = FUENTE_ESTIMADO_COACH): Alimento {
   const nombre = nombreEstimado(item);
   const c = item.cantidad;
   return {
@@ -87,11 +89,16 @@ export function alimentoEstimado(item: ItemComida): Alimento {
       'gramos' in c
         ? []
         : [{ nombre: c.porcion.trim(), plural: plural(c.porcion.trim()), gramos: c.gramosPorUnidad, estimada: true }],
-    fuente: 'Estimación del coach: valores aproximados.',
+    fuente,
   };
 }
 
-export function buscarAlimentoDeItem(item: ItemComida, base: BaseLocal): AlimentoEncontrado {
+// `fuente`: la del alimento estimado si no está en la base (por defecto, la del coach).
+export function buscarAlimentoDeItem(
+  item: ItemComida,
+  base: BaseLocal,
+  fuente: string = FUENTE_ESTIMADO_COACH,
+): AlimentoEncontrado {
   const listas: [DondeSeEncontro, readonly Alimento[]][] = [
     ['reciente', base.recientes],
     ['propio', base.propios],
@@ -117,7 +124,7 @@ export function buscarAlimentoDeItem(item: ItemComida, base: BaseLocal): Aliment
     }
   }
   if (mejor) return encontrado(mejor.alimento, mejor.donde);
-  const alimento = alimentoEstimado(item);
+  const alimento = alimentoEstimado(item, fuente);
   return { alimento, cantidad: cantidadEn(alimento, item.cantidad), donde: 'estimado' };
 }
 
