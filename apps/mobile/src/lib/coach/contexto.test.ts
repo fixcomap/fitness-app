@@ -16,6 +16,8 @@ const perfil: PerfilUsuario = {
   objetivoPeso: 'bajar',
   objetivo: 'hipertrofia',
   diasEntrenoPorSemana: 3,
+  nivel: 'principiante',
+  lugar: 'casa-mancuernas',
   kcalPersonalizadas: 1800,
   esPremium: false,
 };
@@ -121,6 +123,13 @@ describe('armarContexto', () => {
     expect(contexto.perfil).not.toHaveProperty('esPremium');
     expect(contexto.rutinas).toEqual([rutina]);
     expect(contexto).not.toHaveProperty('catalogo');
+  });
+
+  test('manda el nivel y el lugar; sin elegir (perfiles de antes) no los manda', () => {
+    expect(contexto.perfil).toMatchObject({ nivel: 'principiante', lugar: 'casa-mancuernas' });
+    const deAntes = armarContexto({ ...datos, perfil: { ...perfil, nivel: null, lugar: null } }).perfil;
+    expect(deAntes).not.toHaveProperty('nivel');
+    expect(deAntes).not.toHaveProperty('lugar');
   });
 
   test('sin nombre no lo manda', () => {

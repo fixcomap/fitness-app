@@ -5,11 +5,17 @@ import { Pressable, StyleSheet, Text, TextInput, View, type KeyboardTypeOptions 
 import type { Objetivo, Sexo } from '../../lib/calorias';
 import {
   LIMITES,
+  LUGAR_POR_DEFECTO,
+  LUGARES,
+  NIVEL_POR_DEFECTO,
+  NIVELES,
   OBJETIVOS_ENTRENO,
   OBJETIVOS_PESO,
   SEXOS,
   type BorradorPerfil,
   type ErroresPerfil,
+  type Lugar,
+  type Nivel,
   type ObjetivoEntreno,
 } from '../../lib/perfil';
 import { colores, espacios, radios } from '../../theme/tema';
@@ -17,6 +23,16 @@ import { colores, espacios, radios } from '../../theme/tema';
 const NOMBRE_SEXO: Record<Sexo, string> = { hombre: 'Hombre', mujer: 'Mujer' };
 const NOMBRE_OBJETIVO_PESO: Record<Objetivo, string> = { bajar: 'Bajar', mantener: 'Mantener', subir: 'Subir' };
 const NOMBRE_OBJETIVO_ENTRENO: Record<ObjetivoEntreno, string> = { hipertrofia: 'Hipertrofia', fuerza: 'Fuerza' };
+const NIVEL: Record<Nivel, { nombre: string; detalle: string }> = {
+  principiante: { nombre: 'Principiante', detalle: 'Menos de 6 meses entrenando' },
+  intermedio: { nombre: 'Intermedio', detalle: 'De 6 meses a 2 años' },
+  avanzado: { nombre: 'Avanzado', detalle: 'Más de 2 años' },
+};
+const LUGAR: Record<Lugar, { nombre: string; detalle: string }> = {
+  gym: { nombre: 'Gym completo', detalle: 'Barras, máquinas, poleas y todo lo demás' },
+  'casa-mancuernas': { nombre: 'Casa con mancuernas', detalle: 'Mancuernas, peso corporal y bandas' },
+  'peso-corporal': { nombre: 'Solo peso corporal', detalle: 'Peso corporal y bandas' },
+};
 const DIAS = Array.from({ length: LIMITES.diasEntrenoPorSemana.max + 1 }, (_, i) => i);
 
 interface CamposProps {
@@ -128,6 +144,55 @@ export function CamposObjetivos({ borrador, errores, onCambiar }: CamposProps) {
   );
 }
 
+interface CampoEntrenoProps extends CamposProps {
+  // En Perfil, para los perfiles de antes: avisa qué usa el coach mientras no lo elija.
+  avisarSinElegir?: boolean;
+}
+
+// Cuánto hace que entrena (el coach ajusta el volumen y la complejidad).
+export function CampoNivel({ borrador, errores, onCambiar, avisarSinElegir = false }: CampoEntrenoProps) {
+  return (
+    <Campo
+      etiqueta="¿Cuánto hace que entrenás?"
+      ayuda={
+        avisarSinElegir && !borrador.nivel
+          ? `Sin elegir: el coach usa ${NIVEL[NIVEL_POR_DEFECTO].nombre.toLowerCase()} hasta que lo elijas.`
+          : undefined
+      }
+      error={errores.nivel}
+    >
+      <OpcionesConDetalle
+        opciones={NIVELES}
+        textos={NIVEL}
+        elegida={borrador.nivel}
+        onElegir={(nivel) => onCambiar({ nivel })}
+      />
+    </Campo>
+  );
+}
+
+// Dónde entrena (el coach solo usa ejercicios con ese equipo).
+export function CampoLugar({ borrador, errores, onCambiar, avisarSinElegir = false }: CampoEntrenoProps) {
+  return (
+    <Campo
+      etiqueta="¿Dónde entrenás?"
+      ayuda={
+        avisarSinElegir && !borrador.lugar
+          ? `Sin elegir: el coach usa ${LUGAR[LUGAR_POR_DEFECTO].nombre.toLowerCase()} hasta que lo elijas.`
+          : 'El coach arma tus rutinas con el equipo que tenés.'
+      }
+      error={errores.lugar}
+    >
+      <OpcionesConDetalle
+        opciones={LUGARES}
+        textos={LUGAR}
+        elegida={borrador.lugar}
+        onElegir={(lugar) => onCambiar({ lugar })}
+      />
+    </Campo>
+  );
+}
+
 function Campo({
   etiqueta,
   ayuda,
@@ -224,6 +289,40 @@ function Opciones<T extends string>({
   );
 }
 
+// Como Opciones, pero una debajo de la otra y con una línea de detalle (para textos largos).
+function OpcionesConDetalle<T extends string>({
+  opciones,
+  textos,
+  elegida,
+  onElegir,
+}: {
+  opciones: readonly T[];
+  textos: Record<T, { nombre: string; detalle: string }>;
+  elegida: T | null;
+  onElegir: (opcion: T) => void;
+}) {
+  return (
+    <View style={styles.lista} accessibilityRole="radiogroup">
+      {opciones.map((o) => {
+        const activa = o === elegida;
+        return (
+          <Pressable
+            key={o}
+            onPress={() => onElegir(o)}
+            style={[styles.opcionLista, activa && styles.opcionElegida]}
+            accessibilityRole="radio"
+            accessibilityState={{ selected: activa }}
+            accessibilityLabel={`${textos[o].nombre}. ${textos[o].detalle}`}
+          >
+            <Text style={[styles.textoOpcion, activa && styles.textoOpcionElegida]}>{textos[o].nombre}</Text>
+            <Text style={[styles.detalleOpcion, activa && styles.textoOpcionElegida]}>{textos[o].detalle}</Text>
+          </Pressable>
+        );
+      })}
+    </View>
+  );
+}
+
 const styles = StyleSheet.create({
   flex: { flex: 1 },
   grupo: { gap: espacios.l - 4 },
@@ -267,6 +366,17 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   opcionElegida: { backgroundColor: colores.acento },
+  lista: { gap: espacios.s },
+  opcionLista: {
+    minHeight: 60,
+    borderRadius: radios.medio,
+    backgroundColor: colores.tarjeta,
+    paddingHorizontal: espacios.m,
+    paddingVertical: espacios.s + 2,
+    justifyContent: 'center',
+    gap: 2,
+  },
+  detalleOpcion: { color: colores.textoSecundario, fontSize: 13 },
   textoOpcion: { color: colores.textoSecundario, fontSize: 15, fontWeight: '700' },
   textoOpcionElegida: { color: colores.texto },
   dias: { flexDirection: 'row', justifyContent: 'space-between' },

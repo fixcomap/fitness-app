@@ -9,6 +9,19 @@ export const OBJETIVOS_PESO: readonly Objetivo[] = ['bajar', 'mantener', 'subir'
 export const OBJETIVOS_ENTRENO = ['hipertrofia', 'fuerza'] as const;
 export type ObjetivoEntreno = (typeof OBJETIVOS_ENTRENO)[number];
 
+// Cuánto hace que entrena: el coach ajusta el volumen y la complejidad de las rutinas.
+// Mismos valores que la API (apps/api/src/ia/nivelLugar.js).
+export const NIVELES = ['principiante', 'intermedio', 'avanzado'] as const;
+export type Nivel = (typeof NIVELES)[number];
+
+// Dónde entrena: el coach solo usa ejercicios con el equipo que hay ahí (lo valida la API).
+export const LUGARES = ['gym', 'casa-mancuernas', 'peso-corporal'] as const;
+export type Lugar = (typeof LUGARES)[number];
+
+// Lo que asume el coach si el perfil no los tiene (perfiles de antes de que existieran).
+export const NIVEL_POR_DEFECTO: Nivel = 'intermedio';
+export const LUGAR_POR_DEFECTO: Lugar = 'gym';
+
 export interface PerfilUsuario {
   nombre: string;
   sexo: Sexo;
@@ -18,6 +31,9 @@ export interface PerfilUsuario {
   objetivoPeso: Objetivo;
   objetivo: ObjetivoEntreno; // objetivo de entrenamiento
   diasEntrenoPorSemana: number; // 0 a 7 (lo usan las rutinas; no cambia las kcal)
+  // null: perfil de antes, sin elegir (el coach asume los de por defecto y los pregunta si arma una rutina).
+  nivel: Nivel | null;
+  lugar: Lugar | null;
   kcalPersonalizadas: number | null; // si el usuario eligió otro objetivo de kcal
   esPremium: boolean;
 }
@@ -42,6 +58,8 @@ export interface BorradorPerfil {
   objetivoPeso: Objetivo | null;
   objetivo: ObjetivoEntreno | null;
   diasEntrenoPorSemana: number;
+  nivel: Nivel | null;
+  lugar: Lugar | null;
 }
 
 export type CampoPerfil = keyof BorradorPerfil;
@@ -56,6 +74,8 @@ export const BORRADOR_VACIO: BorradorPerfil = {
   objetivoPeso: null,
   objetivo: 'hipertrofia',
   diasEntrenoPorSemana: 3,
+  nivel: null,
+  lugar: null,
 };
 
 export function borradorDe(perfil: PerfilUsuario): BorradorPerfil {
@@ -68,6 +88,8 @@ export function borradorDe(perfil: PerfilUsuario): BorradorPerfil {
     objetivoPeso: perfil.objetivoPeso,
     objetivo: perfil.objetivo,
     diasEntrenoPorSemana: perfil.diasEntrenoPorSemana,
+    nivel: perfil.nivel,
+    lugar: perfil.lugar,
   };
 }
 
@@ -84,8 +106,13 @@ function errorNumero(valor: number | null, { min, max }: { min: number; max: num
   return null;
 }
 
+export interface OpcionesValidacion {
+  // En Perfil, un perfil de antes puede seguir sin nivel ni lugar; en el onboarding hay que elegirlos.
+  nivelYLugarOpcionales?: boolean;
+}
+
 // Errores por campo (vacío si está todo bien).
-export function erroresPerfil(b: BorradorPerfil): ErroresPerfil {
+export function erroresPerfil(b: BorradorPerfil, opciones: OpcionesValidacion = {}): ErroresPerfil {
   const errores: ErroresPerfil = {};
   const nombre = b.nombre.trim();
   if (nombre.length < LIMITES.nombre.min) errores.nombre = 'Escribí tu nombre.';
@@ -103,6 +130,10 @@ export function erroresPerfil(b: BorradorPerfil): ErroresPerfil {
   if (!Number.isInteger(b.diasEntrenoPorSemana) || b.diasEntrenoPorSemana < min || b.diasEntrenoPorSemana > max) {
     errores.diasEntrenoPorSemana = `Entre ${min} y ${max} días.`;
   }
+  if (!opciones.nivelYLugarOpcionales) {
+    if (!b.nivel) errores.nivel = 'Elegí una opción.';
+    if (!b.lugar) errores.lugar = 'Elegí una opción.';
+  }
   return errores;
 }
 
@@ -116,8 +147,12 @@ export type ExtrasPerfil = Pick<PerfilUsuario, 'esPremium' | 'kcalPersonalizadas
 const SIN_EXTRAS: ExtrasPerfil = { esPremium: false, kcalPersonalizadas: null };
 
 // El perfil listo para guardar, o null si algo no es válido.
-export function perfilDesdeBorrador(b: BorradorPerfil, extras: ExtrasPerfil = SIN_EXTRAS): PerfilUsuario | null {
-  if (Object.keys(erroresPerfil(b)).length > 0) return null;
+export function perfilDesdeBorrador(
+  b: BorradorPerfil,
+  extras: ExtrasPerfil = SIN_EXTRAS,
+  opciones: OpcionesValidacion = {},
+): PerfilUsuario | null {
+  if (Object.keys(erroresPerfil(b, opciones)).length > 0) return null;
   return {
     nombre: b.nombre.trim(),
     sexo: b.sexo as Sexo,
@@ -127,9 +162,17 @@ export function perfilDesdeBorrador(b: BorradorPerfil, extras: ExtrasPerfil = SI
     objetivoPeso: b.objetivoPeso as Objetivo,
     objetivo: b.objetivo as ObjetivoEntreno,
     diasEntrenoPorSemana: b.diasEntrenoPorSemana,
+    nivel: b.nivel,
+    lugar: b.lugar,
     kcalPersonalizadas: extras.kcalPersonalizadas,
     esPremium: extras.esPremium,
   };
+}
+
+// "Repetir bienvenida" (solo en desarrollo): lo que se contestó en el onboarding, sin perder lo que no se
+// pregunta ahí (kcal personalizadas y plan).
+export function perfilDeBienvenidaRepetida(nuevo: PerfilUsuario, actual: PerfilUsuario): PerfilUsuario {
+  return { ...nuevo, kcalPersonalizadas: actual.kcalPersonalizadas, esPremium: actual.esPremium };
 }
 
 // ── Metas de kcal y macros ──
@@ -198,6 +241,9 @@ export function leerPerfilGuardado(datos: unknown): PerfilUsuario | null {
     objetivoPeso: d.objetivoPeso as Objetivo,
     objetivo: d.objetivo as ObjetivoEntreno,
     diasEntrenoPorSemana: d.diasEntrenoPorSemana as number,
+    // Si faltan (perfiles de antes) o no son válidos, quedan sin elegir.
+    nivel: NIVELES.includes(d.nivel as Nivel) ? (d.nivel as Nivel) : null,
+    lugar: LUGARES.includes(d.lugar as Lugar) ? (d.lugar as Lugar) : null,
     // Si falta (perfiles de antes) o no es válido, se usan las recomendadas.
     kcalPersonalizadas: enRango(d.kcalPersonalizadas, KCAL_PERSONALIZADAS, true)
       ? (d.kcalPersonalizadas as number)

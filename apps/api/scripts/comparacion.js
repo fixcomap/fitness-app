@@ -1,16 +1,23 @@
 // Funciones puras de probar-ia.mjs (argumentos, costo y resumen), con tests.
 const path = require('path');
+const { LUGARES, NIVELES } = require('../src/ia/nivelLugar');
 
 const USO = `Uso: node scripts/probar-ia.mjs <carpeta-de-fotos> --con <proveedor>:<modelo> [--con ...] [--solo fotos|coach]
+       [--pregunta "<texto>" ...] [--nivel <nivel>] [--lugar <lugar>]
 
   <carpeta-de-fotos>  carpeta con fotos .jpg, .jpeg, .png o .heic (fuera del repo)
   --con               proveedor y modelo a probar; se puede repetir. Proveedores: gemini, claude,
                       vertex-gemini, vertex-claude. Ej.: --con gemini:gemini-3.8-flash --con claude:claude-haiku-5-5
-  --solo              probar solo las fotos o solo el coach`;
+  --solo              probar solo las fotos o solo el coach
+  --pregunta          pregunta para el coach en vez de las de preguntas-coach.json; se puede repetir
+  --nivel             nivel del perfil del ejemplo: ${NIVELES.join(', ')}
+  --lugar             dónde entrena el perfil del ejemplo: ${LUGARES.join(', ')}`;
 
-// { carpeta, candidatos: [{ proveedor, modelo }], solo } o { error }.
+// { carpeta, candidatos: [{ proveedor, modelo }], solo, preguntas, perfil: { nivel?, lugar? } } o { error }.
 function leerArgumentos(argv) {
   const candidatos = [];
+  const preguntas = [];
+  const perfil = {};
   let carpeta = null;
   let solo = null;
   for (let i = 0; i < argv.length; i++) {
@@ -25,6 +32,16 @@ function leerArgumentos(argv) {
     } else if (arg === '--solo') {
       solo = argv[++i];
       if (!['fotos', 'coach'].includes(solo)) return { error: '--solo espera fotos o coach' };
+    } else if (arg === '--pregunta') {
+      const pregunta = (argv[++i] ?? '').trim();
+      if (!pregunta) return { error: '--pregunta espera un texto' };
+      preguntas.push(pregunta);
+    } else if (arg === '--nivel') {
+      perfil.nivel = argv[++i];
+      if (!NIVELES.includes(perfil.nivel)) return { error: `--nivel espera ${NIVELES.join(', ')}` };
+    } else if (arg === '--lugar') {
+      perfil.lugar = argv[++i];
+      if (!LUGARES.includes(perfil.lugar)) return { error: `--lugar espera ${LUGARES.join(', ')}` };
     } else if (arg.startsWith('--')) {
       return { error: `Opción desconocida: ${arg}` };
     } else if (carpeta) {
@@ -35,7 +52,7 @@ function leerArgumentos(argv) {
   }
   if (!carpeta && solo !== 'coach') return { error: 'Falta la carpeta de fotos' };
   if (candidatos.length === 0) return { error: 'Falta al menos un --con proveedor:modelo' };
-  return { carpeta, candidatos, solo };
+  return { carpeta, candidatos, solo, preguntas, perfil };
 }
 
 // true si `ruta` está dentro de `raiz` (o es la misma).
@@ -84,6 +101,7 @@ const MOTIVOS = {
   invalida: 'acciones mal formadas',
   'de-mas': 'sobraban',
   'no-existe': 'no existen en el catálogo',
+  'sin-equipo': 'sin el equipo de donde entrena',
   'fuera-de-rango': 'fuera de rango',
   repetido: 'repetidos en la rutina',
   'sin-ejercicios': 'sin ejercicios válidos',
@@ -93,6 +111,7 @@ const MOTIVOS = {
   'fecha-no-permitida': 'fecha fuera de los últimos 7 días',
   'item-invalido': 'alimentos mal formados',
   'pocos-ejercicios': 'rutinas con menos de 4 ejercicios',
+  'de-mas-para-el-nivel': 'pasaban el máximo de ejercicios por día del nivel',
 };
 
 // "Pechuga a la plancha (cocido): 150 g" o "Empanada de carne (cocido, asumido): 2 × empanada ~90 g c/u",
