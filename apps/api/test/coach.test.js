@@ -192,6 +192,12 @@ test('el prompt: los días que dice el usuario mandan por sobre los del perfil',
   assert.match(SISTEMA_COACH, /Si el usuario dice otra cosa en la charla, vale lo que dijo/);
 });
 
+test('el prompt: si el usuario duda o le pide que decida, elige una opción y la justifica', () => {
+  assert.match(SISTEMA_COACH, /elegí UNA opción concreta según su perfil/);
+  assert.match(SISTEMA_COACH, /Nada de "las dos sirven" o "depende" sin elegir/);
+  assert.match(SISTEMA_COACH, /preguntá uno solo/);
+});
+
 test('el prompt de acciones: solo si pide un cambio, sin decir que ya lo hizo y preguntando si es ambiguo', () => {
   assert.match(SISTEMA_COACH, /Si solo pregunta algo, "acciones" va vacía/);
   assert.match(SISTEMA_COACH, /Nunca digas que ya lo hiciste ni que lo vas a hacer vos/);
