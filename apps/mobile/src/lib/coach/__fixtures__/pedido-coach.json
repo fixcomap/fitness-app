@@ -16,6 +16,8 @@
       "objetivoPeso": "bajar",
       "objetivo": "hipertrofia",
       "diasEntrenoPorSemana": 3,
+      "nivel": "principiante",
+      "lugar": "casa-mancuernas",
       "kcalObjetivo": 1800
     },
     "ultimos7Dias": [

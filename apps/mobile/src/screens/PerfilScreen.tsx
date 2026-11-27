@@ -5,7 +5,7 @@ import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import { KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { CamposDatos, CamposObjetivos } from '../components/perfil/CamposPerfil';
+import { CampoLugar, CampoNivel, CamposDatos, CamposObjetivos } from '../components/perfil/CamposPerfil';
 import { KcalObjetivo } from '../components/perfil/KcalObjetivo';
 import { MetaPasos } from '../components/perfil/MetaPasos';
 import { ResumenMetas } from '../components/perfil/ResumenMetas';
@@ -128,15 +128,19 @@ function Seccion({ titulo, children }: { titulo: string; children: ReactNode }) 
   );
 }
 
-// Datos y objetivos editables. Al guardar, las metas se recalculan solas (salen del perfil).
+// En Perfil, un perfil de antes puede seguir sin nivel ni lugar (el coach asume los de por defecto).
+const VALIDACION = { nivelYLugarOpcionales: true };
+
+// Datos, objetivos, nivel y lugar editables. Al guardar, las metas se recalculan solas (salen del perfil).
 function FormularioPerfil({ perfil, onGuardar }: { perfil: PerfilUsuario; onGuardar: (p: PerfilUsuario) => void }) {
   const [borrador, setBorrador] = useState<BorradorPerfil>(() => borradorDe(perfil));
   const [cambiado, setCambiado] = useState(false);
-  const errores = erroresPerfil(borrador);
-  const nuevo = perfilDesdeBorrador(borrador, {
-    esPremium: perfil.esPremium,
-    kcalPersonalizadas: perfil.kcalPersonalizadas,
-  });
+  const errores = erroresPerfil(borrador, VALIDACION);
+  const nuevo = perfilDesdeBorrador(
+    borrador,
+    { esPremium: perfil.esPremium, kcalPersonalizadas: perfil.kcalPersonalizadas },
+    VALIDACION,
+  );
 
   const cambiar = (cambios: Partial<BorradorPerfil>) => {
     setBorrador((b) => ({ ...b, ...cambios }));
@@ -147,6 +151,8 @@ function FormularioPerfil({ perfil, onGuardar }: { perfil: PerfilUsuario; onGuar
     <View style={[styles.tarjeta, styles.formulario]}>
       <CamposDatos borrador={borrador} errores={errores} onCambiar={cambiar} />
       <CamposObjetivos borrador={borrador} errores={errores} onCambiar={cambiar} />
+      <CampoNivel borrador={borrador} errores={errores} onCambiar={cambiar} avisarSinElegir />
+      <CampoLugar borrador={borrador} errores={errores} onCambiar={cambiar} avisarSinElegir />
       {cambiado && nuevo && (
         <Text style={styles.ayuda}>
           Con estos datos, el objetivo recomendado pasa a {formatearNumero(kcalRecomendadas(nuevo))} kcal por día

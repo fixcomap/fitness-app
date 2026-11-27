@@ -20,6 +20,8 @@ const perfil: PerfilUsuario = {
   objetivoPeso: 'mantener',
   objetivo: 'hipertrofia',
   diasEntrenoPorSemana: 3,
+  nivel: 'avanzado',
+  lugar: 'peso-corporal',
   kcalPersonalizadas: null,
   esPremium: false,
 };
@@ -33,6 +35,8 @@ const borrador: BorradorPerfil = {
   objetivoPeso: 'mantener',
   objetivo: 'hipertrofia',
   diasEntrenoPorSemana: 3,
+  nivel: 'avanzado',
+  lugar: 'peso-corporal',
 };
 
 describe('erroresPerfil', () => {
@@ -42,7 +46,7 @@ describe('erroresPerfil', () => {
 
   test('el borrador vacío pide todo lo que falta', () => {
     expect(Object.keys(erroresPerfil(BORRADOR_VACIO)).sort()).toEqual(
-      ['alturaCm', 'edad', 'nombre', 'objetivoPeso', 'pesoKg', 'sexo'].sort(),
+      ['alturaCm', 'edad', 'lugar', 'nivel', 'nombre', 'objetivoPeso', 'pesoKg', 'sexo'].sort(),
     );
   });
 
@@ -71,6 +75,12 @@ describe('erroresPerfil', () => {
     expect(erroresPerfil({ ...borrador, diasEntrenoPorSemana: 8 }).diasEntrenoPorSemana).toBeDefined();
   });
 
+  test('nivel y lugar: obligatorios en el onboarding; en Perfil, un perfil de antes puede seguir sin elegirlos', () => {
+    const sinElegir = { ...borrador, nivel: null, lugar: null };
+    expect(erroresPerfil(sinElegir)).toEqual({ nivel: 'Elegí una opción.', lugar: 'Elegí una opción.' });
+    expect(erroresPerfil(sinElegir, { nivelYLugarOpcionales: true })).toEqual({});
+  });
+
   test('erroresDe filtra por campos (un paso del onboarding)', () => {
     const errores = erroresPerfil(BORRADOR_VACIO);
     expect(Object.keys(erroresDe(errores, ['nombre', 'objetivo']))).toEqual(['nombre']);
@@ -89,6 +99,12 @@ describe('perfilDesdeBorrador', () => {
   test('conserva lo que no se edita en el formulario', () => {
     const extras = { esPremium: true, kcalPersonalizadas: 1900 };
     expect(perfilDesdeBorrador(borrador, extras)).toEqual({ ...perfil, ...extras });
+  });
+
+  test('un perfil de antes, sin nivel ni lugar, se guarda igual desde Perfil (siguen sin elegir)', () => {
+    const deAntes = { ...perfil, nivel: null, lugar: null };
+    expect(perfilDesdeBorrador(borradorDe(deAntes))).toBeNull();
+    expect(perfilDesdeBorrador(borradorDe(deAntes), undefined, { nivelYLugarOpcionales: true })).toEqual(deAntes);
   });
 
   test('ida y vuelta con borradorDe', () => {
@@ -156,6 +172,16 @@ describe('leerPerfilGuardado', () => {
     expect(leerPerfilGuardado(viejo)).toEqual(perfil);
     expect(leerPerfilGuardado({ ...perfil, kcalPersonalizadas: 900 })).toEqual(perfil);
     expect(leerPerfilGuardado({ ...perfil, kcalPersonalizadas: 1800.5 })).toEqual(perfil);
+  });
+
+  test('nivel y lugar: si faltan (perfiles de antes) o no son válidos, quedan sin elegir', () => {
+    const { nivel: _n, lugar: _l, ...viejo } = perfil;
+    expect(leerPerfilGuardado(viejo)).toEqual({ ...perfil, nivel: null, lugar: null });
+    expect(leerPerfilGuardado({ ...perfil, nivel: 'experto', lugar: 'parque' })).toEqual({
+      ...perfil,
+      nivel: null,
+      lugar: null,
+    });
   });
 
   test('esPremium sólo si está en true', () => {
