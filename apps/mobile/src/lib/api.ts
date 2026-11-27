@@ -5,6 +5,7 @@
 import { randomUUID } from 'expo-crypto';
 
 import { leerRespuestaCoach, type RespuestaCoach } from './coach/acciones';
+import { leerRespuestaConsejo, type Consejo, type PedidoConsejo } from './coach/consejo';
 import type { PedidoCoach } from './coach/contexto';
 
 export const URL_API = process.env.EXPO_PUBLIC_API_URL ?? '';
@@ -87,6 +88,7 @@ export interface OpcionesCliente {
 
 export interface ClienteApi {
   coach: (pedido: PedidoCoach, senal?: AbortSignal) => Promise<RespuestaCoach>;
+  consejo: (pedido: PedidoConsejo, senal?: AbortSignal) => Promise<Consejo>;
 }
 
 export function crearClienteApi({ url = URL_API, fetch: pedir = fetch, dispositivo, esperaMs = ESPERA_MS }: OpcionesCliente): ClienteApi {
@@ -129,6 +131,11 @@ export function crearClienteApi({ url = URL_API, fetch: pedir = fetch, dispositi
       const respuesta = leerRespuestaCoach(await postJson('/coach', pedido, senal));
       if (!respuesta) throw new ErrorApi('respuesta', MENSAJES.respuesta, 200);
       return respuesta;
+    },
+    async consejo(pedido, senal) {
+      const consejo = leerRespuestaConsejo(await postJson('/coach/consejo', pedido, senal));
+      if (!consejo) throw new ErrorApi('respuesta', MENSAJES.respuesta, 200);
+      return consejo;
     },
   };
 }

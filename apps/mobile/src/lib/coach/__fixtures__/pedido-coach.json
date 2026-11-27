@@ -16,7 +16,9 @@
       "objetivoPeso": "bajar",
       "objetivo": "hipertrofia",
       "diasEntrenoPorSemana": 3,
-      "kcalObjetivo": 1800
+      "kcalObjetivo": 1800,
+      "proteinasObjetivo": 140,
+      "metaPasos": 8000
     },
     "ultimos7Dias": [
       {

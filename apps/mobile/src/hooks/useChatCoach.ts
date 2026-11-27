@@ -32,7 +32,8 @@ export interface ChatCoach {
 
 // La charla con el coach: guardada en el celu, y cada mensaje se manda a /coach con el contexto del día.
 export function useChatCoach(): ChatCoach {
-  const { perfil, totalDelDia } = useDatosDelDia();
+  const { perfil, totalDelDia, config } = useDatosDelDia();
+  const { metaPasos } = config;
   const { historial: sesiones, rutinas } = useEntreno();
   const { registros: diario } = useComidas();
 
@@ -46,13 +47,13 @@ export function useChatCoach(): ChatCoach {
   const control = useRef<AbortController | null>(null);
 
   const cliente = useMemo(() => crearClienteApi({ dispositivo: leerIdDispositivo }), []);
-  const datos = useRef({ perfil, totalDelDia, sesiones, rutinas, diario });
+  const datos = useRef({ perfil, totalDelDia, metaPasos, sesiones, rutinas, diario });
   useEffect(() => {
     actuales.current = mensajes;
   }, [mensajes]);
   useEffect(() => {
-    datos.current = { perfil, totalDelDia, sesiones, rutinas, diario };
-  }, [perfil, totalDelDia, sesiones, rutinas, diario]);
+    datos.current = { perfil, totalDelDia, metaPasos, sesiones, rutinas, diario };
+  }, [perfil, totalDelDia, metaPasos, sesiones, rutinas, diario]);
 
   useEffect(() => {
     let vigente = true;

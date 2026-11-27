@@ -5,6 +5,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { leerHistorialGuardado, type RegistroDia } from './actividad/historial';
 import { esIdDispositivo, nuevoIdDispositivo } from './api';
 import { leerChatGuardado, type MensajeGuardado } from './coach/chat';
+import { leerConsejosGuardados, type ConsejoGuardado } from './coach/consejo';
 import type { Alimento } from './comida/alimentos';
 import { leerDiarioGuardado, type RegistroComida } from './comida/diario';
 import { leerProductosGuardados } from './comida/openFoodFacts';
@@ -32,6 +33,7 @@ const CLAVE_ALIMENTOS_PROPIOS = 'alimentosPropios:v1';
 const CLAVE_DISPOSITIVO = 'dispositivo:v1';
 const CLAVE_CHAT_COACH = 'chatCoach:v1';
 const CLAVE_DESBLOQUEO_DEV = 'coachDesbloqueoDev:v1';
+const CLAVE_CONSEJOS_COACH = 'consejosCoach:v1';
 
 async function leerJson(clave: string): Promise<unknown> {
   try {
@@ -177,4 +179,13 @@ export async function leerDesbloqueoDev(): Promise<boolean> {
 
 export async function guardarDesbloqueoDev(desbloqueado: boolean): Promise<void> {
   await AsyncStorage.setItem(CLAVE_DESBLOQUEO_DEV, JSON.stringify(desbloqueado));
+}
+
+// Los últimos consejos del día que dio la IA (el de hoy incluido), con su fecha.
+export async function leerConsejosCoach(): Promise<ConsejoGuardado[]> {
+  return leerConsejosGuardados(await leerJson(CLAVE_CONSEJOS_COACH));
+}
+
+export async function guardarConsejosCoach(consejos: readonly ConsejoGuardado[]): Promise<void> {
+  await AsyncStorage.setItem(CLAVE_CONSEJOS_COACH, JSON.stringify(consejos));
 }

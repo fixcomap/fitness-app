@@ -54,6 +54,7 @@ const datos: DatosCoach = {
   sesiones: [sesion],
   rutinas: [rutina],
   totalDelDia: (clave) => ({ pasos: pasos[clave] ?? 0, minutos: 0 }),
+  metaPasos: 8000,
 };
 const usuario = (texto: string): MensajeChat => ({ rol: 'usuario', texto });
 const coach = (texto: string): MensajeChat => ({ rol: 'coach', texto });
