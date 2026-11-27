@@ -86,6 +86,13 @@ const esquemaSalidaCoach = z.object({
     ),
 });
 
+// El consejo del día de Inicio. destino: a qué pantalla lleva el botón de la tarjeta.
+const DESTINOS_CONSEJO = ['entreno', 'comida', 'actividad', 'coach'];
+const esquemaSalidaConsejo = z.object({
+  texto: z.string().describe('El consejo: una o dos frases, para hacer hoy'),
+  destino: z.enum(DESTINOS_CONSEJO).describe('La pantalla del tema del consejo'),
+});
+
 // JSON Schema para los proveedores que lo piden así (Gemini).
 function jsonSchema(esquema) {
   const resultado = z.toJSONSchema(esquema);
@@ -93,4 +100,4 @@ function jsonSchema(esquema) {
   return resultado;
 }
 
-module.exports = { esquemaSalidaFoto, esquemaSalidaCoach, jsonSchema };
+module.exports = { esquemaSalidaFoto, esquemaSalidaCoach, esquemaSalidaConsejo, DESTINOS_CONSEJO, jsonSchema };

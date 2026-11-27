@@ -1,6 +1,7 @@
 // Gemini, con clave (Gemini API) o en Vertex AI (cuenta de servicio). Mismo SDK para los dos.
-const { esquemaSalidaCoach, esquemaSalidaFoto, jsonSchema } = require('./esquemas');
-const { SISTEMA_COACH, SISTEMA_FOTO, MANUAL_COACH, contextoCoach, textoFoto } = require('./prompts');
+const { esquemaSalidaCoach, esquemaSalidaConsejo, esquemaSalidaFoto, jsonSchema } = require('./esquemas');
+const { SISTEMA_COACH, SISTEMA_CONSEJO, SISTEMA_FOTO, MANUAL_COACH, contextoCoach, textoFoto } = require('./prompts');
+const { PEDIDO_CONSEJO, contextoConsejo } = require('./consejo');
 const { TEXTO_CATALOGO } = require('./catalogo');
 const { ErrorIa, historialDesdeUsuario } = require('./proveedor');
 
@@ -77,6 +78,12 @@ function crearProveedorGemini({ cliente, modeloFoto, modeloCoach, nombre = 'gemi
       // Gemini cachea solo los prefijos repetidos: instrucciones, manual y catálogo primero, el contexto al final.
       const sistema = `${SISTEMA_COACH}\n\n${MANUAL_COACH}\n\n${TEXTO_CATALOGO}\n\n${contextoCoach(contexto)}`;
       return pedir(modeloCoach, sistema, contents, esquemaSalidaCoach);
+    },
+    darConsejo(contexto, opciones) {
+      // El mismo prefijo que el chat, para que Gemini lo reuse; lo del consejo va al final.
+      const sistema = `${SISTEMA_COACH}\n\n${MANUAL_COACH}\n\n${TEXTO_CATALOGO}\n\n${SISTEMA_CONSEJO}\n\n${contextoConsejo(contexto, opciones)}`;
+      const contents = [{ role: 'user', parts: [{ text: PEDIDO_CONSEJO }] }];
+      return pedir(modeloCoach, sistema, contents, esquemaSalidaConsejo);
     },
   };
 }

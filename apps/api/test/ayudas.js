@@ -5,7 +5,7 @@ const DISPOSITIVO = '3f2b8c1e-9a4d-4e6f-8b7a-1c2d3e4f5a6b';
 const OTRO_DISPOSITIVO = '9b1c2d3e-4f5a-4b6c-8d7e-0f1a2b3c4d5e';
 
 // Responde lo que se le pase (o tira el error) y guarda con qué se la llamó.
-function iaFalsa({ foto, coach, error } = {}) {
+function iaFalsa({ foto, coach, consejo, error } = {}) {
   const llamadas = [];
   const responder = (datos) => {
     if (error) throw error;
@@ -21,6 +21,10 @@ function iaFalsa({ foto, coach, error } = {}) {
     async responderCoach(mensajes, contexto) {
       llamadas.push({ tipo: 'coach', mensajes, contexto });
       return responder(coach);
+    },
+    async darConsejo(contexto, opciones) {
+      llamadas.push({ tipo: 'consejo', contexto, ...opciones });
+      return responder(consejo);
     },
   };
 }

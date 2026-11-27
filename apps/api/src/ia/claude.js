@@ -1,7 +1,8 @@
 // Claude, con clave de Anthropic o en Vertex AI (cuenta de servicio). Misma forma de pedido para los dos.
 const { zodOutputFormat } = require('@anthropic-ai/sdk/helpers/zod');
-const { esquemaSalidaCoach, esquemaSalidaFoto } = require('./esquemas');
-const { SISTEMA_COACH, SISTEMA_FOTO, MANUAL_COACH, contextoCoach, textoFoto } = require('./prompts');
+const { esquemaSalidaCoach, esquemaSalidaConsejo, esquemaSalidaFoto } = require('./esquemas');
+const { SISTEMA_COACH, SISTEMA_CONSEJO, SISTEMA_FOTO, MANUAL_COACH, contextoCoach, textoFoto } = require('./prompts');
+const { PEDIDO_CONSEJO, contextoConsejo } = require('./consejo');
 const { TEXTO_CATALOGO } = require('./catalogo');
 const { ErrorIa, historialDesdeUsuario } = require('./proveedor');
 
@@ -95,6 +96,18 @@ function crearProveedorClaude({ clientePara, modeloFoto, modeloCoach, nombre = '
         { type: 'text', text: contextoCoach(contexto) },
       ];
       return pedir(modeloCoach, system, messages, esquemaSalidaCoach);
+    },
+    darConsejo(contexto, opciones) {
+      // El mismo prefijo cacheado que el chat (instrucciones, manual y catálogo); lo del consejo va después.
+      const system = [
+        { type: 'text', text: SISTEMA_COACH },
+        { type: 'text', text: MANUAL_COACH },
+        { type: 'text', text: TEXTO_CATALOGO, cache_control: { type: 'ephemeral' } },
+        { type: 'text', text: SISTEMA_CONSEJO },
+        { type: 'text', text: contextoConsejo(contexto, opciones) },
+      ];
+      const messages = [{ role: 'user', content: PEDIDO_CONSEJO }];
+      return pedir(modeloCoach, system, messages, esquemaSalidaConsejo);
     },
   };
 }
