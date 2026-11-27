@@ -182,6 +182,8 @@ function leerRespuestaCoach(datos, { objetivo, catalogo = CATALOGO, ...opciones 
 
 module.exports = {
   MAXIMO_NOMBRE_RUTINA,
+  MAXIMO_EJERCICIOS_RUTINA,
+  SERIES,
   MAXIMO_MENSAJES_IA,
   mensajesParaIa,
   esquemaPedidoCoach,
