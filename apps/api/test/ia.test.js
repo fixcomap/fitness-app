@@ -520,3 +520,8 @@ test('Claude en Vertex: si está saturado reintenta una vez, y después devuelve
   await assert.rejects(siempre.ia.responderCoach(mensajes, contexto), (e) => e.status === 529);
   assert.strictEqual(siempre.pedidos.length, 2);
 });
+
+test('Claude: JSON que no cumple el esquema es ErrorIa de formato (el SDK lo envuelve en AnthropicError)', async () => {
+  const { ia } = claudeEnVertex('global', [{ cuerpo: mensajeClaude({ otra: 'cosa' }) }]);
+  await assert.rejects(ia.responderCoach(mensajes, contexto), (e) => e instanceof ErrorIa && e.tipo === 'formato');
+});
