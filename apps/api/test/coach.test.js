@@ -2,14 +2,13 @@ const test = require('node:test');
 const assert = require('node:assert');
 const {
   MAXIMO_NOMBRE_RUTINA,
+  MAXIMO_MENSAJES_IA,
+  mensajesParaIa,
   esquemaPedidoCoach,
   recortarNombre,
   limpiarRutina,
-  limpiarRutinas,
-  leerRespuestaCoach,
 } = require('../src/ia/coach');
 const { SISTEMA_COACH } = require('../src/ia/prompts');
-const { ErrorIa } = require('../src/ia/proveedor');
 const { DISPOSITIVO, iaFalsa, usoEnMemoria, conApp } = require('./ayudas');
 
 const catalogo = [
@@ -26,6 +25,7 @@ const pedidoValido = () => ({
     { rol: 'usuario', texto: 'Armame una rutina de 3 días' },
   ],
   contexto: {
+    hoy: '2026-11-26',
     perfil: {
       sexo: 'mujer',
       edad: 30,
@@ -48,12 +48,12 @@ const pedidoValido = () => ({
     ],
     rutinas: [
       {
+        id: 'rutina-full-body',
         nombre: 'Full body',
         dias: [0, 2],
         ejercicios: [{ ejercicioId: 'press-banca', series: 3, rango: { min: 8, max: 10 } }],
       },
     ],
-    catalogo,
   },
 });
 
@@ -63,13 +63,17 @@ test('acepta un pedido válido', () => {
   assert.strictEqual(esquemaPedidoCoach.safeParse(pedidoValido()).success, true);
 });
 
-test('rechaza pedidos sin mensajes, con el último del coach o sin catálogo', () => {
+test('rechaza pedidos sin mensajes, con el último del coach o con datos inválidos (hoy, ids de rutina)', () => {
   const casos = [
     (p) => (p.mensajes = []),
     (p) => p.mensajes.push({ rol: 'coach', texto: 'Listo' }),
     (p) => (p.mensajes[1].texto = '   '),
-    (p) => (p.contexto.catalogo = []),
     (p) => (p.contexto.perfil.sexo = 'otro'),
+    (p) => delete p.contexto.hoy,
+    (p) => (p.contexto.hoy = '2026-02-30'),
+    (p) => (p.contexto.hoy = '26/11/2026'),
+    (p) => delete p.contexto.rutinas[0].id,
+    (p) => p.contexto.rutinas.push({ ...p.contexto.rutinas[0], nombre: 'Otra' }),
     (p) => (p.contexto.ultimos7Dias = Array.from({ length: 8 }, () => p.contexto.ultimos7Dias[0])),
   ];
   for (const cambiar of casos) {
@@ -162,76 +166,71 @@ test('nombres largos se recortan en una palabra completa', () => {
   }
 });
 
-test('una rutina por día: 3 días de empuje/tirón/piernas son 3 rutinas', () => {
-  let n = 0;
-  const r = limpiarRutinas(
-    [
-      { nombre: 'Empuje', dias: [0], ejercicios: [ej('press-banca')] },
-      { nombre: 'Tirón', dias: [2], ejercicios: [ej('remo-barra'), ej('jalon-inventado')] },
-      { nombre: 'Piernas', dias: [4], ejercicios: [ej('sentadilla-barra')] },
-    ],
-    ids,
-    { crearId: () => `r${++n}` },
-  );
-  assert.deepStrictEqual(
-    r.rutinas.map((x) => [x.id, x.nombre, x.dias, x.ejercicios.map((e) => e.ejercicioId)]),
-    [
-      ['r1', 'Empuje', [0], ['press-banca']],
-      ['r2', 'Tirón', [2], ['remo-barra']],
-      ['r3', 'Piernas', [4], ['sentadilla-barra']],
-    ],
-  );
-  assert.deepStrictEqual(r.descartados, [{ rutina: 'Tirón', ejercicioId: 'jalon-inventado', motivo: 'no-existe' }]);
-});
-
-test('un día queda en la primera rutina que lo pide; las rutinas sin ejercicios válidos no van', () => {
-  const r = limpiarRutinas(
-    [
-      { nombre: 'A', dias: [0, 2], ejercicios: [ej('press-banca')] },
-      { nombre: 'B', dias: [2, 4], ejercicios: [ej('remo-barra')] },
-      { nombre: 'C', dias: [5], ejercicios: [ej('nada')] },
-      'cualquier cosa',
-    ],
-    ids,
-  );
-  assert.deepStrictEqual(
-    r.rutinas.map((x) => [x.nombre, x.dias]),
-    [
-      ['A', [0, 2]],
-      ['B', [4]],
-    ],
-  );
-  assert.deepStrictEqual(limpiarRutinas(undefined, ids), { rutinas: [], descartados: [] });
-});
-
-test('como mucho 7 rutinas', () => {
-  const lista = Array.from({ length: 9 }, (_, i) => ({
-    nombre: `R${i}`,
-    dias: [i % 7],
-    ejercicios: [ej('remo-barra')],
-  }));
-  assert.strictEqual(limpiarRutinas(lista, ids).rutinas.length, 7);
-});
-
-test('la respuesta tiene que traer texto', () => {
-  assert.deepStrictEqual(leerRespuestaCoach({ texto: ' Dale con todo ', rutinas: [] }, catalogo), {
-    texto: 'Dale con todo',
-    rutinas: [],
-    descartados: [],
-  });
-  for (const datos of [null, {}, { texto: '' }, { texto: 3 }]) {
-    assert.throws(
-      () => leerRespuestaCoach(datos, catalogo),
-      (e) => e instanceof ErrorIa && e.tipo === 'formato',
-    );
-  }
-});
-
 test('el prompt pide una rutina por día, nombres cortos y no repetir los días en el texto', () => {
   assert.match(SISTEMA_COACH, /Una rutina por cada día de entrenamiento/);
+  assert.match(SISTEMA_COACH, /3 acciones crear_rutina/);
   assert.match(SISTEMA_COACH, /"Empuje", "Tirón", "Piernas"/);
   assert.match(SISTEMA_COACH, /No repitas los días/);
-  assert.match(SISTEMA_COACH, /"rutinas" va vacía/);
+});
+
+test('el prompt de acciones: solo si pide un cambio, sin decir que ya lo hizo y preguntando si es ambiguo', () => {
+  assert.match(SISTEMA_COACH, /Si solo pregunta algo, "acciones" va vacía/);
+  assert.match(SISTEMA_COACH, /Nunca digas que ya lo hiciste ni que lo vas a hacer vos/);
+  assert.match(SISTEMA_COACH, /"Te dejo la propuesta abajo, tocá Aplicar para guardarla"/);
+  assert.match(
+    SISTEMA_COACH,
+    /Así no: "Listo", "Listo para borrar", "Anotado", "Sumé los 40 minutos", "Ya lo cargué", "Decime cuál y lo registro", "Decime cuál y la borro"/,
+  );
+  assert.match(SISTEMA_COACH, /preguntá y dejá "acciones" vacía/);
+  assert.match(SISTEMA_COACH, /"borrá la rutina" cuando tiene 3/);
+  assert.match(SISTEMA_COACH, /Nunca propongas borrar o quitar algo que el usuario no nombró/);
+  assert.match(SISTEMA_COACH, /usá su "id" del contexto/);
+  assert.match(SISTEMA_COACH, /acciones de distinto tipo/);
+});
+
+test('el prompt de comidas y pasos: días permitidos, crudo o cocido asumido y la unidad del usuario', () => {
+  assert.match(SISTEMA_COACH, /Solo hoy o los 6 días anteriores, nunca un día futuro/);
+  assert.match(SISTEMA_COACH, /en platos listos para comer .* asumí cocido, poné "estadoAsumido" en true y decilo/);
+  assert.match(SISTEMA_COACH, /Preguntá solo si cambia mucho el resultado/);
+  assert.match(SISTEMA_COACH, /"gramosPorUnidad" estimado/);
+  assert.match(SISTEMA_COACH, /por 100 g/);
+  assert.match(SISTEMA_COACH, /Usá la unidad que dijo el usuario \(km, minutos o pasos\), sin convertir/);
+});
+
+// m0 usuario, m1 coach, m2 usuario… (los pares son del usuario).
+const charla = (largo, primero = 'usuario') =>
+  Array.from({ length: largo }, (_, i) => ({
+    rol: i % 2 === 0 ? primero : primero === 'usuario' ? 'coach' : 'usuario',
+    texto: `m${i}`,
+  }));
+const textos = (mensajes) => mensajes.map((m) => m.texto);
+
+test('a la IA van solo los últimos 10 mensajes', () => {
+  assert.strictEqual(MAXIMO_MENSAJES_IA, 10);
+  // 12 mensajes: los últimos 10 arrancan en m2, del usuario.
+  assert.deepStrictEqual(textos(mensajesParaIa(charla(12))), [
+    'm2',
+    'm3',
+    'm4',
+    'm5',
+    'm6',
+    'm7',
+    'm8',
+    'm9',
+    'm10',
+    'm11',
+  ]);
+  const corta = charla(3);
+  assert.deepStrictEqual(mensajesParaIa(corta), corta);
+});
+
+test('si al recortar el primero queda del coach, se saca: siempre empieza el usuario', () => {
+  // 13 mensajes: los últimos 10 arrancan en m3, del coach; queda desde m4.
+  const recortados = mensajesParaIa(charla(13));
+  assert.deepStrictEqual(textos(recortados), ['m4', 'm5', 'm6', 'm7', 'm8', 'm9', 'm10', 'm11', 'm12']);
+  assert.strictEqual(recortados[0].rol, 'usuario');
+  // Sin recortar también: si la charla arranca con el saludo del coach, se saca.
+  assert.deepStrictEqual(textos(mensajesParaIa(charla(3, 'coach'))), ['m1', 'm2']);
 });
 
 // ── POST /coach ──
@@ -241,42 +240,95 @@ const json = (cuerpo, id = DISPOSITIVO) => ({
   cuerpo: JSON.stringify(cuerpo),
 });
 
-test('responde el texto y una rutina por día, validadas contra el catálogo', async () => {
+test('responde el texto y las acciones validadas contra el catálogo y el contexto', async () => {
+  const nueva = (nombre, dia, ...ids) => ({
+    tipo: 'crear_rutina',
+    nombre,
+    dia,
+    ejercicios: ids.map((ejercicioId) => ({ ejercicioId, series: 3 })),
+  });
   const ia = iaFalsa({
     coach: {
-      texto: 'Te armé un plan de empuje, tirón y piernas.',
-      rutinas: [
-        { nombre: 'Empuje', dias: [0], ejercicios: [ej('press-banca', 4, 8, 10)] },
-        { nombre: 'Tirón', dias: [2], ejercicios: [ej('remo-barra'), ej('hip-thrust-inventado')] },
-        { nombre: 'Piernas', dias: [4], ejercicios: [ej('sentadilla-barra', 4, 6, 8)] },
+      texto: 'Te dejo empuje, tirón y piernas para que las apliques.',
+      acciones: [
+        nueva('Empuje', 0, 'press-banca-barra'),
+        nueva('Tirón', 2, 'remo-barra', 'hip-thrust-inventado'),
+        nueva('Piernas', 4, 'sentadilla-barra'),
+        { tipo: 'borrar_rutinas', rutinaIds: ['rutina-full-body'] },
+        { tipo: 'borrar_rutinas', rutinaIds: ['rutina-inventada'] },
       ],
     },
   });
   await conApp({ ia, uso: usoEnMemoria() }, async (pedir) => {
     const r = await pedir('POST', '/coach', json(pedidoValido()));
     assert.strictEqual(r.status, 200);
-    assert.strictEqual(r.body.texto, 'Te armé un plan de empuje, tirón y piernas.');
+    assert.strictEqual(r.body.texto, 'Te dejo empuje, tirón y piernas para que las apliques.');
+    assert.strictEqual(r.body.rutinas, undefined);
     assert.deepStrictEqual(
-      r.body.rutinas.map((x) => [x.nombre, x.dias, x.ejercicios.length]),
+      r.body.acciones.map((a) => [a.tipo, a.nombre ?? a.rutinaIds, a.dia, a.ejercicios?.length]),
       [
-        ['Empuje', [0], 1],
-        ['Tirón', [2], 1],
-        ['Piernas', [4], 1],
+        ['crear_rutina', 'Empuje', 0, 1],
+        ['crear_rutina', 'Tirón', 2, 1],
+        ['crear_rutina', 'Piernas', 4, 1],
+        ['borrar_rutinas', ['rutina-full-body'], undefined, undefined],
       ],
     );
-    for (const rutina of r.body.rutinas) assert.match(rutina.id, /^[0-9a-f-]{36}$/);
+    for (const accion of r.body.acciones) assert.match(accion.id, /^[0-9a-f-]{36}$/);
     assert.deepStrictEqual(r.body.descartados, [
-      { rutina: 'Tirón', ejercicioId: 'hip-thrust-inventado', motivo: 'no-existe' },
+      { accion: 'crear_rutina', rutina: 'Tirón', ejercicioId: 'hip-thrust-inventado', motivo: 'no-existe' },
+      { accion: 'borrar_rutinas', rutinaId: 'rutina-inventada', motivo: 'no-existe-rutina' },
     ]);
 
     const [llamada] = ia.llamadas;
-    assert.strictEqual(llamada.mensajes.length, 2);
-    assert.deepStrictEqual(llamada.contexto.catalogo, catalogo);
+    // El saludo del coach no va: la charla con la IA arranca por el usuario.
+    assert.deepStrictEqual(
+      llamada.mensajes.map((m) => m.rol),
+      ['usuario'],
+    );
+    // El catálogo no viaja en el contexto: lo pone la API en el prompt.
+    assert.strictEqual(llamada.contexto.catalogo, undefined);
+  });
+});
+
+test('POST /coach acepta 40 mensajes pero a la IA le pasa los últimos 10, empezando por el usuario', async () => {
+  const ia = iaFalsa({ coach: { texto: 'Dale', acciones: [] } });
+  const pedido = pedidoValido();
+  // Arranca el coach (m0) y termina el usuario (m39): los últimos 10 arrancan en m30, del coach.
+  pedido.mensajes = charla(40, 'coach');
+  await conApp({ ia, uso: usoEnMemoria() }, async (pedir) => {
+    const r = await pedir('POST', '/coach', json(pedido));
+    assert.strictEqual(r.status, 200);
+    assert.deepStrictEqual(textos(ia.llamadas[0].mensajes), textos(pedido.mensajes.slice(-9)));
+    assert.strictEqual(ia.llamadas[0].mensajes[0].rol, 'usuario');
+    assert.strictEqual(ia.llamadas[0].contexto.hoy, '2026-11-26');
+  });
+});
+
+test('POST /coach no deja borrar todas las rutinas si el último mensaje no lo pide', async () => {
+  const ia = iaFalsa({
+    coach: {
+      texto: 'Te dejo el borrado',
+      acciones: [{ tipo: 'borrar_rutinas', rutinaIds: ['rutina-full-body', 'r2'] }],
+    },
+  });
+  const pedido = (texto) => {
+    const p = pedidoValido();
+    p.contexto.rutinas.push({ ...p.contexto.rutinas[0], id: 'r2', nombre: 'Otra', dias: [4] });
+    p.mensajes[1].texto = texto;
+    return p;
+  };
+  await conApp({ ia, uso: usoEnMemoria() }, async (pedir) => {
+    const ambiguo = await pedir('POST', '/coach', json(pedido('borrá la rutina')));
+    assert.deepStrictEqual(ambiguo.body.acciones, []);
+    assert.deepStrictEqual(ambiguo.body.descartados, [{ accion: 'borrar_rutinas', motivo: 'ambiguo' }]);
+
+    const pedidoTodas = await pedir('POST', '/coach', json(pedido('borrá todas las rutinas')));
+    assert.deepStrictEqual(pedidoTodas.body.acciones[0].rutinaIds, ['rutina-full-body', 'r2']);
   });
 });
 
 test('pedido inválido: 400 con detalles y sin llamar a la IA', async () => {
-  const ia = iaFalsa({ coach: { texto: 'hola', rutinas: [] } });
+  const ia = iaFalsa({ coach: { texto: 'hola', acciones: [] } });
   await conApp({ ia, uso: usoEnMemoria() }, async (pedir) => {
     const pedido = pedidoValido();
     pedido.mensajes = [];
@@ -307,7 +359,7 @@ test('pedido de más de 100 KB: 413', async () => {
 });
 
 test('límite diario de mensajes: 429 con cuántos quedan mañana', async () => {
-  const ia = iaFalsa({ coach: { texto: 'Dale', rutinas: [] } });
+  const ia = iaFalsa({ coach: { texto: 'Dale', acciones: [] } });
   await conApp({ ia, uso: usoEnMemoria(), limitesDiarios: { fotos: 10, mensajes: 1 } }, async (pedir) => {
     assert.strictEqual((await pedir('POST', '/coach', json(pedidoValido()))).status, 200);
     const r = await pedir('POST', '/coach', json(pedidoValido()));
@@ -318,7 +370,7 @@ test('límite diario de mensajes: 429 con cuántos quedan mañana', async () => 
 });
 
 test('si la IA falla o responde sin texto: 502 y no cuenta el mensaje', async () => {
-  for (const ia of [iaFalsa({ error: new Error('caída') }), iaFalsa({ coach: { rutinas: [] } })]) {
+  for (const ia of [iaFalsa({ error: new Error('caída') }), iaFalsa({ coach: { acciones: [] } })]) {
     const uso = usoEnMemoria();
     await conApp({ ia, uso }, async (pedir) => {
       const r = await pedir('POST', '/coach', json(pedidoValido()));

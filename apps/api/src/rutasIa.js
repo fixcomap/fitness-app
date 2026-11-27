@@ -6,11 +6,12 @@ const { crearLimitador } = require('./limites');
 const { exigirDispositivo, respuestaLimiteDiario } = require('./uso');
 const { COMIDAS, leerResultadoFoto } = require('./ia/foto');
 const { ErrorImagen, prepararJpeg, tipoImagen } = require('./imagen');
-const { esquemaPedidoCoach, erroresPedido, leerRespuestaCoach } = require('./ia/coach');
+const { esquemaPedidoCoach, erroresPedido, mensajesParaIa } = require('./ia/coach');
+const { leerRespuestaCoach } = require('./ia/acciones');
 const { ErrorIa } = require('./ia/proveedor');
 
 const MAXIMO_FOTO = '2mb';
-// El contexto del coach trae el catálogo de ejercicios (~12 KB) y el resumen de la semana.
+// El contexto del coach trae el perfil, el resumen de la semana y las rutinas (el catálogo lo pone la API).
 const MAXIMO_COACH = '100kb';
 const esquemaComida = z.enum(COMIDAS).optional();
 const MENSAJE_NO_JPEG_NI_PNG = 'Mandá la foto como JPEG o PNG (Content-Type: image/jpeg o image/png)';
@@ -108,8 +109,8 @@ function crearRutasIa({ ia, uso, limitesDiarios, limites }) {
         res,
         'mensajes',
         async () => {
-          const { datos } = await ia.responderCoach(mensajes, contexto);
-          return leerRespuestaCoach(datos, contexto.catalogo, { objetivo: contexto.perfil.objetivo });
+          const { datos } = await ia.responderCoach(mensajesParaIa(mensajes), contexto);
+          return leerRespuestaCoach(datos, contexto, { ultimoMensaje: mensajes.at(-1).texto });
         },
         { rechazo: MENSAJES_ERROR.rechazoCoach, otro: MENSAJES_ERROR.coach },
       );

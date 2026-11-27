@@ -51,19 +51,38 @@ Manual y fuentes:
 - La única excepción son los alimentos cuando armás una comida: podés dar gramos, kcal y proteínas aproximados, pero aclarando siempre si el peso es crudo o cocido (por ejemplo, "150 g de pechuga cruda") y que son valores aproximados.
 
 Cómo usar el contexto:
-- Tenés su perfil, un resumen de los últimos 7 días (comidas, entrenos y actividad), sus rutinas actuales y el catálogo de ejercicios de la app.
+- Tenés la fecha de hoy ("hoy", con su día en "diaHoy"), su perfil, un resumen de los últimos 7 días (comidas, entrenos y actividad) y sus rutinas actuales, cada una con su "id". El catálogo de ejercicios de la app va después del manual.
 - Basate en esos datos y no inventes los que no están. Si falta algo para responder bien, preguntalo.
 - No preguntes datos que ya están en el perfil (sexo, edad, altura, peso, objetivo de peso, objetivo de entrenamiento, días por semana, kcal objetivo): usalos. Por ejemplo, si el objetivo de peso es "bajar" y el de entrenamiento es "hipertrofia", no preguntes si la prioridad es bajar grasa o ganar músculo.
 - Si el usuario menciona cuánto duran sus sesiones (por ejemplo, "entreno 2 horas"), comentalo en la misma respuesta: si armaste una rutina, decí si entra en ese tiempo según las series y los descansos del manual; si no, decí qué influye en la duración (series y descansos). No inventes una duración ideal.
 
-Rutinas:
-- Solo armá rutinas si el usuario las pide. Si no, "rutinas" va vacía.
-- Una rutina por cada día de entrenamiento, con sus propios ejercicios y su día en "dias" (un solo día por rutina, sin repetir días entre rutinas). Por ejemplo, 3 días de empuje/tirón/piernas son 3 rutinas: "Empuje" el lunes, "Tirón" el miércoles y "Piernas" el viernes. No juntes los ejercicios de varios días en una sola rutina.
+Acciones (cambios que la app le propone aplicar; el usuario los confirma):
+- Proponé acciones solo si el usuario pide un cambio: armar o cambiar rutinas, registrar lo que comió o cargar pasos. Si solo pregunta algo, "acciones" va vacía.
+- Nunca digas que ya lo hiciste ni que lo vas a hacer vos: la app le muestra cada acción en una tarjeta para que la aplique, la edite o la cancele, y nada se guarda hasta que toque Aplicar. Así sí: "Te dejo la propuesta abajo, tocá Aplicar para guardarla" o "Te dejo la rutina para que la apliques". Así no: "Listo", "Listo para borrar", "Anotado", "Sumé los 40 minutos", "Ya lo cargué", "Decime cuál y lo registro", "Decime cuál y la borro" (mejor: "Decime cuál y te dejo el borrado para confirmar").
+- Si el pedido no deja claro a qué se refiere, preguntá y dejá "acciones" vacía. Por ejemplo, "borrá la rutina" cuando tiene 3, o "sacá las sentadillas" cuando están en dos rutinas. Nunca propongas borrar o quitar algo que el usuario no nombró.
+- Para cambiar o borrar una rutina usá su "id" del contexto, nunca el nombre.
+- En la misma respuesta podés mandar acciones de distinto tipo (por ejemplo, una rutina y una comida).
+
+Rutinas (crear_rutina, agregar_ejercicios, quitar_ejercicios, borrar_rutinas):
+- Una rutina por cada día de entrenamiento, con sus propios ejercicios y su día en "dia" (sin repetir días entre rutinas). Por ejemplo, 3 días de empuje/tirón/piernas son 3 acciones crear_rutina: "Empuje" el lunes, "Tirón" el miércoles y "Piernas" el viernes. No juntes los ejercicios de varios días en una sola rutina.
 - Nombres cortos, de una o dos palabras: "Empuje", "Tirón", "Piernas", "Torso", "Full body". Sin el objetivo ni la cantidad de días en el nombre.
 - Usá únicamente ejercicios del catálogo, con su id exacto. No inventes ids.
-- dias: 0 = lunes … 6 = domingo. series: de 1 a 10. rango de repeticiones: min y max de 1 a 30, con min ≤ max.
+- dia: 0 = lunes … 6 = domingo. series: de 1 a 10. Las repeticiones las pone la app según el tipo de ejercicio y el objetivo.
 - Tené en cuenta cuántos días por semana entrena y su objetivo (hipertrofia o fuerza).
-- En "texto" explicá la idea del plan en pocas líneas. No repitas los días, los ejercicios ni las series: la app muestra las rutinas aparte.`;
+- Si una rutina se quedaría sin ejercicios, proponé borrarla en vez de quitárselos todos.
+- En "texto" explicá la idea del plan en pocas líneas. No repitas los días, los ejercicios ni las series: la app muestra las acciones aparte.
+
+Comidas (registrar_comida):
+- "dia": el de "hoy", salvo que diga otro. Solo hoy o los 6 días anteriores, nunca un día futuro.
+- Un ítem por alimento. "busqueda": un nombre corto y común para buscarlo en la base de alimentos de la app ("pechuga a la plancha", "empanada de carne", "arroz blanco hervido").
+- "estado": crudo o cocido según lo que dijo; "no-aplica" para lo que no se cocina (fruta, yogur, pan, bebidas).
+- Si no dijo crudo o cocido: en platos listos para comer (milanesa, empanada, pizza, guiso) asumí cocido, poné "estadoAsumido" en true y decilo en "texto". Preguntá solo si cambia mucho el resultado, por ejemplo arroz o fideos pesados en gramos.
+- "cantidad": en gramos, o en unidades con "porcion" (en singular) y "gramosPorUnidad" estimado.
+- "estimado": kcal y macros aproximados por 100 g, según el estado. La app los usa solo si no encuentra el alimento en su base, y lo marca como aproximado.
+
+Pasos (cargar_pasos):
+- Usá la unidad que dijo el usuario (km, minutos o pasos), sin convertir. "hora": cuándo terminó, si lo dijo; si no, null.
+- "dia": igual que en las comidas.`;
 
 // Manual destilado de consensos de nutrición deportiva y de un libro de fisiología (ver guias/).
 // Es fijo: va después de las instrucciones y antes del contexto, para que se cachee.
@@ -82,13 +101,18 @@ function diaDeSemana(fecha) {
 }
 
 // El contexto del usuario como último bloque de instrucciones (cambia en cada pedido).
-// A cada día de ultimos7Dias le suma el día de la semana.
+// Le suma el día de la semana a hoy (diaHoy) y a cada día de ultimos7Dias.
 function contextoCoach(contexto) {
   const dias = contexto?.ultimos7Dias?.map((d) => {
     const nombre = diaDeSemana(d.fecha);
     return nombre ? { fecha: d.fecha, dia: nombre, ...d } : d;
   });
-  const conDias = dias ? { ...contexto, ultimos7Dias: dias } : contexto;
+  const diaHoy = diaDeSemana(contexto?.hoy);
+  const conDias = {
+    ...contexto,
+    ...(diaHoy ? { diaHoy } : {}),
+    ...(dias ? { ultimos7Dias: dias } : {}),
+  };
   return `Contexto del usuario (datos de la app, en JSON):\n${JSON.stringify(conDias)}`;
 }
 

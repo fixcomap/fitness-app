@@ -1,0 +1,1148 @@
+[
+  {
+    "id": "press-militar-mancuernas",
+    "nombre": "Press militar con mancuernas",
+    "equipo": "mancuernas",
+    "tipo": "compuesto"
+  },
+  {
+    "id": "elevaciones-laterales",
+    "nombre": "Elevaciones laterales",
+    "equipo": "mancuernas",
+    "tipo": "aislamiento"
+  },
+  {
+    "id": "pike-push-up",
+    "nombre": "Flexiones en pica",
+    "equipo": "peso-corporal",
+    "tipo": "aislamiento"
+  },
+  {
+    "id": "flexiones",
+    "nombre": "Flexiones de brazos",
+    "equipo": "peso-corporal",
+    "tipo": "aislamiento"
+  },
+  {
+    "id": "press-banca-barra",
+    "nombre": "Press de banca con barra",
+    "equipo": "barra",
+    "tipo": "compuesto"
+  },
+  {
+    "id": "aperturas-piso-mancuernas",
+    "nombre": "Aperturas en el piso con mancuernas",
+    "equipo": "mancuernas",
+    "tipo": "aislamiento"
+  },
+  {
+    "id": "dominadas",
+    "nombre": "Dominadas",
+    "equipo": "peso-corporal",
+    "tipo": "compuesto"
+  },
+  {
+    "id": "remo-barra",
+    "nombre": "Remo con barra",
+    "equipo": "barra",
+    "tipo": "compuesto"
+  },
+  {
+    "id": "remo-mancuerna-una-mano",
+    "nombre": "Remo con mancuerna a una mano",
+    "equipo": "mancuernas",
+    "tipo": "compuesto"
+  },
+  {
+    "id": "curl-barra",
+    "nombre": "Curl de bíceps con barra",
+    "equipo": "barra",
+    "tipo": "aislamiento"
+  },
+  {
+    "id": "curl-martillo",
+    "nombre": "Curl martillo",
+    "equipo": "mancuernas",
+    "tipo": "aislamiento"
+  },
+  {
+    "id": "extension-triceps-banda",
+    "nombre": "Extensión de tríceps con banda",
+    "equipo": "bandas",
+    "tipo": "aislamiento"
+  },
+  {
+    "id": "sentadilla-barra",
+    "nombre": "Sentadilla con barra",
+    "equipo": "barra",
+    "tipo": "compuesto"
+  },
+  {
+    "id": "zancadas-mancuernas",
+    "nombre": "Zancadas con mancuernas",
+    "equipo": "mancuernas",
+    "tipo": "compuesto"
+  },
+  {
+    "id": "elevacion-talones",
+    "nombre": "Elevación de talones",
+    "equipo": "peso-corporal",
+    "tipo": "aislamiento"
+  },
+  {
+    "id": "hip-thrust-barra",
+    "nombre": "Hip thrust con barra",
+    "equipo": "barra",
+    "tipo": "compuesto"
+  },
+  {
+    "id": "peso-muerto-rumano-mancuernas",
+    "nombre": "Peso muerto rumano con mancuernas",
+    "equipo": "mancuernas",
+    "tipo": "compuesto"
+  },
+  {
+    "id": "puente-gluteo-banda",
+    "nombre": "Puente de glúteos con banda",
+    "equipo": "bandas",
+    "tipo": "aislamiento"
+  },
+  {
+    "id": "plancha",
+    "nombre": "Plancha",
+    "equipo": "peso-corporal",
+    "tipo": "aislamiento"
+  },
+  {
+    "id": "plancha-lateral",
+    "nombre": "Plancha lateral",
+    "equipo": "peso-corporal",
+    "tipo": "aislamiento"
+  },
+  {
+    "id": "pallof-press-banda",
+    "nombre": "Pallof press con banda",
+    "equipo": "bandas",
+    "tipo": "compuesto"
+  },
+  {
+    "id": "press-militar-barra",
+    "nombre": "Press militar con barra",
+    "equipo": "barra",
+    "tipo": "compuesto"
+  },
+  {
+    "id": "press-arnold",
+    "nombre": "Press Arnold",
+    "equipo": "mancuernas",
+    "tipo": "compuesto"
+  },
+  {
+    "id": "press-hombros-maquina",
+    "nombre": "Press de hombros en máquina",
+    "equipo": "maquina",
+    "tipo": "compuesto"
+  },
+  {
+    "id": "press-militar-smith",
+    "nombre": "Press militar en Smith",
+    "equipo": "maquina",
+    "tipo": "compuesto"
+  },
+  {
+    "id": "press-hombros-banda",
+    "nombre": "Press de hombros con banda",
+    "equipo": "bandas",
+    "tipo": "compuesto"
+  },
+  {
+    "id": "press-militar-kettlebells",
+    "nombre": "Press militar con kettlebells",
+    "equipo": "kettlebell",
+    "tipo": "compuesto"
+  },
+  {
+    "id": "push-press-kettlebell",
+    "nombre": "Push press con kettlebell",
+    "equipo": "kettlebell",
+    "tipo": "compuesto"
+  },
+  {
+    "id": "elevaciones-frontales-mancuernas",
+    "nombre": "Elevaciones frontales con mancuernas",
+    "equipo": "mancuernas",
+    "tipo": "aislamiento"
+  },
+  {
+    "id": "elevacion-frontal-polea",
+    "nombre": "Elevación frontal en polea",
+    "equipo": "polea",
+    "tipo": "aislamiento"
+  },
+  {
+    "id": "vuelos-laterales-polea",
+    "nombre": "Vuelos laterales en polea",
+    "equipo": "polea",
+    "tipo": "aislamiento"
+  },
+  {
+    "id": "vuelos-laterales-banda",
+    "nombre": "Vuelos laterales con banda",
+    "equipo": "bandas",
+    "tipo": "aislamiento"
+  },
+  {
+    "id": "vuelos-posteriores-mancuernas",
+    "nombre": "Vuelos posteriores con mancuernas",
+    "equipo": "mancuernas",
+    "tipo": "aislamiento"
+  },
+  {
+    "id": "vuelos-posteriores-maquina",
+    "nombre": "Vuelos posteriores en máquina",
+    "equipo": "maquina",
+    "tipo": "aislamiento"
+  },
+  {
+    "id": "vuelos-posteriores-polea",
+    "nombre": "Vuelos posteriores en polea",
+    "equipo": "polea",
+    "tipo": "aislamiento"
+  },
+  {
+    "id": "face-pull",
+    "nombre": "Face pull",
+    "equipo": "polea",
+    "tipo": "aislamiento"
+  },
+  {
+    "id": "aperturas-banda-pull-apart",
+    "nombre": "Aperturas con banda (pull apart)",
+    "equipo": "bandas",
+    "tipo": "aislamiento"
+  },
+  {
+    "id": "remo-al-menton-barra",
+    "nombre": "Remo al mentón con barra",
+    "equipo": "barra",
+    "tipo": "compuesto"
+  },
+  {
+    "id": "remo-al-menton-polea",
+    "nombre": "Remo al mentón en polea",
+    "equipo": "polea",
+    "tipo": "compuesto"
+  },
+  {
+    "id": "encogimientos-barra",
+    "nombre": "Encogimientos con barra",
+    "equipo": "barra",
+    "tipo": "aislamiento"
+  },
+  {
+    "id": "encogimientos-mancuernas",
+    "nombre": "Encogimientos con mancuernas",
+    "equipo": "mancuernas",
+    "tipo": "aislamiento"
+  },
+  {
+    "id": "rotacion-externa-polea",
+    "nombre": "Rotación externa en polea",
+    "equipo": "polea",
+    "tipo": "aislamiento"
+  },
+  {
+    "id": "rotacion-externa-banda",
+    "nombre": "Rotación externa con banda",
+    "equipo": "bandas",
+    "tipo": "aislamiento"
+  },
+  {
+    "id": "halo-kettlebell",
+    "nombre": "Halo con kettlebell",
+    "equipo": "kettlebell",
+    "tipo": "aislamiento"
+  },
+  {
+    "id": "levantada-turca",
+    "nombre": "Levantada turca (Turkish get-up)",
+    "equipo": "kettlebell",
+    "tipo": "compuesto"
+  },
+  {
+    "id": "flexiones-en-vertical",
+    "nombre": "Flexiones en vertical",
+    "equipo": "peso-corporal",
+    "tipo": "aislamiento"
+  },
+  {
+    "id": "cargada-y-press",
+    "nombre": "Cargada y press",
+    "equipo": "barra",
+    "tipo": "compuesto"
+  },
+  {
+    "id": "press-inclinado-barra",
+    "nombre": "Press inclinado con barra",
+    "equipo": "barra",
+    "tipo": "compuesto"
+  },
+  {
+    "id": "press-declinado-barra",
+    "nombre": "Press declinado con barra",
+    "equipo": "barra",
+    "tipo": "compuesto"
+  },
+  {
+    "id": "press-plano-mancuernas",
+    "nombre": "Press plano con mancuernas",
+    "equipo": "mancuernas",
+    "tipo": "compuesto"
+  },
+  {
+    "id": "press-inclinado-mancuernas",
+    "nombre": "Press inclinado con mancuernas",
+    "equipo": "mancuernas",
+    "tipo": "compuesto"
+  },
+  {
+    "id": "press-declinado-mancuernas",
+    "nombre": "Press declinado con mancuernas",
+    "equipo": "mancuernas",
+    "tipo": "compuesto"
+  },
+  {
+    "id": "aperturas-planas-mancuernas",
+    "nombre": "Aperturas planas con mancuernas",
+    "equipo": "mancuernas",
+    "tipo": "aislamiento"
+  },
+  {
+    "id": "aperturas-inclinadas-mancuernas",
+    "nombre": "Aperturas inclinadas con mancuernas",
+    "equipo": "mancuernas",
+    "tipo": "aislamiento"
+  },
+  {
+    "id": "peck-deck",
+    "nombre": "Peck deck (mariposa)",
+    "equipo": "maquina",
+    "tipo": "aislamiento"
+  },
+  {
+    "id": "press-pecho-maquina",
+    "nombre": "Press de pecho en máquina",
+    "equipo": "maquina",
+    "tipo": "compuesto"
+  },
+  {
+    "id": "press-inclinado-maquina",
+    "nombre": "Press inclinado en máquina",
+    "equipo": "maquina",
+    "tipo": "compuesto"
+  },
+  {
+    "id": "press-plano-smith",
+    "nombre": "Press plano en Smith",
+    "equipo": "maquina",
+    "tipo": "compuesto"
+  },
+  {
+    "id": "press-inclinado-smith",
+    "nombre": "Press inclinado en Smith",
+    "equipo": "maquina",
+    "tipo": "compuesto"
+  },
+  {
+    "id": "cruce-de-poleas",
+    "nombre": "Cruce de poleas",
+    "equipo": "polea",
+    "tipo": "aislamiento"
+  },
+  {
+    "id": "cruce-de-poleas-bajo",
+    "nombre": "Cruce de poleas desde abajo",
+    "equipo": "polea",
+    "tipo": "aislamiento"
+  },
+  {
+    "id": "press-pecho-polea",
+    "nombre": "Press de pecho en polea",
+    "equipo": "polea",
+    "tipo": "compuesto"
+  },
+  {
+    "id": "aperturas-inclinadas-polea",
+    "nombre": "Aperturas inclinadas en polea",
+    "equipo": "polea",
+    "tipo": "aislamiento"
+  },
+  {
+    "id": "press-pecho-banda",
+    "nombre": "Press de pecho con banda",
+    "equipo": "bandas",
+    "tipo": "compuesto"
+  },
+  {
+    "id": "cruce-banda",
+    "nombre": "Cruce de pecho con banda",
+    "equipo": "bandas",
+    "tipo": "aislamiento"
+  },
+  {
+    "id": "pullover-mancuerna",
+    "nombre": "Pullover con mancuerna",
+    "equipo": "mancuernas",
+    "tipo": "aislamiento"
+  },
+  {
+    "id": "flexiones-inclinadas",
+    "nombre": "Flexiones inclinadas",
+    "equipo": "peso-corporal",
+    "tipo": "aislamiento"
+  },
+  {
+    "id": "flexiones-declinadas",
+    "nombre": "Flexiones declinadas (pies elevados)",
+    "equipo": "peso-corporal",
+    "tipo": "aislamiento"
+  },
+  {
+    "id": "flexiones-abiertas",
+    "nombre": "Flexiones con agarre abierto",
+    "equipo": "peso-corporal",
+    "tipo": "aislamiento"
+  },
+  {
+    "id": "flexiones-pliometricas",
+    "nombre": "Flexiones pliométricas",
+    "equipo": "peso-corporal",
+    "tipo": "aislamiento"
+  },
+  {
+    "id": "flexiones-un-brazo",
+    "nombre": "Flexiones a un brazo",
+    "equipo": "peso-corporal",
+    "tipo": "aislamiento"
+  },
+  {
+    "id": "press-piso-kettlebell",
+    "nombre": "Press en el piso con kettlebell",
+    "equipo": "kettlebell",
+    "tipo": "compuesto"
+  },
+  {
+    "id": "dominadas-supinas",
+    "nombre": "Dominadas supinas",
+    "equipo": "peso-corporal",
+    "tipo": "compuesto"
+  },
+  {
+    "id": "dominadas-triangulo",
+    "nombre": "Dominadas con triángulo",
+    "equipo": "peso-corporal",
+    "tipo": "compuesto"
+  },
+  {
+    "id": "jalon-al-pecho",
+    "nombre": "Jalón al pecho",
+    "equipo": "polea",
+    "tipo": "compuesto"
+  },
+  {
+    "id": "jalon-al-pecho-cerrado",
+    "nombre": "Jalón al pecho con agarre cerrado",
+    "equipo": "polea",
+    "tipo": "compuesto"
+  },
+  {
+    "id": "jalon-al-pecho-supino",
+    "nombre": "Jalón al pecho con agarre supino",
+    "equipo": "polea",
+    "tipo": "compuesto"
+  },
+  {
+    "id": "jalon-triangulo",
+    "nombre": "Jalón con triángulo",
+    "equipo": "polea",
+    "tipo": "compuesto"
+  },
+  {
+    "id": "jalon-un-brazo",
+    "nombre": "Jalón a un brazo",
+    "equipo": "polea",
+    "tipo": "compuesto"
+  },
+  {
+    "id": "pullover-polea-alta",
+    "nombre": "Pullover en polea alta",
+    "equipo": "polea",
+    "tipo": "aislamiento"
+  },
+  {
+    "id": "remo-bajo-polea",
+    "nombre": "Remo bajo en polea",
+    "equipo": "polea",
+    "tipo": "compuesto"
+  },
+  {
+    "id": "remo-bajo-un-brazo",
+    "nombre": "Remo bajo a un brazo",
+    "equipo": "polea",
+    "tipo": "compuesto"
+  },
+  {
+    "id": "remo-alto-maquina",
+    "nombre": "Remo alto en máquina",
+    "equipo": "maquina",
+    "tipo": "compuesto"
+  },
+  {
+    "id": "remo-maquina",
+    "nombre": "Remo en máquina",
+    "equipo": "maquina",
+    "tipo": "compuesto"
+  },
+  {
+    "id": "remo-t-apoyo-pecho",
+    "nombre": "Remo en T con apoyo de pecho",
+    "equipo": "maquina",
+    "tipo": "compuesto"
+  },
+  {
+    "id": "remo-en-t",
+    "nombre": "Remo en T",
+    "equipo": "barra",
+    "tipo": "compuesto"
+  },
+  {
+    "id": "remo-dos-mancuernas",
+    "nombre": "Remo con dos mancuernas",
+    "equipo": "mancuernas",
+    "tipo": "compuesto"
+  },
+  {
+    "id": "remo-banco-inclinado",
+    "nombre": "Remo en banco inclinado con mancuernas",
+    "equipo": "mancuernas",
+    "tipo": "compuesto"
+  },
+  {
+    "id": "remo-barra-supino",
+    "nombre": "Remo con barra agarre supino",
+    "equipo": "barra",
+    "tipo": "compuesto"
+  },
+  {
+    "id": "remo-smith",
+    "nombre": "Remo en Smith",
+    "equipo": "maquina",
+    "tipo": "compuesto"
+  },
+  {
+    "id": "remo-kettlebell",
+    "nombre": "Remo con kettlebell a un brazo",
+    "equipo": "kettlebell",
+    "tipo": "compuesto"
+  },
+  {
+    "id": "remo-renegado",
+    "nombre": "Remo renegado",
+    "equipo": "kettlebell",
+    "tipo": "compuesto"
+  },
+  {
+    "id": "peso-muerto",
+    "nombre": "Peso muerto",
+    "equipo": "barra",
+    "tipo": "compuesto"
+  },
+  {
+    "id": "hiperextensiones-en-banco",
+    "nombre": "Hiperextensiones en banco",
+    "equipo": "peso-corporal",
+    "tipo": "aislamiento"
+  },
+  {
+    "id": "buenos-dias-barra",
+    "nombre": "Buenos días con barra",
+    "equipo": "barra",
+    "tipo": "compuesto"
+  },
+  {
+    "id": "pullover-barra",
+    "nombre": "Pullover con barra",
+    "equipo": "barra",
+    "tipo": "aislamiento"
+  },
+  {
+    "id": "curl-alternado-mancuernas",
+    "nombre": "Curl alternado con mancuernas",
+    "equipo": "mancuernas",
+    "tipo": "aislamiento"
+  },
+  {
+    "id": "curl-barra-z",
+    "nombre": "Curl con barra Z",
+    "equipo": "barra-z",
+    "tipo": "aislamiento"
+  },
+  {
+    "id": "curl-banco-scott",
+    "nombre": "Curl en banco Scott",
+    "equipo": "barra",
+    "tipo": "aislamiento"
+  },
+  {
+    "id": "curl-concentrado",
+    "nombre": "Curl concentrado",
+    "equipo": "mancuernas",
+    "tipo": "aislamiento"
+  },
+  {
+    "id": "curl-banco-inclinado",
+    "nombre": "Curl en banco inclinado",
+    "equipo": "mancuernas",
+    "tipo": "aislamiento"
+  },
+  {
+    "id": "curl-arana",
+    "nombre": "Curl araña con barra Z",
+    "equipo": "barra-z",
+    "tipo": "aislamiento"
+  },
+  {
+    "id": "curl-martillo-polea",
+    "nombre": "Curl martillo en polea con soga",
+    "equipo": "polea",
+    "tipo": "aislamiento"
+  },
+  {
+    "id": "curl-biceps-polea",
+    "nombre": "Curl de bíceps en polea",
+    "equipo": "polea",
+    "tipo": "aislamiento"
+  },
+  {
+    "id": "curl-polea-alta",
+    "nombre": "Curl en polea alta",
+    "equipo": "polea",
+    "tipo": "aislamiento"
+  },
+  {
+    "id": "curl-scott-maquina",
+    "nombre": "Curl Scott en máquina",
+    "equipo": "maquina",
+    "tipo": "aislamiento"
+  },
+  {
+    "id": "curl-invertido-barra",
+    "nombre": "Curl invertido con barra",
+    "equipo": "barra",
+    "tipo": "aislamiento"
+  },
+  {
+    "id": "curl-zottman",
+    "nombre": "Curl Zottman",
+    "equipo": "mancuernas",
+    "tipo": "aislamiento"
+  },
+  {
+    "id": "triceps-polea",
+    "nombre": "Tríceps en polea",
+    "equipo": "polea",
+    "tipo": "aislamiento"
+  },
+  {
+    "id": "triceps-polea-soga",
+    "nombre": "Tríceps en polea con soga",
+    "equipo": "polea",
+    "tipo": "aislamiento"
+  },
+  {
+    "id": "triceps-polea-supino",
+    "nombre": "Tríceps en polea agarre supino",
+    "equipo": "polea",
+    "tipo": "aislamiento"
+  },
+  {
+    "id": "extension-triceps-polea-cabeza",
+    "nombre": "Extensión de tríceps sobre la cabeza en polea",
+    "equipo": "polea",
+    "tipo": "aislamiento"
+  },
+  {
+    "id": "press-frances-barra-z",
+    "nombre": "Press francés con barra Z",
+    "equipo": "barra-z",
+    "tipo": "aislamiento"
+  },
+  {
+    "id": "press-banca-cerrado",
+    "nombre": "Press de banca agarre cerrado",
+    "equipo": "barra",
+    "tipo": "compuesto"
+  },
+  {
+    "id": "fondos-paralelas",
+    "nombre": "Fondos en paralelas",
+    "equipo": "peso-corporal",
+    "tipo": "compuesto"
+  },
+  {
+    "id": "fondos-en-banco",
+    "nombre": "Fondos en banco",
+    "equipo": "peso-corporal",
+    "tipo": "compuesto"
+  },
+  {
+    "id": "patada-triceps",
+    "nombre": "Patada de tríceps con mancuerna",
+    "equipo": "mancuernas",
+    "tipo": "aislamiento"
+  },
+  {
+    "id": "extension-triceps-mancuerna",
+    "nombre": "Extensión de tríceps con mancuerna (copa)",
+    "equipo": "mancuernas",
+    "tipo": "aislamiento"
+  },
+  {
+    "id": "press-frances-mancuernas",
+    "nombre": "Press francés con mancuernas",
+    "equipo": "mancuernas",
+    "tipo": "aislamiento"
+  },
+  {
+    "id": "extension-triceps-maquina",
+    "nombre": "Extensión de tríceps en máquina",
+    "equipo": "maquina",
+    "tipo": "aislamiento"
+  },
+  {
+    "id": "fondos-maquina",
+    "nombre": "Fondos en máquina",
+    "equipo": "maquina",
+    "tipo": "compuesto"
+  },
+  {
+    "id": "flexiones-cerradas",
+    "nombre": "Flexiones cerradas",
+    "equipo": "peso-corporal",
+    "tipo": "aislamiento"
+  },
+  {
+    "id": "press-frances-banda",
+    "nombre": "Press francés con banda",
+    "equipo": "bandas",
+    "tipo": "compuesto"
+  },
+  {
+    "id": "extension-triceps-kettlebell",
+    "nombre": "Extensión de tríceps con kettlebell",
+    "equipo": "kettlebell",
+    "tipo": "aislamiento"
+  },
+  {
+    "id": "curl-muneca-barra",
+    "nombre": "Curl de muñeca con barra",
+    "equipo": "barra",
+    "tipo": "aislamiento"
+  },
+  {
+    "id": "curl-muneca-invertido",
+    "nombre": "Curl de muñeca invertido con mancuerna",
+    "equipo": "mancuernas",
+    "tipo": "aislamiento"
+  },
+  {
+    "id": "prensa",
+    "nombre": "Prensa",
+    "equipo": "maquina",
+    "tipo": "compuesto"
+  },
+  {
+    "id": "sentadilla-hack",
+    "nombre": "Sentadilla hack",
+    "equipo": "maquina",
+    "tipo": "compuesto"
+  },
+  {
+    "id": "sillon-cuadriceps",
+    "nombre": "Sillón de cuádriceps",
+    "equipo": "maquina",
+    "tipo": "aislamiento"
+  },
+  {
+    "id": "camilla-isquiotibiales",
+    "nombre": "Camilla de isquiotibiales",
+    "equipo": "maquina",
+    "tipo": "aislamiento"
+  },
+  {
+    "id": "curl-femoral-sentado",
+    "nombre": "Curl femoral sentado",
+    "equipo": "maquina",
+    "tipo": "aislamiento"
+  },
+  {
+    "id": "sentadilla-smith",
+    "nombre": "Sentadilla en Smith",
+    "equipo": "maquina",
+    "tipo": "compuesto"
+  },
+  {
+    "id": "aductores-maquina",
+    "nombre": "Aductores en máquina",
+    "equipo": "maquina",
+    "tipo": "aislamiento"
+  },
+  {
+    "id": "gemelos-de-pie-maquina",
+    "nombre": "Gemelos de pie en máquina",
+    "equipo": "maquina",
+    "tipo": "aislamiento"
+  },
+  {
+    "id": "gemelos-sentado-maquina",
+    "nombre": "Gemelos sentado en máquina",
+    "equipo": "maquina",
+    "tipo": "aislamiento"
+  },
+  {
+    "id": "gemelos-en-prensa",
+    "nombre": "Gemelos en prensa",
+    "equipo": "maquina",
+    "tipo": "aislamiento"
+  },
+  {
+    "id": "sentadilla-frontal",
+    "nombre": "Sentadilla frontal con barra",
+    "equipo": "barra",
+    "tipo": "compuesto"
+  },
+  {
+    "id": "estocadas-barra",
+    "nombre": "Estocadas con barra",
+    "equipo": "barra",
+    "tipo": "compuesto"
+  },
+  {
+    "id": "estocadas-atras-mancuernas",
+    "nombre": "Estocadas hacia atrás con mancuernas",
+    "equipo": "mancuernas",
+    "tipo": "compuesto"
+  },
+  {
+    "id": "sentadilla-bulgara",
+    "nombre": "Sentadilla búlgara con mancuernas",
+    "equipo": "mancuernas",
+    "tipo": "compuesto"
+  },
+  {
+    "id": "subidas-al-cajon",
+    "nombre": "Subidas al cajón con mancuernas",
+    "equipo": "mancuernas",
+    "tipo": "compuesto"
+  },
+  {
+    "id": "sentadilla-goblet",
+    "nombre": "Sentadilla goblet",
+    "equipo": "kettlebell",
+    "tipo": "compuesto"
+  },
+  {
+    "id": "sentadilla-libre",
+    "nombre": "Sentadilla libre",
+    "equipo": "peso-corporal",
+    "tipo": "compuesto"
+  },
+  {
+    "id": "sentadilla-con-salto",
+    "nombre": "Sentadilla con salto",
+    "equipo": "peso-corporal",
+    "tipo": "compuesto"
+  },
+  {
+    "id": "estocadas-con-salto",
+    "nombre": "Estocadas con salto",
+    "equipo": "peso-corporal",
+    "tipo": "compuesto"
+  },
+  {
+    "id": "saltos-sobre-banco",
+    "nombre": "Saltos laterales sobre banco",
+    "equipo": "peso-corporal",
+    "tipo": "aislamiento"
+  },
+  {
+    "id": "sentadilla-sumo-mancuerna",
+    "nombre": "Sentadilla sumo con mancuerna",
+    "equipo": "mancuernas",
+    "tipo": "compuesto"
+  },
+  {
+    "id": "sentadilla-banda",
+    "nombre": "Sentadilla con banda",
+    "equipo": "bandas",
+    "tipo": "compuesto"
+  },
+  {
+    "id": "aduccion-banda",
+    "nombre": "Aducción de cadera con banda",
+    "equipo": "bandas",
+    "tipo": "aislamiento"
+  },
+  {
+    "id": "peso-muerto-piernas-rigidas",
+    "nombre": "Peso muerto con piernas rígidas",
+    "equipo": "barra",
+    "tipo": "compuesto"
+  },
+  {
+    "id": "curl-nordico",
+    "nombre": "Curl nórdico",
+    "equipo": "peso-corporal",
+    "tipo": "aislamiento"
+  },
+  {
+    "id": "gemelos-barra",
+    "nombre": "Gemelos de pie con barra",
+    "equipo": "barra",
+    "tipo": "aislamiento"
+  },
+  {
+    "id": "gemelos-banda",
+    "nombre": "Gemelos con banda",
+    "equipo": "bandas",
+    "tipo": "aislamiento"
+  },
+  {
+    "id": "sentadilla-pistol",
+    "nombre": "Sentadilla pistol con kettlebell",
+    "equipo": "kettlebell",
+    "tipo": "compuesto"
+  },
+  {
+    "id": "salto-en-largo",
+    "nombre": "Salto en largo",
+    "equipo": "peso-corporal",
+    "tipo": "aislamiento"
+  },
+  {
+    "id": "cargada-de-potencia",
+    "nombre": "Cargada de potencia",
+    "equipo": "barra",
+    "tipo": "compuesto"
+  },
+  {
+    "id": "puente-de-gluteos",
+    "nombre": "Puente de glúteos",
+    "equipo": "peso-corporal",
+    "tipo": "aislamiento"
+  },
+  {
+    "id": "puente-gluteos-una-pierna",
+    "nombre": "Puente de glúteos a una pierna",
+    "equipo": "peso-corporal",
+    "tipo": "aislamiento"
+  },
+  {
+    "id": "patada-de-gluteo",
+    "nombre": "Patada de glúteo en cuadrupedia",
+    "equipo": "peso-corporal",
+    "tipo": "aislamiento"
+  },
+  {
+    "id": "extension-cadera-banda",
+    "nombre": "Extensión de cadera con banda",
+    "equipo": "bandas",
+    "tipo": "aislamiento"
+  },
+  {
+    "id": "caminata-monstruo",
+    "nombre": "Caminata monstruo con banda",
+    "equipo": "bandas",
+    "tipo": "aislamiento"
+  },
+  {
+    "id": "patada-gluteo-polea",
+    "nombre": "Patada de glúteo en polea",
+    "equipo": "polea",
+    "tipo": "aislamiento"
+  },
+  {
+    "id": "pull-through-polea",
+    "nombre": "Pull through en polea",
+    "equipo": "polea",
+    "tipo": "aislamiento"
+  },
+  {
+    "id": "subida-banco-rodilla",
+    "nombre": "Subida al banco con elevación de rodilla",
+    "equipo": "peso-corporal",
+    "tipo": "aislamiento"
+  },
+  {
+    "id": "abductores-maquina",
+    "nombre": "Abductores en máquina",
+    "equipo": "maquina",
+    "tipo": "aislamiento"
+  },
+  {
+    "id": "swing-kettlebell",
+    "nombre": "Swing con kettlebell",
+    "equipo": "kettlebell",
+    "tipo": "aislamiento"
+  },
+  {
+    "id": "peso-muerto-una-pierna",
+    "nombre": "Peso muerto a una pierna con kettlebell",
+    "equipo": "kettlebell",
+    "tipo": "compuesto"
+  },
+  {
+    "id": "peso-muerto-rumano-barra",
+    "nombre": "Peso muerto rumano con barra",
+    "equipo": "barra",
+    "tipo": "compuesto"
+  },
+  {
+    "id": "patada-gluteo-de-pie",
+    "nombre": "Patada de glúteo de pie",
+    "equipo": "peso-corporal",
+    "tipo": "aislamiento"
+  },
+  {
+    "id": "crunch",
+    "nombre": "Crunch abdominal",
+    "equipo": "peso-corporal",
+    "tipo": "aislamiento"
+  },
+  {
+    "id": "abdominales-completos",
+    "nombre": "Abdominales completos",
+    "equipo": "peso-corporal",
+    "tipo": "aislamiento"
+  },
+  {
+    "id": "crunch-inverso",
+    "nombre": "Crunch inverso",
+    "equipo": "peso-corporal",
+    "tipo": "aislamiento"
+  },
+  {
+    "id": "crunch-cruzado",
+    "nombre": "Crunch cruzado",
+    "equipo": "peso-corporal",
+    "tipo": "aislamiento"
+  },
+  {
+    "id": "bicicleta-abdominal",
+    "nombre": "Bicicleta abdominal",
+    "equipo": "peso-corporal",
+    "tipo": "aislamiento"
+  },
+  {
+    "id": "dead-bug",
+    "nombre": "Dead bug",
+    "equipo": "peso-corporal",
+    "tipo": "aislamiento"
+  },
+  {
+    "id": "giros-rusos",
+    "nombre": "Giros rusos",
+    "equipo": "peso-corporal",
+    "tipo": "aislamiento"
+  },
+  {
+    "id": "elevacion-piernas-banco",
+    "nombre": "Elevación de piernas en banco",
+    "equipo": "peso-corporal",
+    "tipo": "aislamiento"
+  },
+  {
+    "id": "elevacion-piernas-colgado",
+    "nombre": "Elevación de piernas colgado",
+    "equipo": "peso-corporal",
+    "tipo": "aislamiento"
+  },
+  {
+    "id": "navajas",
+    "nombre": "Navajas",
+    "equipo": "peso-corporal",
+    "tipo": "aislamiento"
+  },
+  {
+    "id": "crunch-polea",
+    "nombre": "Crunch en polea",
+    "equipo": "polea",
+    "tipo": "aislamiento"
+  },
+  {
+    "id": "lenador-polea",
+    "nombre": "Leñador en polea",
+    "equipo": "polea",
+    "tipo": "aislamiento"
+  },
+  {
+    "id": "pallof-con-rotacion",
+    "nombre": "Pallof press con rotación en polea",
+    "equipo": "polea",
+    "tipo": "aislamiento"
+  },
+  {
+    "id": "crunch-maquina",
+    "nombre": "Crunch en máquina",
+    "equipo": "maquina",
+    "tipo": "aislamiento"
+  },
+  {
+    "id": "inclinaciones-laterales",
+    "nombre": "Inclinaciones laterales con mancuerna",
+    "equipo": "mancuernas",
+    "tipo": "aislamiento"
+  },
+  {
+    "id": "rueda-abdominal-barra",
+    "nombre": "Rueda abdominal con barra",
+    "equipo": "barra",
+    "tipo": "aislamiento"
+  },
+  {
+    "id": "molino-kettlebell",
+    "nombre": "Molino con kettlebell",
+    "equipo": "kettlebell",
+    "tipo": "aislamiento"
+  },
+  {
+    "id": "landmine-180",
+    "nombre": "Landmine 180",
+    "equipo": "barra",
+    "tipo": "aislamiento"
+  },
+  {
+    "id": "crunch-declinado",
+    "nombre": "Crunch declinado",
+    "equipo": "peso-corporal",
+    "tipo": "aislamiento"
+  },
+  {
+    "id": "crunch-oblicuo",
+    "nombre": "Crunch oblicuo en el piso",
+    "equipo": "peso-corporal",
+    "tipo": "aislamiento"
+  },
+  {
+    "id": "toques-de-talon",
+    "nombre": "Toques de talón alternados",
+    "equipo": "peso-corporal",
+    "tipo": "aislamiento"
+  },
+  {
+    "id": "encogimientos-sentado",
+    "nombre": "Encogimientos sentado",
+    "equipo": "peso-corporal",
+    "tipo": "aislamiento"
+  }
+]

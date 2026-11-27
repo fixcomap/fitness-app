@@ -21,7 +21,8 @@ const { leerConfigIa } = require('../src/ia/config');
 const { crearProveedor } = require('../src/ia');
 const { leerResultadoFoto } = require('../src/ia/foto');
 const { EXTENSIONES, esFoto, fotoAJpeg } = require('./fotos');
-const { leerRespuestaCoach } = require('../src/ia/coach');
+const { leerRespuestaCoach } = require('../src/ia/acciones');
+const { CATALOGO } = require('../src/ia/catalogo');
 const {
   USO,
   leerArgumentos,
@@ -36,12 +37,9 @@ const {
 const MAXIMO_FOTO = 2 * 1024 * 1024;
 const precios = JSON.parse(fs.readFileSync(path.join(aqui, 'precios-ia.json'), 'utf8')).modelos;
 const ejemplo = JSON.parse(fs.readFileSync(path.join(aqui, 'preguntas-coach.json'), 'utf8'));
-// El catálogo real de la app (id, nombre, equipo y tipo), como lo va a mandar la app.
-const catalogo = JSON.parse(fs.readFileSync(path.join(raizRepo, 'apps/mobile/src/data/ejercicios.json'), 'utf8')).map(
-  ({ id, nombre, equipo, tipo }) => ({ id, nombre, equipo, ...(tipo ? { tipo } : {}) }),
-);
-console.log(`Catálogo: ${catalogo.length} ejercicios de apps/mobile/src/data/ejercicios.json`);
-const contexto = { ...ejemplo.contexto, catalogo };
+// El catálogo lo pone la API en el prompt (src/ia/catalogo.json); la app no lo manda.
+console.log(`Catálogo: ${CATALOGO.length} ejercicios de src/ia/catalogo.json`);
+const contexto = ejemplo.contexto;
 
 function salir(mensaje) {
   console.error(`${mensaje}\n\n${USO}`);
@@ -99,7 +97,7 @@ function detalleFoto({ salida }) {
   ];
 }
 
-const detalleCoach = ({ salida }) => lineasCoach(salida, catalogo);
+const detalleCoach = ({ salida }) => lineasCoach(salida, CATALOGO, contexto.rutinas);
 
 async function probar({ proveedor, modelo }, fotos, solo) {
   const env = { ...process.env, IA_PROVEEDOR: proveedor, IA_MODELO_FOTO: modelo, IA_MODELO_COACH: modelo };
@@ -143,7 +141,7 @@ async function probar({ proveedor, modelo }, fotos, solo) {
           const respuesta = await ia.responderCoach([{ rol: 'usuario', texto: pregunta }], contexto);
           return {
             ...respuesta,
-            salida: leerRespuestaCoach(respuesta.datos, catalogo, { objetivo: contexto.perfil.objetivo }),
+            salida: leerRespuestaCoach(respuesta.datos, contexto, { ultimoMensaje: pregunta }),
           };
         }),
       );

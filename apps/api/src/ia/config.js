@@ -5,21 +5,25 @@
 //   claude         Claude con ANTHROPIC_API_KEY (solo desarrollo local)
 //   vertex-gemini  Gemini en Vertex AI (producción: cuenta de servicio de Cloud Run, sin claves)
 //   vertex-claude  Claude en Vertex AI (ídem)
+//   falso          respuestas fijas, sin red ni costo, para probar la app (solo desarrollo, ver falso.js)
 //   vacío          IA apagada: las rutas de IA responden 503
 // En producción solo se aceptan los de Vertex.
 
-const PROVEEDORES = ['gemini', 'claude', 'vertex-gemini', 'vertex-claude'];
+const PROVEEDORES = ['gemini', 'claude', 'vertex-gemini', 'vertex-claude', 'falso'];
+const SOLO_DESARROLLO = ['gemini', 'claude', 'falso'];
 const CON_CLAVE = { gemini: 'GEMINI_API_KEY', claude: 'ANTHROPIC_API_KEY' };
 
 // Modelos por defecto si no se indican IA_MODELO_FOTO / IA_MODELO_COACH.
 const MODELOS_POR_DEFECTO = {
   gemini: 'gemini-3.8-flash',
   claude: 'claude-haiku-5-5',
+  falso: 'falso',
 };
 
 const LIMITES_DIARIOS_POR_DEFECTO = { fotos: 10, mensajes: 30 };
 
 function familia(proveedor) {
+  if (proveedor === 'falso') return 'falso';
   return proveedor.endsWith('claude') ? 'claude' : 'gemini';
 }
 
@@ -48,7 +52,7 @@ function leerConfigIa(env, { esProduccion = false } = {}) {
   }
 
   const variableClave = CON_CLAVE[proveedor];
-  if (variableClave && esProduccion) {
+  if (SOLO_DESARROLLO.includes(proveedor) && esProduccion) {
     throw new Error(`IA_PROVEEDOR=${proveedor} es solo para desarrollo: en producción se usa Vertex AI`);
   }
   // Sin la clave, ese proveedor queda apagado sin romper la API.

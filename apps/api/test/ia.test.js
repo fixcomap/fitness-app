@@ -15,9 +15,10 @@ const {
   contextoCoach,
   diaDeSemana,
 } = require('../src/ia/prompts');
+const { TEXTO_CATALOGO } = require('../src/ia/catalogo');
 
 const imagen = Buffer.from([0xff, 0xd8, 0xff, 0xe0, 1, 2, 3]);
-const contexto = { perfil: { sexo: 'mujer' }, catalogo: [{ id: 'sentadilla', nombre: 'Sentadilla' }] };
+const contexto = { perfil: { sexo: 'mujer' }, rutinas: [{ nombre: 'Piernas' }] };
 const mensajes = [
   { rol: 'coach', texto: '¡Hola! ¿En qué te ayudo?' },
   { rol: 'usuario', texto: 'Armame una rutina' },
@@ -121,6 +122,16 @@ test('diaDeSemana: el día de una fecha AAAA-MM-DD, o null si no existe', () => 
   for (const mala of ['2026-02-30', '2026-13-01', '21/11/2026', '', undefined]) {
     assert.strictEqual(diaDeSemana(mala), null);
   }
+});
+
+test('el contexto del coach suma el día de la semana a hoy', () => {
+  const datos = (texto) => JSON.parse(texto.slice(texto.indexOf('\n') + 1));
+  assert.deepStrictEqual(datos(contextoCoach({ hoy: '2026-11-26', perfil: {} })), {
+    hoy: '2026-11-26',
+    perfil: {},
+    diaHoy: 'jueves',
+  });
+  assert.strictEqual(datos(contextoCoach({ hoy: '2026-02-30' })).diaHoy, undefined);
 });
 
 test('el contexto del coach suma el día de la semana a cada día de ultimos7Dias', () => {
@@ -229,10 +240,10 @@ test('Gemini: manda la foto con el prompt y lee JSON y tokens (con los de razona
 });
 
 test('Gemini: el coach manda el historial con roles user/model y el contexto en las instrucciones', async () => {
-  const cliente = clienteGemini(respuestaGemini('{"texto":"Dale","rutinas":[]}'));
+  const cliente = clienteGemini(respuestaGemini('{"texto":"Dale","acciones":[]}'));
   const ia = crearProveedorGemini({ cliente, modeloFoto: 'm-foto', modeloCoach: 'm-coach' });
   const r = await ia.responderCoach(mensajes, contexto);
-  assert.deepStrictEqual(r.datos, { texto: 'Dale', rutinas: [] });
+  assert.deepStrictEqual(r.datos, { texto: 'Dale', acciones: [] });
 
   const [pedido] = cliente.pedidos;
   assert.strictEqual(pedido.model, 'm-coach');
@@ -240,9 +251,9 @@ test('Gemini: el coach manda el historial con roles user/model y el contexto en 
     pedido.contents.map((c) => c.role),
     ['user', 'model', 'user'],
   );
-  // Lo fijo primero (instrucciones y manual) y el contexto al final.
+  // Lo fijo primero (instrucciones, manual y catálogo) y el contexto al final.
   const sistema = pedido.config.systemInstruction;
-  assert.ok(sistema.startsWith(`${SISTEMA_COACH}\n\n${MANUAL_COACH}\n\n`));
+  assert.ok(sistema.startsWith(`${SISTEMA_COACH}\n\n${MANUAL_COACH}\n\n${TEXTO_CATALOGO}\n\n`));
   assert.ok(sistema.endsWith(JSON.stringify(contexto)));
 });
 
@@ -302,7 +313,7 @@ test('Claude: manda la foto en base64 con salida estructurada y lee tokens', asy
 });
 
 test('Claude: el coach manda el historial, el manual cacheado y el contexto aparte', async () => {
-  const { pedidos, clientePara } = clientesClaude(respuestaClaude({ texto: 'Dale', rutinas: [] }));
+  const { pedidos, clientePara } = clientesClaude(respuestaClaude({ texto: 'Dale', acciones: [] }));
   const ia = crearProveedorClaude({ clientePara, modeloFoto: 'm-foto', modeloCoach: 'm-coach' });
   await ia.responderCoach(mensajes, contexto);
   const [pedido] = pedidos;
@@ -310,14 +321,16 @@ test('Claude: el coach manda el historial, el manual cacheado y el contexto apar
     pedido.messages.map((m) => m.role),
     ['user', 'assistant', 'user'],
   );
-  assert.deepStrictEqual(pedido.system.slice(0, 2), [
+  // Un solo punto de caché, al final del catálogo: cubre instrucciones, manual y catálogo.
+  assert.deepStrictEqual(pedido.system.slice(0, 3), [
     { type: 'text', text: SISTEMA_COACH },
-    { type: 'text', text: MANUAL_COACH, cache_control: { type: 'ephemeral' } },
+    { type: 'text', text: MANUAL_COACH },
+    { type: 'text', text: TEXTO_CATALOGO, cache_control: { type: 'ephemeral' } },
   ]);
   // El contexto va después del punto de caché y sin cache_control: cambia en cada pedido.
-  assert.strictEqual(pedido.system.length, 3);
-  assert.ok(pedido.system[2].text.includes('"sentadilla"'));
-  assert.strictEqual(pedido.system[2].cache_control, undefined);
+  assert.strictEqual(pedido.system.length, 4);
+  assert.ok(pedido.system[3].text.includes('"Piernas"'));
+  assert.strictEqual(pedido.system[3].cache_control, undefined);
 });
 
 test('Claude: rechazo, respuesta cortada o sin JSON son ErrorIa', async () => {

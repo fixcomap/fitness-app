@@ -108,41 +108,80 @@ test('precios-ia.json: cada modelo tiene precio de entrada y de salida', () => {
   assert.ok(precios.modelos['gemini-3.8-flash']);
 });
 
-test('el script muestra las rutinas con los nombres del catálogo y los descartados por motivo', () => {
+test('el script muestra las acciones con los nombres del catálogo y de las rutinas, y lo descartado por motivo', () => {
   const catalogo = [
     { id: 'press-banca', nombre: 'Press de banca' },
     { id: 'remo-barra', nombre: 'Remo con barra' },
   ];
+  const rutinas = [{ id: 'r1', nombre: 'Piernas' }];
   const salida = {
     texto: 'Arrancamos.\nTres días.',
-    rutinas: [
+    acciones: [
       {
         id: 'a',
+        tipo: 'crear_rutina',
         nombre: 'Empuje',
-        dias: [0],
+        dia: 0,
         ejercicios: [{ ejercicioId: 'press-banca', series: 4, rango: { min: 8, max: 10 } }],
       },
       {
         id: 'b',
-        nombre: 'Tirón',
-        dias: [],
-        ejercicios: [{ ejercicioId: 'remo-barra', series: 3, rango: { min: 10, max: 12 } }],
+        tipo: 'agregar_ejercicios',
+        rutinaId: 'r1',
+        ejercicios: [{ ejercicioId: 'remo-barra', series: 3, rango: { min: 6, max: 10 } }],
       },
+      { id: 'c', tipo: 'quitar_ejercicios', rutinaId: 'r1', ejercicioIds: ['press-banca'] },
+      { id: 'd', tipo: 'borrar_rutinas', rutinaIds: ['r1', 'r9'] },
+      {
+        id: 'e',
+        tipo: 'registrar_comida',
+        dia: '2026-11-26',
+        comida: 'cena',
+        items: [
+          {
+            busqueda: 'empanada de carne',
+            estado: 'cocido',
+            estadoAsumido: true,
+            cantidad: { unidades: 2, porcion: 'empanada', gramosPorUnidad: 90 },
+            estimado: { kcal: 300, proteinas: 11, carbos: 28, grasas: 16 },
+          },
+          {
+            busqueda: 'manzana',
+            estado: 'no-aplica',
+            estadoAsumido: false,
+            cantidad: { gramos: 150 },
+            estimado: { kcal: 52, proteinas: 0.3, carbos: 14, grasas: 0.2 },
+          },
+        ],
+      },
+      { id: 'f', tipo: 'cargar_pasos', dia: '2026-11-25', unidad: 'km', valor: 2.5, hora: '18:30' },
+      { id: 'g', tipo: 'crear_rutina', nombre: 'Tirón', dia: null, ejercicios: [] },
     ],
     descartados: [
-      { rutina: 'Tirón', ejercicioId: 'jalon-inventado', motivo: 'no-existe' },
-      { rutina: 'Empuje', ejercicioId: 'press-banca', motivo: 'repetido' },
-      { rutina: 'Empuje', ejercicioId: 'fondos-inventado', motivo: 'no-existe' },
+      { accion: 'crear_rutina', rutina: 'Tirón', ejercicioId: 'jalon-inventado', motivo: 'no-existe' },
+      { accion: 'crear_rutina', rutina: 'Empuje', ejercicioId: 'fondos-inventado', motivo: 'no-existe' },
+      { accion: 'borrar_rutinas', rutinaId: 'r7', motivo: 'no-existe-rutina' },
+      { accion: 'registrar_comida', dia: '2026-11-27', motivo: 'fecha-no-permitida' },
+      { accion: 'mandar_mail', motivo: 'invalida' },
     ],
   };
-  assert.deepStrictEqual(lineasCoach(salida, catalogo), [
+  assert.deepStrictEqual(lineasCoach(salida, catalogo, rutinas), [
     '│ Arrancamos.',
     '│ Tres días.',
-    'Rutina "Empuje" (lunes):',
+    'Crear rutina "Empuje" (lunes):',
     '  Press de banca [press-banca]: 4 × 8-10',
-    'Rutina "Tirón" (sin día):',
-    '  Remo con barra [remo-barra]: 3 × 10-12',
+    'Agregar a "Piernas":',
+    '  Remo con barra [remo-barra]: 3 × 6-10',
+    'Quitar de "Piernas": Press de banca',
+    'Borrar rutinas: "Piernas", r9',
+    'Registrar cena del 2026-11-26:',
+    '  empanada de carne (cocido, asumido): 2 × empanada ~90 g c/u · estimado c/100 g: 300 kcal, P 11 C 28 G 16',
+    '  manzana: 150 g · estimado c/100 g: 52 kcal, P 0.3 C 14 G 0.2',
+    'Cargar pasos del 2026-11-25: 2.5 km (18:30)',
+    'Crear rutina "Tirón" (sin día):',
+    'Descartados, acciones mal formadas: mandar_mail',
     'Descartados, no existen en el catálogo: jalon-inventado (Tirón), fondos-inventado (Empuje)',
-    'Descartados, repetidos en la misma rutina: press-banca (Empuje)',
+    'Descartados, rutinas que no existen: r7 (borrar_rutinas)',
+    'Descartados, fecha fuera de los últimos 7 días: 2026-11-27 (registrar_comida)',
   ]);
 });
