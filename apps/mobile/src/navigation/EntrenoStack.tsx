@@ -44,6 +44,7 @@ function RutinasRuta({ navigation }: NativeStackScreenProps<EntrenoStackParamLis
       onEditar={(rutina) => raiz.navigate('EditarRutina', { id: rutina.id })}
       onNueva={(dia) => raiz.navigate('EditarRutina', { dia })}
       onVerHistorial={() => navigation.navigate('Historial')}
+      onAbrirEjercicio={(id) => navigation.navigate('Detalle', { id })}
     />
   );
 }
