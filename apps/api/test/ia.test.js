@@ -130,6 +130,7 @@ test('el contexto del coach suma el día de la semana a hoy', () => {
     hoy: '2026-11-26',
     perfil: {},
     diaHoy: 'jueves',
+    equiposDisponibles: 'todos',
   });
   assert.strictEqual(datos(contextoCoach({ hoy: '2026-02-30' })).diaHoy, undefined);
 });
@@ -151,7 +152,26 @@ test('el contexto del coach suma el día de la semana a cada día de ultimos7Dia
   ]);
   assert.deepStrictEqual(r.perfil, { sexo: 'hombre' });
   // Sin ultimos7Dias el contexto va igual.
-  assert.deepStrictEqual(datos(contextoCoach({ perfil: {} })), { perfil: {} });
+  assert.deepStrictEqual(datos(contextoCoach({ perfil: {} })), { perfil: {}, equiposDisponibles: 'todos' });
+});
+
+test('el contexto del coach dice qué equipos hay donde entrena', () => {
+  const equipos = (lugar) => {
+    const texto = contextoCoach({ perfil: lugar ? { lugar } : {} });
+    return JSON.parse(texto.slice(texto.indexOf('{'))).equiposDisponibles;
+  };
+  assert.strictEqual(equipos('gym'), 'todos');
+  assert.deepStrictEqual(equipos('casa-mancuernas'), ['mancuernas', 'peso-corporal', 'bandas']);
+  assert.deepStrictEqual(equipos('peso-corporal'), ['peso-corporal', 'bandas']);
+  // Perfiles de antes, sin lugar: gym completo.
+  assert.strictEqual(equipos(null), 'todos');
+});
+
+test('el prompt del coach ajusta por nivel y pide nivel y lugar si faltan', () => {
+  assert.match(SISTEMA_COACH, /principiante: menos series/);
+  assert.match(SISTEMA_COACH, /no lleve las series al fallo/);
+  assert.match(SISTEMA_COACH, /Si el perfil no trae "nivel" o "lugar"/);
+  assert.match(SISTEMA_COACH, /Usá únicamente ejercicios con esos equipos/);
 });
 
 test('el prompt del coach: sin cifras fuera del manual o del contexto; alimentos con peso crudo o cocido', () => {
@@ -254,7 +274,7 @@ test('Gemini: el coach manda el historial con roles user/model y el contexto en 
   // Lo fijo primero (instrucciones, manual y catálogo) y el contexto al final.
   const sistema = pedido.config.systemInstruction;
   assert.ok(sistema.startsWith(`${SISTEMA_COACH}\n\n${MANUAL_COACH}\n\n${TEXTO_CATALOGO}\n\n`));
-  assert.ok(sistema.endsWith(JSON.stringify(contexto)));
+  assert.ok(sistema.endsWith(contextoCoach(contexto)));
 });
 
 test('Gemini: bloqueo, respuesta cortada o JSON inválido son ErrorIa', async () => {

@@ -2,6 +2,7 @@
 // y lo que cambia en cada pedido, al final.
 const fs = require('fs');
 const path = require('path');
+const { EQUIPOS_POR_LUGAR, LUGAR_POR_DEFECTO } = require('./nivelLugar');
 
 // Mismos mínimos que la app (apps/mobile/src/lib/calorias.ts).
 const MINIMO_KCAL = { hombre: 1500, mujer: 1200 };
@@ -54,7 +55,7 @@ Manual y fuentes:
 Cómo usar el contexto:
 - Tenés la fecha de hoy ("hoy", con su día en "diaHoy"), su perfil, un resumen de los últimos 7 días (comidas, entrenos y actividad) y sus rutinas actuales, cada una con su "id". El catálogo de ejercicios de la app va después del manual.
 - Basate en esos datos y no inventes los que no están. Si falta algo para responder bien, preguntalo.
-- No preguntes datos que ya están en el perfil (sexo, edad, altura, peso, objetivo de peso, objetivo de entrenamiento, días por semana, kcal objetivo): usalos. Si el usuario dice otra cosa en la charla, vale lo que dijo. Por ejemplo, si el objetivo de peso es "bajar" y el de entrenamiento es "hipertrofia", no preguntes si la prioridad es bajar grasa o ganar músculo.
+- No preguntes datos que ya están en el perfil (sexo, edad, altura, peso, objetivo de peso, objetivo de entrenamiento, días por semana, nivel, lugar, kcal objetivo): usalos. Si el usuario dice otra cosa en la charla, vale lo que dijo. Por ejemplo, si el objetivo de peso es "bajar" y el de entrenamiento es "hipertrofia", no preguntes si la prioridad es bajar grasa o ganar músculo.
 - Si el usuario duda o te pide que decidas ("no sé, decidí vos", "¿qué me conviene?", "¿así o así?"), elegí UNA opción concreta según su perfil y lo que sabés de él, y justificala en una o dos frases. Si es un cambio (una rutina, una comida), dejá la propuesta en "acciones". Nada de "las dos sirven" o "depende" sin elegir. Si de verdad falta un dato clave para decidir, preguntá uno solo.
 - Si el usuario menciona cuánto duran sus sesiones (por ejemplo, "entreno 2 horas"), comentalo en la misma respuesta: si armaste una rutina, decí si entra en ese tiempo según las series y los descansos del manual; si no, decí qué influye en la duración (series y descansos). No inventes una duración ideal.
 
@@ -71,7 +72,7 @@ Rutinas (crear_rutina, agregar_ejercicios, quitar_ejercicios, borrar_rutinas):
 - Una rutina por cada día de entrenamiento, con sus propios ejercicios y su día en "dia" (sin repetir días entre rutinas). Por ejemplo, 3 días son 3 acciones crear_rutina: "Pecho y tríceps" el lunes, "Espalda y bíceps" el miércoles y "Piernas" el viernes. No juntes los ejercicios de varios días en una sola rutina.
 - El nombre de la rutina son los grupos musculares que trabaja, corto: "Espalda y bíceps", "Pecho y tríceps", "Piernas", "Hombros y core", "Full body". Nunca el nombre de un ejercicio ("Remo", "Sentadilla"), ni el objetivo o la cantidad de días.
 - Cada día lleva entre 4 y 7 ejercicios, con los compuestos (multiarticulares) primero y los de aislamiento después. La app descarta un día con menos de 4.
-- Repartí el volumen en la semana: apuntá a unas 10 series semanales por músculo grande (pecho, espalda, piernas), no repitas el mismo grupo muscular en días seguidos y no armes días de un solo músculo chico (solo bíceps, solo gemelos, solo core).
+- Repartí el volumen en la semana según el nivel (ver "Nivel y lugar"), no repitas el mismo grupo muscular en días seguidos y no armes días de un solo músculo chico (solo bíceps, solo gemelos, solo core).
 - Para 5 días usá un split equilibrado, por ejemplo: piernas; pecho y tríceps; espalda y bíceps; hombros y core; piernas y glúteos.
 - Usá únicamente ejercicios del catálogo, con su id exacto. No inventes ids.
 - dia: 0 = lunes … 6 = domingo. series: de 1 a 10. Las repeticiones las pone la app según el tipo de ejercicio y el objetivo.
@@ -81,6 +82,14 @@ Rutinas (crear_rutina, agregar_ejercicios, quitar_ejercicios, borrar_rutinas):
 - Si reemplaza, mandá en la misma respuesta las crear_rutina nuevas completas y un borrar_rutinas con los ids de las rutinas viejas que se reemplazan. Si lo contestó después de que preguntaste, armá el plan completo en esa respuesta. La app le pide confirmar el borrado aparte, con los nombres.
 - Si suma, mandá solo las crear_rutina.
 - En "texto" explicá la idea del plan en pocas líneas. No repitas los días, los ejercicios ni las series: la app muestra las acciones aparte.
+
+Nivel y lugar (perfil.nivel, perfil.lugar):
+- "lugar" es dónde entrena: "gym" (gym completo), "casa-mancuernas" (casa con mancuernas) o "peso-corporal" (solo peso corporal). "equiposDisponibles" del contexto dice qué equipos del catálogo (columna equipo) tiene. Usá únicamente ejercicios con esos equipos: la app descarta el resto. Si dice que ahora entrena en otro lado, armalo para el lugar del perfil y decile que lo cambie en Perfil para poder usar otros ejercicios.
+- "nivel" es cuánto hace que entrena: "principiante" (menos de 6 meses), "intermedio" (de 6 meses a 2 años) o "avanzado" (más de 2 años). Ajusta el volumen y la complejidad según la sección de entrenamiento del manual:
+  - principiante: menos series (de 1 a 3 por ejercicio, menos de 10 semanales por músculo), 4 o 5 ejercicios por día, con todo el cuerpo en cada sesión si entrena 2 o 3 días. Ejercicios simples y estables (máquinas, poleas, mancuernas, peso corporal) antes que los técnicos con barra libre (sentadilla, peso muerto, cargadas). En "texto" decile que no lleve las series al fallo, que termine cada una pudiendo hacer un par de repeticiones más.
+  - intermedio: unas 10 series semanales por músculo grande (pecho, espalda, piernas).
+  - avanzado: más volumen (de 3 a 6 series por ejercicio y más de 10 semanales por músculo grande, sin pasar de unas 10 por músculo en una sesión), puede usar los ejercicios técnicos con barra y llevar al fallo la última serie de los monoarticulares o de máquina.
+- Si el perfil no trae "nivel" o "lugar" (perfiles de antes), asumí intermedio y gym. Si te pide armar una rutina nueva, antes preguntale en un solo mensaje lo que falte (cuánto hace que entrena y si entrena en un gym, en casa con mancuernas o solo con su peso corporal) y dejá "acciones" vacía. Cuando conteste, armala con eso y decile que lo puede guardar en Perfil. Si ya lo dijo en la charla, no preguntes. Para el resto de los pedidos no lo pidas.
 
 Comidas (registrar_comida):
 - "dia": el de "hoy", salvo que diga otro. Solo hoy o los 6 días anteriores, nunca un día futuro.
@@ -111,16 +120,19 @@ function diaDeSemana(fecha) {
 }
 
 // El contexto del usuario como último bloque de instrucciones (cambia en cada pedido).
-// Le suma el día de la semana a hoy (diaHoy) y a cada día de ultimos7Dias.
+// Le suma el día de la semana a hoy (diaHoy) y a cada día de ultimos7Dias, y los equipos que tiene
+// donde entrena (equiposDisponibles: "todos" o la lista).
 function contextoCoach(contexto) {
   const dias = contexto?.ultimos7Dias?.map((d) => {
     const nombre = diaDeSemana(d.fecha);
     return nombre ? { fecha: d.fecha, dia: nombre, ...d } : d;
   });
   const diaHoy = diaDeSemana(contexto?.hoy);
+  const equipos = EQUIPOS_POR_LUGAR[contexto?.perfil?.lugar] ?? EQUIPOS_POR_LUGAR[LUGAR_POR_DEFECTO];
   const conDias = {
     ...contexto,
     ...(diaHoy ? { diaHoy } : {}),
+    equiposDisponibles: equipos ?? 'todos',
     ...(dias ? { ultimos7Dias: dias } : {}),
   };
   return `Contexto del usuario (datos de la app, en JSON):\n${JSON.stringify(conDias)}`;

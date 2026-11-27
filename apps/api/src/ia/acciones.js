@@ -8,6 +8,7 @@ const { ErrorIa } = require('./proveedor');
 const { CATALOGO } = require('./catalogo');
 const { rangoDeLaApp } = require('./rangos');
 const { COMIDAS, MAXIMO_ITEMS } = require('./foto');
+const { equipoDisponible } = require('./nivelLugar');
 
 const TIPOS_ACCION = [
   'crear_rutina',
@@ -106,12 +107,12 @@ function diaPermitido(dia, hoy) {
   return dia <= hoy && dia >= restarDias(hoy, DIAS_ATRAS);
 }
 
-function crearRutina(a, { diasOcupados, idsCatalogo, rangoPara }) {
+function crearRutina(a, { diasOcupados, idsCatalogo, rangoPara, equipoPermitido }) {
   const { rutina, descartados } = limpiarRutina(
     { nombre: a.nombre, dias: a.dia === null ? [] : [a.dia], ejercicios: a.ejercicios },
     idsCatalogo,
     // El id de la rutina lo pone la app al aplicarla: acá no se usa.
-    { crearId: () => '', diasOcupados, rangoPara },
+    { crearId: () => '', diasOcupados, rangoPara, equipoPermitido },
   );
   const sueltos = descartados.map((d) => ({ accion: a.tipo, ...d }));
   if (!rutina) return { descartados: [...sueltos, { accion: a.tipo, motivo: 'sin-ejercicios' }] };
@@ -125,7 +126,7 @@ function crearRutina(a, { diasOcupados, idsCatalogo, rangoPara }) {
   };
 }
 
-function agregarEjercicios(a, { rutinas, idsCatalogo, rangoPara }) {
+function agregarEjercicios(a, { rutinas, idsCatalogo, rangoPara, equipoPermitido }) {
   const rutina = rutinas.get(a.rutinaId);
   if (!rutina) return { descartados: [{ accion: a.tipo, rutinaId: a.rutinaId, motivo: 'no-existe-rutina' }] };
   const usados = new Set(rutina.ejercicios.map((e) => e.ejercicioId));
@@ -137,6 +138,7 @@ function agregarEjercicios(a, { rutinas, idsCatalogo, rangoPara }) {
     const rango = idsCatalogo.has(id) ? rangoPara(id) : null;
     const descartar = (motivo) => descartados.push({ accion: a.tipo, rutinaId: a.rutinaId, ejercicioId: id, motivo });
     if (!idsCatalogo.has(id)) descartar('no-existe');
+    else if (!equipoPermitido(id)) descartar('sin-equipo');
     else if (!r.success || !rango) descartar('fuera-de-rango');
     else if (usados.has(id)) descartar('repetido');
     else if (usados.size >= MAXIMO_EJERCICIOS_RUTINA) descartar('de-mas');
@@ -222,7 +224,7 @@ function pideTodo(texto) {
 }
 
 // Las acciones de la IA validadas contra el contexto del pedido. Cada una sale con un id nuevo.
-// contexto: { hoy, perfil: { objetivo }, rutinas: [{ id, ejercicios }] } (ya validado por esquemaPedidoCoach).
+// contexto: { hoy, perfil: { objetivo, lugar }, rutinas: [{ id, ejercicios }] } (ya validado por esquemaPedidoCoach).
 // { acciones, descartados }
 function limpiarAcciones(lista, contexto, { catalogo = CATALOGO, crearId = randomUUID } = {}) {
   const porId = new Map(catalogo.map((e) => [e.id, e]));
@@ -231,6 +233,8 @@ function limpiarAcciones(lista, contexto, { catalogo = CATALOGO, crearId = rando
     rutinas: new Map((contexto.rutinas ?? []).map((r) => [r.id, r])),
     idsCatalogo: new Set(porId.keys()),
     rangoPara: (id) => rangoDeLaApp(porId.get(id), contexto.perfil?.objetivo),
+    // Solo ejercicios con el equipo de donde entrena (sin lugar en el perfil: gym completo, todos).
+    equipoPermitido: (id) => equipoDisponible(porId.get(id)?.equipo, contexto.perfil?.lugar),
     diasOcupados: new Set(), // días que ya pidió otra crear_rutina de esta misma respuesta
     crearId,
   };
