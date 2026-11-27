@@ -9,6 +9,7 @@ import { PerfilScreen } from '../screens/PerfilScreen';
 import { BuscarAlimentoScreen } from '../screens/BuscarAlimentoScreen';
 import { CrearAlimentoScreen } from '../screens/CrearAlimentoScreen';
 import { EscanearCodigoScreen } from '../screens/EscanearCodigoScreen';
+import { FotoComidaScreen } from '../screens/FotoComidaScreen';
 import { ResumenSesionScreen } from '../screens/ResumenSesionScreen';
 import { SesionArmadaScreen } from '../screens/SesionArmadaScreen';
 import { SesionEnCursoScreen } from '../screens/SesionEnCursoScreen';
@@ -98,6 +99,19 @@ function EscanearCodigoRuta({ navigation, route }: NativeStackScreenProps<RaizPa
   );
 }
 
+function FotoComidaRuta({ navigation, route }: NativeStackScreenProps<RaizParamList, 'FotoComida'>) {
+  const { dia, comida } = route.params;
+  return (
+    <FotoComidaScreen
+      dia={dia}
+      comida={comida}
+      onVolver={() => navigation.goBack()}
+      // Agregado al diario: vuelve a la pestaña Comida.
+      onListo={() => navigation.popTo('Tabs')}
+    />
+  );
+}
+
 function CrearAlimentoRuta({ navigation, route }: NativeStackScreenProps<RaizParamList, 'CrearAlimento'>) {
   const { dia, comida, nombre, marca, codigo } = route.params;
   return (
@@ -149,6 +163,7 @@ export function Raiz() {
       />
       <Stack.Screen name="Perfil" component={PerfilRuta} options={{ headerShown: false }} />
       <Stack.Screen name="BuscarAlimento" component={BuscarAlimentoRuta} options={{ headerShown: false }} />
+      <Stack.Screen name="FotoComida" component={FotoComidaRuta} options={{ headerShown: false }} />
       <Stack.Screen
         name="EscanearCodigo"
         component={EscanearCodigoRuta}
