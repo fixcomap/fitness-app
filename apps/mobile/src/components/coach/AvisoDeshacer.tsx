@@ -7,12 +7,13 @@ import { colores, radios } from '../../theme/tema';
 
 interface AvisoDeshacerProps {
   titulo: string; // lo que se aplicó
+  prefijo?: string; // "Aplicado" (coach) o "Agregado" (foto)
   vence: number; // ms: cuándo deja de poder deshacerse
   onDeshacer: () => void;
 }
 
 // Abajo, después de aplicar: qué se aplicó y Deshacer con la cuenta de 6 s.
-export function AvisoDeshacer({ titulo, vence, onDeshacer }: AvisoDeshacerProps) {
+export function AvisoDeshacer({ titulo, prefijo = 'Aplicado', vence, onDeshacer }: AvisoDeshacerProps) {
   const ahora = useAhora(250);
   const segundos = segundosRestantes(vence, ahora);
   if (segundos === 0) return null;
@@ -20,7 +21,7 @@ export function AvisoDeshacer({ titulo, vence, onDeshacer }: AvisoDeshacerProps)
     <View style={styles.aviso} accessibilityLiveRegion="polite">
       <Ionicons name="checkmark-circle" size={20} color={colores.verde} />
       <Text style={styles.texto} numberOfLines={2}>
-        Aplicado: {titulo}
+        {prefijo}: {titulo}
       </Text>
       <Pressable
         onPress={onDeshacer}

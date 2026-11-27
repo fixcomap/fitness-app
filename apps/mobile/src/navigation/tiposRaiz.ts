@@ -19,6 +19,7 @@ export type RaizParamList = {
   Perfil: undefined;
   BuscarAlimento: { dia: string; comida: Comida };
   EscanearCodigo: { dia: string; comida: Comida };
+  FotoComida: { dia: string; comida: Comida };
   CrearAlimento: { dia: string; comida: Comida } & DatosIniciales;
 };
 

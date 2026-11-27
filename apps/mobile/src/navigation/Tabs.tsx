@@ -63,6 +63,7 @@ function ComidaRuta() {
     <ComidaScreen
       onBuscar={(dia, comida) => raiz.navigate('BuscarAlimento', { dia, comida })}
       onEscanear={(dia, comida) => raiz.navigate('EscanearCodigo', { dia, comida })}
+      onFoto={(dia, comida) => raiz.navigate('FotoComida', { dia, comida })}
     />
   );
 }

@@ -6,9 +6,11 @@ import { randomUUID } from 'expo-crypto';
 
 import { leerRespuestaCoach, type RespuestaCoach } from './coach/acciones';
 import type { PedidoCoach } from './coach/contexto';
+import type { Comida } from './comida/diario';
+import { leerResultadoFoto, type ItemFoto } from './comida/respuestaFoto';
 
 export const URL_API = process.env.EXPO_PUBLIC_API_URL ?? '';
-// El coach tarda unos segundos; con mala señal, un poco más.
+// El coach y la foto tardan unos segundos; con mala señal, un poco más.
 export const ESPERA_MS = 30_000;
 
 export type TipoErrorApi =
@@ -87,10 +89,16 @@ export interface OpcionesCliente {
 
 export interface ClienteApi {
   coach: (pedido: PedidoCoach, senal?: AbortSignal) => Promise<RespuestaCoach>;
+  // La foto ya en JPEG. comida: una pista para la IA (de qué comida del día es). Una lista vacía es que
+  // no encontró comida en la foto.
+  fotoComida: (foto: Blob, comida: Comida | null, senal?: AbortSignal) => Promise<ItemFoto[]>;
 }
 
+// Lo que se manda: JSON (el coach) o la foto tal cual (image/jpeg).
+type Cuerpo = { json: unknown } | { jpeg: Blob };
+
 export function crearClienteApi({ url = URL_API, fetch: pedir = fetch, dispositivo, esperaMs = ESPERA_MS }: OpcionesCliente): ClienteApi {
-  async function postJson(ruta: string, cuerpo: unknown, senal?: AbortSignal): Promise<unknown> {
+  async function post(ruta: string, cuerpo: Cuerpo, senal?: AbortSignal): Promise<unknown> {
     const destino = urlDe(url, ruta);
     if (!destino) throw new ErrorApi('sin-url', MENSAJES['sin-url']);
     const control = new AbortController();
@@ -107,8 +115,11 @@ export function crearClienteApi({ url = URL_API, fetch: pedir = fetch, dispositi
       try {
         respuesta = await pedir(destino, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'X-Dispositivo': await dispositivo() },
-          body: JSON.stringify(cuerpo),
+          headers: {
+            'Content-Type': 'jpeg' in cuerpo ? 'image/jpeg' : 'application/json',
+            'X-Dispositivo': await dispositivo(),
+          },
+          body: 'jpeg' in cuerpo ? cuerpo.jpeg : JSON.stringify(cuerpo.json),
           signal: control.signal,
         });
       } catch (e) {
@@ -126,9 +137,15 @@ export function crearClienteApi({ url = URL_API, fetch: pedir = fetch, dispositi
 
   return {
     async coach(pedido, senal) {
-      const respuesta = leerRespuestaCoach(await postJson('/coach', pedido, senal));
+      const respuesta = leerRespuestaCoach(await post('/coach', { json: pedido }, senal));
       if (!respuesta) throw new ErrorApi('respuesta', MENSAJES.respuesta, 200);
       return respuesta;
+    },
+    async fotoComida(foto, comida, senal) {
+      const ruta = comida ? `/comida/foto?comida=${comida}` : '/comida/foto';
+      const items = leerResultadoFoto(await post(ruta, { jpeg: foto }, senal));
+      if (!items) throw new ErrorApi('respuesta', MENSAJES.respuesta, 200);
+      return items;
     },
   };
 }
