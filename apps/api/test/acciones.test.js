@@ -406,6 +406,82 @@ test('con el catálogo real de la API (por defecto) y objetivo fuerza', () => {
   assert.match(r.acciones[0].id, /^[0-9a-f-]{36}$/);
 });
 
+// Un ejercicio de cada equipo del catálogo real, para ver qué queda en cada lugar.
+const DE_CADA_EQUIPO = [
+  'press-banca-barra', // barra
+  'press-hombros-maquina', // maquina
+  'press-militar-kettlebells', // kettlebell
+  'press-militar-mancuernas', // mancuernas
+  'remo-mancuerna-una-mano', // mancuernas
+  'flexiones', // peso-corporal
+  'dominadas', // peso-corporal
+  'extension-triceps-banda', // bandas
+];
+const rutinaDeCadaEquipo = {
+  tipo: 'crear_rutina',
+  nombre: 'Full body',
+  dia: 0,
+  ejercicios: DE_CADA_EQUIPO.map((ejercicioId) => ({ ejercicioId, series: 3 })),
+};
+const conLugar = (lugar) => ({ ...contexto, perfil: { objetivo: 'hipertrofia', ...(lugar ? { lugar } : {}) } });
+const quedan = (r) => r.acciones[0]?.ejercicios.map((e) => e.ejercicioId);
+const sinEquipo = (ejercicioId) => ({ accion: 'crear_rutina', rutina: 'Full body', ejercicioId, motivo: 'sin-equipo' });
+
+test('crear_rutina en casa con mancuernas: solo mancuernas, peso corporal y banda; el resto se descarta con motivo', () => {
+  const r = limpiarAcciones([rutinaDeCadaEquipo], conLugar('casa-mancuernas'));
+  assert.deepStrictEqual(quedan(r), DE_CADA_EQUIPO.slice(3));
+  assert.deepStrictEqual(r.descartados, DE_CADA_EQUIPO.slice(0, 3).map(sinEquipo));
+});
+
+test('crear_rutina solo con peso corporal: peso corporal y banda; si quedan menos de 4, el día se descarta', () => {
+  const r = limpiarAcciones([rutinaDeCadaEquipo], conLugar('peso-corporal'));
+  assert.deepStrictEqual(r.acciones, []);
+  assert.deepStrictEqual(r.descartados, [
+    ...DE_CADA_EQUIPO.slice(0, 5).map(sinEquipo),
+    { accion: 'crear_rutina', rutina: 'Full body', motivo: 'pocos-ejercicios' },
+  ]);
+});
+
+test('crear_rutina en el gym o sin lugar en el perfil (perfiles de antes): todos los equipos', () => {
+  for (const lugar of ['gym', null]) {
+    const r = limpiarAcciones([rutinaDeCadaEquipo], conLugar(lugar));
+    assert.deepStrictEqual(quedan(r), DE_CADA_EQUIPO, String(lugar));
+    assert.deepStrictEqual(r.descartados, []);
+  }
+});
+
+test('crear_rutina de un principiante: hasta 5 ejercicios por día; los de más se descartan con motivo', () => {
+  const siete = { ...rutinaDeCadaEquipo, ejercicios: rutinaDeCadaEquipo.ejercicios.slice(0, 7) };
+  const conNivel = (nivel) => ({ ...contexto, perfil: { objetivo: 'hipertrofia', ...(nivel ? { nivel } : {}) } });
+  const r = limpiarAcciones([siete], conNivel('principiante'));
+  assert.deepStrictEqual(quedan(r), DE_CADA_EQUIPO.slice(0, 5));
+  assert.deepStrictEqual(
+    r.descartados,
+    DE_CADA_EQUIPO.slice(5, 7).map((ejercicioId) => ({
+      accion: 'crear_rutina',
+      rutina: 'Full body',
+      ejercicioId,
+      motivo: 'de-mas-para-el-nivel',
+    })),
+  );
+  // Intermedio, avanzado o sin nivel (perfiles de antes): el máximo general.
+  for (const nivel of ['intermedio', 'avanzado', null]) {
+    assert.deepStrictEqual(quedan(limpiarAcciones([siete], conNivel(nivel))), DE_CADA_EQUIPO.slice(0, 7), String(nivel));
+  }
+});
+
+test('agregar_ejercicios también descarta lo que no se puede hacer donde entrena', () => {
+  const ejercicios = [
+    { ejercicioId: 'curl-barra', series: 3 },
+    { ejercicioId: 'flexiones', series: 3 },
+  ];
+  const r = limpiarAcciones([{ tipo: 'agregar_ejercicios', rutinaId: 'r-empuje', ejercicios }], conLugar('peso-corporal'));
+  assert.deepStrictEqual(quedan(r), ['flexiones']);
+  assert.deepStrictEqual(r.descartados, [
+    { accion: 'agregar_ejercicios', rutinaId: 'r-empuje', ejercicioId: 'curl-barra', motivo: 'sin-equipo' },
+  ]);
+});
+
 test('si la IA copia el resumen "[Propuse: …]" que agrega la app, se saca del texto', () => {
   const r = leerRespuestaCoach(
     { texto: 'Tocá Aplicar en las tarjetas de arriba.\n\n[Propuse: crear "Piernas" (lunes, 4 ejercicios, pendiente)]', acciones: [] },

@@ -3,6 +3,7 @@ const { randomUUID } = require('crypto');
 const { z } = require('zod');
 const { historialDesdeUsuario } = require('./proveedor');
 const { diaDeSemana } = require('./prompts');
+const { LUGARES, NIVELES } = require('./nivelLugar');
 
 // Mismos rangos que la app (apps/mobile/src/lib/entreno/rutinas.ts y rangos.ts).
 const SERIES = { min: 1, max: 10 };
@@ -45,6 +46,9 @@ const esquemaPedidoCoach = z.object({
       objetivoPeso: z.enum(['bajar', 'mantener', 'subir']),
       objetivo: z.enum(['hipertrofia', 'fuerza']),
       diasEntrenoPorSemana: entero(0, 7),
+      // Opcionales: los perfiles de antes no los tienen (y las apps viejas no los mandan).
+      nivel: z.enum(NIVELES).optional(),
+      lugar: z.enum(LUGARES).optional(),
       kcalObjetivo: z.number().min(0).max(10000).optional(),
     }),
     ultimos7Dias: z
@@ -111,11 +115,12 @@ function recortarNombre(nombre, maximo = MAXIMO_NOMBRE_RUTINA) {
 // Una rutina de la IA en el formato de Mis rutinas, solo con ejercicios del catálogo y en rango.
 // diasOcupados: días que ya tiene otra rutina de la lista (en la app, un día tiene una sola rutina).
 // rangoPara: id -> rango de la app para ese ejercicio, o null (se queda el que dio la IA).
+// equipoPermitido: id -> si el ejercicio se puede hacer donde entrena el usuario.
 // { rutina, descartados } — rutina es null si no queda ningún ejercicio válido.
 function limpiarRutina(
   rutina,
   idsCatalogo,
-  { crearId = randomUUID, diasOcupados = new Set(), rangoPara = () => null } = {},
+  { crearId = randomUUID, diasOcupados = new Set(), rangoPara = () => null, equipoPermitido = () => true } = {},
 ) {
   if (!rutina || typeof rutina !== 'object') return { rutina: null, descartados: [] };
   const nombre = recortarNombre(typeof rutina.nombre === 'string' ? rutina.nombre : '') || NOMBRE_RUTINA_POR_DEFECTO;
@@ -128,6 +133,7 @@ function limpiarRutina(
     const r = ejercicioRutina.safeParse(rangoApp ? { ...crudo, rango: rangoApp } : crudo);
     const id = r.success ? r.data.ejercicioId : String(crudo?.ejercicioId ?? '?');
     if (!idsCatalogo.has(id)) descartar(id, 'no-existe');
+    else if (!equipoPermitido(id)) descartar(id, 'sin-equipo');
     else if (!r.success || r.data.rango.min > r.data.rango.max) descartar(id, 'fuera-de-rango');
     else if (usados.has(id)) descartar(id, 'repetido');
     else if (ejercicios.length >= MAXIMO_EJERCICIOS_RUTINA) descartar(id, 'de-mas');

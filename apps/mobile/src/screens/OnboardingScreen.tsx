@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { CamposDatos, CamposObjetivos } from '../components/perfil/CamposPerfil';
+import { CampoLugar, CampoNivel, CamposDatos, CamposObjetivos } from '../components/perfil/CamposPerfil';
 import { ResumenMetas } from '../components/perfil/ResumenMetas';
 import {
   BORRADOR_VACIO,
@@ -16,16 +16,26 @@ import {
 } from '../lib/perfil';
 import { colores, espacios, radios } from '../theme/tema';
 
-// Los campos que se validan en cada paso (el tercero es el resultado).
+// Los campos que se validan en cada paso (el último es el resultado).
 const CAMPOS_PASO: readonly (readonly CampoPerfil[])[] = [
   ['nombre', 'sexo', 'edad', 'alturaCm', 'pesoKg'],
   ['objetivoPeso', 'objetivo', 'diasEntrenoPorSemana'],
+  ['nivel'],
+  ['lugar'],
 ];
-const TITULOS = ['Contanos de vos', 'Tus objetivos', 'Tu plan'];
-const TOTAL_PASOS = 3;
+const TITULOS = ['Contanos de vos', 'Tus objetivos', 'Tu nivel', 'Dónde entrenás', 'Tu plan'];
+const TOTAL_PASOS = TITULOS.length;
+const PASO_PLAN = TOTAL_PASOS - 1;
 
-// La primera vez: datos, objetivos y el resultado con las kcal calculadas.
-export function OnboardingScreen({ onListo }: { onListo: (perfil: PerfilUsuario) => void }) {
+// La primera vez: datos, objetivos, nivel, dónde entrena (una pregunta por pantalla) y el resultado
+// con las kcal calculadas. onCancelar: solo al repetirla desde Perfil (en desarrollo), para salir sin guardar.
+export function OnboardingScreen({
+  onListo,
+  onCancelar,
+}: {
+  onListo: (perfil: PerfilUsuario) => void;
+  onCancelar?: () => void;
+}) {
   const insets = useSafeAreaInsets();
   const [paso, setPaso] = useState(0);
   const [borrador, setBorrador] = useState<BorradorPerfil>(BORRADOR_VACIO);
@@ -56,9 +66,16 @@ export function OnboardingScreen({ onListo }: { onListo: (perfil: PerfilUsuario)
             <View key={i} style={[styles.barraPaso, i <= paso && styles.barraPasoHecha]} />
           ))}
         </View>
-        <Text style={styles.numeroPaso}>
-          Paso {paso + 1} de {TOTAL_PASOS}
-        </Text>
+        <View style={styles.filaPaso}>
+          <Text style={styles.numeroPaso}>
+            Paso {paso + 1} de {TOTAL_PASOS}
+          </Text>
+          {onCancelar && (
+            <Pressable onPress={onCancelar} hitSlop={8} accessibilityRole="button">
+              <Text style={styles.textoCancelar}>Cancelar</Text>
+            </Pressable>
+          )}
+        </View>
         <Text style={styles.titulo} accessibilityRole="header">
           {TITULOS[paso]}
         </Text>
@@ -69,7 +86,9 @@ export function OnboardingScreen({ onListo }: { onListo: (perfil: PerfilUsuario)
         {paso === 1 && (
           <CamposObjetivos borrador={borrador} errores={intentado ? erroresPaso : {}} onCambiar={cambiar} />
         )}
-        {paso === 2 && perfil && (
+        {paso === 2 && <CampoNivel borrador={borrador} errores={intentado ? erroresPaso : {}} onCambiar={cambiar} />}
+        {paso === 3 && <CampoLugar borrador={borrador} errores={intentado ? erroresPaso : {}} onCambiar={cambiar} />}
+        {paso === PASO_PLAN && perfil && (
           <View style={styles.resultado}>
             <Text style={styles.texto}>
               {perfil.nombre}, esto es lo que te conviene comer en un día sin entrenar para{' '}
@@ -96,7 +115,7 @@ export function OnboardingScreen({ onListo }: { onListo: (perfil: PerfilUsuario)
           style={({ pressed }) => [styles.botonSeguir, pressed && styles.presionado]}
           accessibilityRole="button"
         >
-          <Text style={styles.textoSeguir}>{paso === TOTAL_PASOS - 1 ? 'Empezar' : 'Seguir'}</Text>
+          <Text style={styles.textoSeguir}>{paso === PASO_PLAN ? 'Empezar' : 'Seguir'}</Text>
         </Pressable>
       </View>
     </KeyboardAvoidingView>
@@ -109,7 +128,14 @@ const styles = StyleSheet.create({
   pasos: { flexDirection: 'row', gap: 6 },
   barraPaso: { flex: 1, height: 4, borderRadius: 2, backgroundColor: colores.pista },
   barraPasoHecha: { backgroundColor: colores.acento },
-  numeroPaso: { color: colores.textoSecundario, fontSize: 13, fontWeight: '700', marginTop: espacios.s },
+  filaPaso: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: espacios.s,
+  },
+  numeroPaso: { color: colores.textoSecundario, fontSize: 13, fontWeight: '700' },
+  textoCancelar: { color: colores.textoSecundario, fontSize: 15, fontWeight: '700' },
   titulo: { color: colores.texto, fontSize: 30, fontWeight: '800' },
   contenido: { padding: espacios.m, paddingBottom: espacios.xl },
   resultado: { gap: espacios.m },
