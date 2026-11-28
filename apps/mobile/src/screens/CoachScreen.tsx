@@ -13,6 +13,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { AvisoIa, AVISO_COACH } from '../components/AvisoIa';
 import { AvisoDeshacer } from '../components/coach/AvisoDeshacer';
 import { EditorAccion, prepararEdicion, type Edicion } from '../components/coach/EditorAccion';
 import { TarjetaAccion } from '../components/coach/TarjetaAccion';
@@ -70,6 +71,12 @@ function Chat() {
           renderItem={({ item }) => <Burbuja mensaje={item} acciones={acciones} onEditar={setEdicion} />}
           // Con la lista dada vuelta, el encabezado queda abajo de todo: debajo del último mensaje.
           ListHeaderComponent={<Estado enviando={enviando} error={error} onReintentar={reintentar} />}
+          // Y el pie queda arriba de todo: el aviso de IA, encima del primer mensaje del historial.
+          ListFooterComponent={
+            <View style={styles.avisoIa}>
+              <AvisoIa texto={AVISO_COACH} />
+            </View>
+          }
           contentContainerStyle={styles.lista}
           keyboardShouldPersistTaps="handled"
           keyboardDismissMode="interactive"
@@ -229,6 +236,9 @@ function Bienvenida() {
         Preguntame por tu entreno, tus comidas o tus pasos. También puedo armarte una rutina o cargar lo que comiste y
         caminaste: te muestro la propuesta y vos decidís si se aplica.
       </Text>
+      <View style={styles.avisoBienvenida}>
+        <AvisoIa texto={AVISO_COACH} />
+      </View>
     </View>
   );
 }
@@ -262,6 +272,8 @@ const styles = StyleSheet.create({
   encabezado: { paddingHorizontal: 16, paddingTop: 16, paddingBottom: 8 },
   titulo: { color: colores.texto, fontSize: 34, fontWeight: '800' },
   lista: { paddingHorizontal: 16, paddingVertical: 12, gap: 10 },
+  avisoIa: { paddingHorizontal: 8, paddingBottom: 6 },
+  avisoBienvenida: { marginTop: 8 },
   mensaje: { gap: 8 },
   fila: { flexDirection: 'row' },
   filaUsuario: { justifyContent: 'flex-end' },
