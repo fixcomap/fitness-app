@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState, type ComponentProps } from 'react
 import { ActivityIndicator, Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { AvisoIa, AVISO_FOTO } from '../components/AvisoIa';
 import { AvisoDeshacer } from '../components/coach/AvisoDeshacer';
 import { ControlPorcion } from '../components/comida/ControlPorcion';
 import { useComidas } from '../estado/Comidas';
@@ -266,6 +267,7 @@ function Resultado({
         </View>
 
         <Text style={styles.etiqueta}>Lo que encontré</Text>
+        <AvisoIa texto={AVISO_FOTO} />
         {items.map((item, i) => (
           <View key={`${item.alimento.id}-${i}`} style={styles.item}>
             <View style={styles.filaItem}>
