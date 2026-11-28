@@ -2,6 +2,7 @@
 // En producción no hay valores por defecto: si falta una obligatoria, la API no arranca.
 require('dotenv').config({ path: require('path').resolve(__dirname, '../../../.env'), quiet: true });
 const { leerConfigIa } = require('./ia/config');
+const { conexionDb } = require('./conexionDb');
 
 const esProduccion = process.env.NODE_ENV === 'production';
 
@@ -19,9 +20,10 @@ module.exports = {
   puerto: Number(process.env.PORT) || 3000,
   apiUrl: obligatoria('API_URL', 'http://localhost:3000'),
   ia: leerConfigIa(process.env, { esProduccion }),
-  // Neon siempre con SSL verificado; en local, el Postgres del docker-compose.
+  // Con DATABASE_URL, SSL verificado salvo conexión local o sslmode=disable
+  // (ver conexionDb.js); sin ella, el Postgres del docker-compose.
   db: databaseUrl
-    ? { connectionString: databaseUrl, ssl: { rejectUnauthorized: true } }
+    ? conexionDb(databaseUrl)
     : {
         host: 'localhost',
         port: 5432,
