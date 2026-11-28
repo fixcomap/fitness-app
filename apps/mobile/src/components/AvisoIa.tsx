@@ -3,7 +3,7 @@ import { StyleSheet, Text, View } from 'react-native';
 
 import { colores } from '../theme/tema';
 
-export const AVISO_COACH = 'Soy un coach con IA. Puedo equivocarme y no reemplazo a un médico ni a un nutricionista.';
+export const AVISO_COACH = 'Coach con IA · puede equivocarse, no reemplaza a un médico.';
 export const AVISO_FOTO = 'Estimación con IA: revisá las cantidades';
 
 // Aviso chico y discreto de que lo que se ve lo generó una IA: texto secundario, no un cartel.
